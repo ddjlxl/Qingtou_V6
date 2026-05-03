@@ -51,6 +51,13 @@
 - [x] 初始迁移脚本：[alembic/versions/20260503_init_database.py](file:///e:/Qingtou_V6/apps/server/alembic/versions/20260503_init_database.py)
 - [x] SQLite 数据库验证通过：11 张表全部创建成功
 
+### 技能迁移 ✅
+
+- [x] 从 V4 迁移 4 个新技能：完成前验证、分支收尾、重构计划、界面设计
+- [x] 增强 2 个现有技能：bug-fix（根因追溯+多层防护）、testing（浏览器测试+测试策略）
+- [x] 技能总数：17 → 21
+- [x] 相关文档已同步更新
+
 ---
 
 ## 下一步

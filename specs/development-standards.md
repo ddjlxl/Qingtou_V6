@@ -248,6 +248,7 @@ AI 每次生成代码前，必须确认：
 
 - [ ] 没有 `any` 类型
 - [ ] 没有 `console.log`
+- [ ] 声明"完成"前已运行 `verification-before-completion` 验证门禁
 - [ ] 文件 ≤ 300 行
 - [ ] 函数 ≤ 50 行
 - [ ] 组件处理了 loading / empty / error

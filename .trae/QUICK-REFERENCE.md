@@ -38,6 +38,9 @@
 | 跑测试 | `/testing 登录模块` |
 | 优化性能 | `/performance-optimization 首页慢` |
 | 改已有功能 | `/feature-iteration 功能名 — 要改啥` |
+| 重构代码 | `/refactor-plan 拆分大文件` |
+| 设计页面 | `/frontend-design 订单列表页` |
+| 合并分支 | `/finishing-a-development-branch` |
 
 ---
 
