@@ -1,0 +1,156 @@
+# 技术栈选型
+
+> **版本**：v1.0  
+> **创建日期**：2026-05-03  
+> **来源**：基于产品概述的技术选型决策  
+
+---
+
+## 一、需求分析摘要
+
+- **项目类型**：Web 应用（调度端 + 司机端），移动端响应式适配
+- **预估用户量**：调度员 3-5 人，司机 10-30 人，管理员 1-2 人
+- **实时性要求**：中（地图车辆定位 30 秒刷新，消息通知即时提示）
+- **开发周期**：正常（质量优先，不赶工期）
+- **团队背景**：熟悉 Vue 3 + FastAPI 生态，V4 已验证技术路线可行
+
+---
+
+## 二、推荐方案
+
+### 前端（调度端）
+
+| 技术 | 版本 | 用途 | 选型理由 |
+|------|------|------|---------|
+| Vue | 3.5 | 前端框架 | V4 已验证，Composition API 逻辑复用清晰，生态成熟 |
+| Vite | 6 | 构建工具 | 开发服务器秒启动，原生 TS 支持，内置 proxy 无需 Express |
+| TypeScript | 5.8 | 类型系统 | strict 模式，零容忍 `any`，编译期拦截类型错误 |
+| Pinia | 3 | 状态管理 | Vue 3 官方推荐，API 简洁，支持 Composition API 风格 |
+| Vue Router | 4 | 路由 | 标配，懒加载页面，路由守卫做权限控制 |
+| Element Plus | 2 | UI 组件库 | 表格/表单/弹窗/标签页全套，专为后台系统设计 |
+| Axios | 1 | HTTP 客户端 | 拦截器统一处理 token/错误，取消重复请求 |
+| Leaflet | 1.9 | 地图引擎 | 轻量开源（42KB），天地图兼容好，V4 已验证 |
+| @vue-leaflet/vue-leaflet | 0.10 | Leaflet Vue 封装 | 声明式地图组件，和 Vue 3 响应式无缝集成 |
+| @vueuse/core | 13 | 组合式工具函数 | useStorage/useDebounceFn/useIntervalFn 等开箱即用，减少自写工具代码 |
+| zod | 3 | 运行时数据校验 | 表单校验 + API 响应校验，和 TS 类型互补，可从 schema 推导类型 |
+| dayjs | 1 | 日期处理 | 2KB 轻量，API 和 moment.js 兼容，链式调用友好 |
+| xlsx | 0.18 | Excel 读写 | 批量导出任务列表为 Excel，V4 已验证 |
+
+### 前端（司机端）
+
+| 技术 | 版本 | 用途 | 选型理由 |
+|------|------|------|---------|
+| 原生 HTML + CSS + JS | — | 页面结构 | 独立页面，无构建工具链，加载快，维护简单 |
+| TypeScript（可选） | 5.8 | 类型检查 | 通过 tsc 单独检查司机端 JS 文件，不引入构建步骤 |
+
+### 后端
+
+| 技术 | 版本 | 用途 | 选型理由 |
+|------|------|------|---------|
+| FastAPI | 0.115+ | Web 框架 | 异步支持好，自动生成 OpenAPI 文档，Pydantic 集成，V4 已验证 |
+| Python | 3.11+ | 运行环境 | 稳定 LTS，FastAPI 最佳支持版本 |
+| SQLAlchemy | 2 | ORM | 成熟稳定，异步支持，迁移到不同数据库只需改连接串 |
+| Alembic | 1.13 | 数据库迁移 | 版本化管理表结构，回滚/升级可控 |
+| Pydantic | 2 | 数据校验 | FastAPI 内置，请求/响应自动校验，类型安全 |
+| python-jose | 3 | JWT 认证 | 无状态 token 认证，不需要服务端 session |
+| bcrypt | 4 | 密码哈希 | 安全标配，自动加盐，抗彩虹表 |
+| uvicorn | 0.30 | ASGI 服务器 | FastAPI 官方推荐，支持热重载开发 |
+
+### 数据库
+
+| 技术 | 用途 | 选型理由 |
+|------|------|---------|
+| SQLite | 统一数据库（开发+生产） | 零配置、零依赖，无需单独安装数据库服务；aiosqlite 异步驱动支持 FastAPI 并发；3-5 个调度员并发量 SQLite 完全够用；Alembic 迁移兼容 |
+
+> **决策变更**：V6 统一使用 SQLite，开发和生产同一套数据库，避免环境差异。用户量小（调度员 3-5 人），SQLite 性能完全满足需求。
+
+### 包管理
+
+| 技术 | 用途 | 选型理由 |
+|------|------|---------|
+| pnpm | 前端包管理 | 严格禁止幽灵依赖，环境一致性好，安装速度快 2-3 倍，磁盘空间省一半 |
+
+### 测试
+
+| 技术 | 用途 | 选型理由 |
+|------|------|---------|
+| Vitest | 单元测试 + 组件测试 | 和 Vite 无缝集成，速度快，API 兼容 Jest，只需一个测试框架 |
+| @vue/test-utils | Vue 组件测试 | Vue 官方测试工具，支持 Composition API |
+| happy-dom | DOM 模拟 | 比 jsdom 快，Vitest 官方推荐 |
+
+### 代码质量
+
+| 技术 | 用途 | 选型理由 |
+|------|------|---------|
+| ESLint | 代码规范检查 | 禁止 `console`、禁止 `any`、文件行数限制 |
+| Prettier | 代码格式化 | 统一代码风格，保存时自动格式化 |
+| vue-tsc | Vue 类型检查 | 检查 `.vue` 文件中的类型错误 |
+
+### OCR 识别
+
+| 技术 | 用途 | 选型理由 |
+|------|------|---------|
+| Tesseract.js 或云端 OCR API | 集装箱号码识别 | 拍照识别箱号，V4 已有 OCR 服务基础，V6 继承增强 |
+
+---
+
+## 三、备选方案对比
+
+### 地图方案
+
+| | Leaflet（✅ 推荐） | 高德/百度地图 |
+|---|---|---|
+| 开源 | 完全开源免费 | 商业授权 |
+| 体积 | 42KB | 数百 KB |
+| 天地图兼容 | 原生支持 | 需适配 |
+| V4 验证 | 已验证可行 | 未验证 |
+| 离线部署 | 可离线 | 依赖在线 SDK |
+
+### 数据库方案
+
+| | SQLite（开发） + PostgreSQL（生产） | 纯 SQLite |
+|---|---|---|
+| 并发写入 | PostgreSQL 行级锁，不卡 | SQLite 库级锁，多人同时写会排队 |
+| 运维成本 | 生产需安装 PostgreSQL | 零运维 |
+| 数据量上限 | 百万级无压力 | 十万级开始吃力 |
+| 迁移成本 | SQLAlchemy 改一行配置 | 无需迁移 |
+
+> 推荐开发用 SQLite、生产切 PostgreSQL。当前用户规模 SQLite 也能跑，但 PostgreSQL 为未来留足余量。
+
+---
+
+## 四、关键决策记录
+
+- **决策 1：测试框架** → 只用 Vitest → 理由：V4 同时用 Jest + Vitest 导致配置冲突，V6 统一为一个
+- **决策 2：样式方案** → 只用 Element Plus + scoped CSS → 理由：V4 同时用 TailwindCSS 导致样式互相覆盖，V6 砍掉 TailwindCSS
+- **决策 3：代理服务** → 用 Vite 内置 proxy → 理由：V4 引入 Express + http-proxy-middleware 做代理完全多余
+- **决策 4：包管理器** → pnpm → 理由：杜绝幽灵依赖，确保环境一致性
+- **决策 5：数据库** → 开发 SQLite / 生产 PostgreSQL → 理由：开发体验好，生产并发稳，切换成本一行配置
+- **决策 6：工具函数** → 引入 @vueuse/core → 理由：减少自写工具代码，降低 BUG 率
+
+---
+
+## 五、不选的技术及原因
+
+| 不选的技术 | V4 是否在用 | 不选的原因 |
+|-----------|------------|-----------|
+| Jest | ✅ 在用 | 和 Vitest 功能重复，保留 Vitest 一个即可 |
+| Express | ✅ 在用 | Vite 内置 proxy，不需要额外 HTTP 服务器 |
+| http-proxy-middleware | ✅ 在用 | 同上 |
+| TailwindCSS | ✅ 在用 | 和 Element Plus 样式冲突，scoped CSS 够用 |
+| @google/genai | ✅ 已安装 | 未看到实际业务使用场景 |
+| motion | ✅ 已安装 | Element Plus 内置过渡动画够用 |
+| @tanstack/vue-virtual | ✅ 已安装 | 任务列表分页加载，不需要虚拟滚动 |
+| dotenv | ✅ 已安装 | Vite 原生支持 `.env` 文件 |
+| MongoDB | ❌ | 物流数据结构固定，关系型数据库更合适 |
+| Nuxt | ❌ | 后台管理系统不需要 SSR/SEO |
+| React / Angular | ❌ | 团队熟悉 Vue，切换成本高且无收益 |
+
+---
+
+## 六、关联文档
+
+- 产品概述：[product-overview.md](product-overview.md)
+- 需求澄清：[requirements-clarification.md](requirements-clarification.md)
+- 下一步：[项目结构设计](project-structure.md)
+- V4 参考：[V6技术栈配置.md](../docs/V6技术栈配置.md)

@@ -1,0 +1,78 @@
+# V6 开发进度
+
+> ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
+> 最后更新：2026-05-04
+
+---
+
+## 当前状态
+
+| 里程碑 | 阶段 | 状态 |
+|--------|------|------|
+| M1: MVP | Phase 1.1 项目骨架 | ✅ 已完成 |
+| M1: MVP | Phase 1.2 基础设施 | 🔄 进行中 |
+| M1: MVP | Phase 1.3 核心业务 | ⬜ 未开始 |
+| M2: 完整版 | - | ⬜ 未开始 |
+| M3: 增强版 | - | ⬜ 未开始 |
+
+---
+
+## 已完成
+
+### Phase 1.1：项目骨架 ✅
+
+- [x] Monorepo 初始化（pnpm workspace）
+- [x] 前端项目（Vite + Vue 3 + TS + Element Plus）
+- [x] 后端项目（FastAPI + SQLAlchemy，目录结构 + requirements.txt）
+- [x] shared-types 共享包（枚举 + API 类型）
+- [x] 司机端目录骨架
+- [x] 工具链配置（ESLint 9 flat config、Prettier、TS 严格模式、Vitest）
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅ / dev ✅
+
+### Phase 1.2：基础设施 — 数据库模型 ✅
+
+- [x] 技术选型确认：SQLite（开发+生产统一）
+- [x] 数据库模型设计文档：[specs/features/database-model/design.md](file:///e:/Qingtou_V6/specs/features/database-model/design.md)
+- [x] SQLAlchemy 模型实现（每个模型独立文件）：
+  - [x] [users](file:///e:/Qingtou_V6/apps/server/app/models/user.py) — 用户表
+  - [x] [orders](file:///e:/Qingtou_V6/apps/server/app/models/order.py) — 订单表
+  - [x] [drivers](file:///e:/Qingtou_V6/apps/server/app/models/driver.py) — 司机表
+  - [x] [vehicles](file:///e:/Qingtou_V6/apps/server/app/models/vehicle.py) — 车辆表
+  - [x] [warehouses](file:///e:/Qingtou_V6/apps/server/app/models/warehouse.py) — 仓库表
+  - [x] [storage_slots](file:///e:/Qingtou_V6/apps/server/app/models/storage_slot.py) — 库位表
+  - [x] [certificates](file:///e:/Qingtou_V6/apps/server/app/models/certificate.py) — 证照表
+  - [x] [common_addresses](file:///e:/Qingtou_V6/apps/server/app/models/common_address.py) — 常用地址表
+  - [x] [operation_logs](file:///e:/Qingtou_V6/apps/server/app/models/operation_log.py) — 操作日志表
+  - [x] [system_configs](file:///e:/Qingtou_V6/apps/server/app/models/system_config.py) — 系统配置表
+  - [x] [help_articles](file:///e:/Qingtou_V6/apps/server/app/models/help_article.py) — 帮助文章表
+- [x] 数据库连接管理：[app/core/database.py](file:///e:/Qingtou_V6/apps/server/app/core/database.py)
+- [x] 应用配置管理：[app/core/config.py](file:///e:/Qingtou_V6/apps/server/app/core/config.py)
+- [x] Alembic 迁移配置：[alembic.ini](file:///e:/Qingtou_V6/apps/server/alembic.ini) + [alembic/env.py](file:///e:/Qingtou_V6/apps/server/alembic/env.py)
+- [x] 初始迁移脚本：[alembic/versions/20260503_init_database.py](file:///e:/Qingtou_V6/apps/server/alembic/versions/20260503_init_database.py)
+- [x] SQLite 数据库验证通过：11 张表全部创建成功
+
+---
+
+## 下一步
+
+### Phase 1.2：基础设施（剩余）
+
+**1. shared 公共模块**（优先）
+- Axios 客户端（拦截器、错误处理）
+- 通用 UI 组件（EmptyState、LoadingSpinner）
+- 工具函数（日期格式化、数据验证）
+
+**2. auth 用户认证**
+- 登录页面 + JWT 认证
+- 路由守卫
+- 角色权限控制
+
+---
+
+## 使用说明
+
+新开会话时，AI 应：
+1. 读取本文件了解当前进度
+2. 扫描实际代码目录交叉验证
+3. 主动建议下一步操作
+4. 任务完成后更新本文件
