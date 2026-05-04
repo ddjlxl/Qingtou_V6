@@ -264,4 +264,3 @@ AI 每次生成代码前，必须确认：
 - 技术栈：[tech-stack.md](tech-stack.md)
 - 项目结构：[project-structure.md](project-structure.md)
 - 产品概述：[product-overview.md](product-overview.md)
-- 旧版参考：[V6开发规则.md](../docs/V6开发规则.md)

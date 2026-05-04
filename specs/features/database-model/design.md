@@ -1,9 +1,10 @@
 # 数据库模型技术方案
 
-> **版本**：v1.0
+> **版本**：v1.1
 > **创建日期**：2026-05-03
+> **最后更新**：2026-05-04
 > **需求文档**：[requirements.md](./requirements.md)
-> **设计目标**：基于 PostgreSQL + SQLAlchemy 2.0 构建完整的数据模型，支持 Alembic 迁移，为后续所有业务功能提供数据基础
+> **设计目标**：基于 SQLite + SQLAlchemy 2.0 构建完整的数据模型，支持 Alembic 迁移，为后续所有业务功能提供数据基础
 
 ---
 
@@ -97,7 +98,7 @@ class User(BaseModel):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -445,12 +446,13 @@ alembic upgrade head
 
 ---
 
-## 九、PostgreSQL 特定优化
+## 九、SQLite 特定说明
 
-1. **UUID 生成**：使用 `pgcrypto` 扩展的 `gen_random_uuid()`
-2. **索引类型**：字符串字段使用 B-tree 索引，日期字段使用 B-tree 索引支持范围查询
-3. **字符集**：UTF-8
-4. **时区**：使用 TIMESTAMP WITH TIME ZONE（带时区）
+1. **UUID 生成**：使用 Python `uuid.uuid4()` 在应用层生成，不依赖数据库函数
+2. **索引类型**：SQLite 自动为索引选择合适类型
+3. **字符集**：UTF-8（SQLite 默认）
+4. **时区**：使用 `DateTime` 类型，应用层处理时区转换
+5. **并发**：SQLite 使用库级锁，适合小团队（3-5 调度员）并发场景
 
 ---
 

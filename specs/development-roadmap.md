@@ -163,4 +163,36 @@
 - 项目结构：[project-structure.md](project-structure.md)
 - 开发规范：[development-standards.md](development-standards.md)
 - 技术栈：[tech-stack.md](tech-stack.md)
-- 下一步：[项目初始化](project-init.md)
+
+---
+
+## 六、开发流程与 Skills 体系
+
+V6 项目采用 **21 个 Skills + 11 阶段** 的规范驱动开发流程。详见 [.trae/rules/guardrails.md](../.trae/rules/guardrails.md)。
+
+### 核心工作流
+
+```
+项目级（一次性）：
+  需求澄清 → 产品规划 → 技术设计 → 路线图规划 → 项目初始化
+
+功能级（循环使用）：
+  功能需求澄清 → 功能技术设计 → 任务规划 → TDD编码实现 → 测试验证
+                                                            ↓
+                                                      功能迭代 ←┘
+```
+
+### 常用 Skills
+
+| 场景 | Skill | 说明 |
+|------|-------|------|
+| 新功能开发 | `/feature-requirements-clarification` | 澄清功能需求，产出 AC |
+| 技术方案设计 | `/feature-design` | 设计 DB/API/组件结构 |
+| 任务拆分 | `/task-planning` | 垂直切片，定义验收标准 |
+| 编码实现 | `/feature-implementation` | TDD 驱动，穿透所有技术层 |
+| 完成前验证 | `/verification-before-completion` | 声称"完成"前必须运行 |
+| 分支收尾 | `/finishing-a-development-branch` | 合并/PR/保留/丢弃分支 |
+
+### AI 启动时读取的文档
+
+详见 [.trae/rules/project-context.md](../.trae/rules/project-context.md)

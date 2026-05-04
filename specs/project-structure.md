@@ -324,4 +324,3 @@ shared ← auth ← dashboard
 - 产品概述：[product-overview.md](product-overview.md)
 - 需求澄清：[requirements-clarification.md](requirements-clarification.md)
 - 下一步：[开发规范制定](development-standards.md)
-- V4 参考：[V6项目结构规范.md](../docs/V6项目结构规范.md)

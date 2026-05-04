@@ -106,17 +106,6 @@
 | V4 验证 | 已验证可行 | 未验证 |
 | 离线部署 | 可离线 | 依赖在线 SDK |
 
-### 数据库方案
-
-| | SQLite（开发） + PostgreSQL（生产） | 纯 SQLite |
-|---|---|---|
-| 并发写入 | PostgreSQL 行级锁，不卡 | SQLite 库级锁，多人同时写会排队 |
-| 运维成本 | 生产需安装 PostgreSQL | 零运维 |
-| 数据量上限 | 百万级无压力 | 十万级开始吃力 |
-| 迁移成本 | SQLAlchemy 改一行配置 | 无需迁移 |
-
-> 推荐开发用 SQLite、生产切 PostgreSQL。当前用户规模 SQLite 也能跑，但 PostgreSQL 为未来留足余量。
-
 ---
 
 ## 四、关键决策记录
@@ -125,7 +114,7 @@
 - **决策 2：样式方案** → 只用 Element Plus + scoped CSS → 理由：V4 同时用 TailwindCSS 导致样式互相覆盖，V6 砍掉 TailwindCSS
 - **决策 3：代理服务** → 用 Vite 内置 proxy → 理由：V4 引入 Express + http-proxy-middleware 做代理完全多余
 - **决策 4：包管理器** → pnpm → 理由：杜绝幽灵依赖，确保环境一致性
-- **决策 5：数据库** → 开发 SQLite / 生产 PostgreSQL → 理由：开发体验好，生产并发稳，切换成本一行配置
+- **决策 5：数据库** → 统一使用 SQLite → 理由：零配置、零运维、适合小团队（3-5 调度员）并发场景
 - **决策 6：工具函数** → 引入 @vueuse/core → 理由：减少自写工具代码，降低 BUG 率
 
 ---
@@ -153,4 +142,3 @@
 - 产品概述：[product-overview.md](product-overview.md)
 - 需求澄清：[requirements-clarification.md](requirements-clarification.md)
 - 下一步：[项目结构设计](project-structure.md)
-- V4 参考：[V6技术栈配置.md](../docs/V6技术栈配置.md)

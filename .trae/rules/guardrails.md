@@ -1,8 +1,20 @@
-# V6边界守卫机制
+# V6 边界守卫机制
 
-> **版本**：v3.0  
-> **用途**：强制AI在正确的阶段做正确的事  
-> **作用范围**：所有Skills执行时自动加载
+> **版本**：v1.0  
+> **创建日期**：2026-05-04  
+> **定位**：定义 11 个阶段的边界，强制 AI 在正确的阶段做正确的事  
+> **前置文档**：[project-context.md](project-context.md)（启动时先读）
+
+---
+
+## 与其他文档的关系
+
+| 文档 | 定位 | 本文档关系 |
+|------|------|-----------|
+| [project-context.md](project-context.md) | 启动时读什么 | 入口文档，先加载 |
+| **本文档** | 什么阶段能做什么 | 流程边界 |
+| [project_rules.md](project_rules.md) | 一页速查 | 日常参考 |
+| [ai-constraints.md](ai-constraints.md) | 为什么有这些规则 | V4 教训详解 |
 
 ---
 
@@ -200,7 +212,7 @@ AI有个本能：你问它什么，它都想帮你做。听起来是好事，但
 
 ### 阶段十：测试验证阶段
 
-**对应Skills**：`testing`、`code-review`、`bug-fix`、`performance-optimization`
+**对应Skills**：`testing`、`code-review`、`bug-fix`、`performance-optimization`、`verification-before-completion`、`refactor-plan`
 
 **允许**：
 - ✅ 编写测试代码
@@ -208,13 +220,15 @@ AI有个本能：你问它什么，它都想帮你做。听起来是好事，但
 - ✅ 修复BUG
 - ✅ 代码审查
 - ✅ 性能优化
+- ✅ 完成前验证门禁
+- ✅ 多文件重构规划
 
 **禁止**：
-- ❌ 修改需求文档
+- ❌ 未经确认修改需求文档
 - ❌ 跳过失败的测试
 - ❌ 降低测试覆盖率要求
 
-**产出物**：测试报告、审查报告
+**产出物**：测试报告、审查报告、重构方案
 
 ---
 
@@ -366,7 +380,7 @@ AI：⚠️ 边界守卫拦截
 | feature-design | 功能技术设计阶段 |
 | task-planning | 任务规划阶段 |
 | feature-implementation | 编码实现阶段 |
-| testing, code-review, bug-fix, performance-optimization | 测试验证阶段 |
+| testing, code-review, bug-fix, performance-optimization, verification-before-completion, refactor-plan | 测试验证阶段 |
 | feature-iteration | 功能迭代阶段 |
 
 ---
@@ -402,4 +416,15 @@ AI：⚠️ 边界守卫拦截
 
 ---
 
-*边界守卫机制基于SpecForge方法论设计，确保V6项目开发流程规范化*
+## 辅助 Skills（跨阶段使用）
+
+以下 Skills 不属于特定阶段，可在多个阶段使用：
+
+| Skill | 用途 | 使用时机 |
+|-------|------|---------|
+| `finishing-a-development-branch` | Git 分支收尾 | 功能开发完成后，需要合并/PR/保留/丢弃分支时 |
+| `frontend-design` | 前端界面设计品质指导 | 编码实现阶段设计 UI 时，或任何需要美化界面的场景 |
+
+---
+
+*边界守卫机制基于 SpecForge 方法论设计，确保 V6 项目开发流程规范化*
