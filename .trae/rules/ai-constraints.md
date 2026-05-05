@@ -1,7 +1,8 @@
 # V6 项目 AI 开发约束机制
 
-> **版本**：v1.0  
+> **版本**：v1.1  
 > **创建日期**：2026-05-04  
+> **更新日期**：2026-05-05  
 > **定位**：记录 V4 踩过的坑，解释"为什么要有这些规则"  
 > **详细规则**：见 [development-standards.md](../../specs/development-standards.md)
 
@@ -169,6 +170,84 @@ const trend = computed(() => {
 
 ---
 
+### 1.6 禁止推测性功能（Simplicity First）
+
+**V4 问题**：为"可能的未来需求"提前写代码，导致代码膨胀、维护困难
+
+**后果**：
+- 代码复杂度增加，但实际从未使用
+- 增加测试负担
+- 增加理解成本
+- 重构时不敢删除"可能有用"的代码
+
+**V6 解决**：
+```typescript
+// ❌ 禁止：未被请求的可配置性
+let onUnauthorized: () => void = () => { ... }
+export function setUnauthorizedHandler(handler: () => void): void { ... }
+
+// ✅ 当前需求就是跳 /login，直接写死
+window.location.href = '/login'
+
+// ❌ 禁止：为单次使用创建抽象层
+interface IFormatter { format(value: unknown): string }
+class DateFormatter implements IFormatter { ... }
+class MoneyFormatter implements IFormatter { ... }
+
+// ✅ 简单函数，需要时再抽象
+export function formatDate(value: string | Date, pattern?: string): string { ... }
+export function formatMoney(amount: number, decimals?: number): string { ... }
+```
+
+**自检**：一个高级工程师会说这段代码过度复杂吗？如果是，简化它。
+
+---
+
+### 1.7 外科手术式修改（Surgical Changes）
+
+**V4 问题**：修复一个 Bug 时顺手重构了相邻代码，引入新问题
+
+**后果**：
+- PR diff 膨胀，审查困难
+- 引入与原问题无关的新 Bug
+- 改动难以回滚
+- 代码风格不一致
+
+**V6 解决**：
+```diff
+# ❌ 禁止：修复空 email bug 时顺手做了其他事
+- if not user_data.get('email'):
++ email = user_data.get('email', '').strip()
++ if not email:
+      raise ValueError("Email required")
+- if '@' not in user_data['email']:
++ if '@' not in email or '.' not in email.split('@')[1]:  # ← 未被请求的增强
+      raise ValueError("Invalid email")
++ # ← 未被请求的用户名验证
++ if len(username) < 3:
++     raise ValueError("Username too short")
+```
+
+```diff
+# ✅ 只改与空 email bug 相关的行
+- if not user_data.get('email'):
++ email = user_data.get('email', '')
++ if not email or not email.strip():
+      raise ValueError("Email required")
+- if '@' not in user_data['email']:
++ if '@' not in email:
+      raise ValueError("Invalid email")
+```
+
+**规则**：
+- 不"改进"相邻代码、注释或格式
+- 不重构没有坏的东西
+- 匹配现有代码风格，即使你更习惯另一种写法
+- 每行改动都必须能追溯到用户的具体请求
+- 如果发现无关的死代码，提出来但不要删除
+
+---
+
 ## 二、开发前检查清单
 
 > 详细规范见 [development-standards.md](../../specs/development-standards.md)
@@ -184,6 +263,8 @@ const trend = computed(() => {
 - [ ] 确认不使用 `console.log`
 - [ ] 确认文件大小符合限制（≤ 300 行）
 - [ ] 确认函数长度符合限制（≤ 50 行）
+- [ ] 确认不写未被请求的功能或可配置性（1.6）
+- [ ] 确认每行改动都能追溯到用户请求（1.7）
 
 **业务规则检查**：
 - [ ] 确认理解相关业务规则
@@ -226,6 +307,8 @@ pnpm test
 | 文件超过 300 行 | 立即拆分，重新设计结构 |
 | 函数超过 50 行 | 立即重构，提取子函数 |
 | 业务逻辑错误 | 立即修复，补充测试用例 |
+| 写了未被请求的功能 | 立即删除，回归最小实现 |
+| 改动了与任务无关的代码 | 立即回滚，只保留必要改动 |
 
 ---
 

@@ -62,17 +62,20 @@
 
 ## 下一步
 
-### Phase 1.2：基础设施（剩余）
+### Phase 1.2：基础设施（剩余）— 计划已就绪 📋
 
 **1. shared 公共模块**（优先）
-- Axios 客户端（拦截器、错误处理）
-- 通用 UI 组件（EmptyState、LoadingSpinner）
-- 工具函数（日期格式化、数据验证）
+- 📄 需求+设计：[specs/features/shared/requirements.md](file:///e:/Qingtou_V6/specs/features/shared/requirements.md)
+- 📄 任务规划：[specs/features/shared/tasks.md](file:///e:/Qingtou_V6/specs/features/shared/tasks.md)
+- 5 个原子任务：T-001(Axios) → T-002(Utils) → T-003(UI组件) → T-004(后端) → T-005(导出验证)
 
 **2. auth 用户认证**
-- 登录页面 + JWT 认证
-- 路由守卫
-- 角色权限控制
+- 📄 需求：[specs/features/auth/requirements.md](file:///e:/Qingtou_V6/specs/features/auth/requirements.md)
+- 📄 设计：[specs/features/auth/design.md](file:///e:/Qingtou_V6/specs/features/auth/design.md)
+- 📄 任务规划：[specs/features/auth/tasks.md](file:///e:/Qingtou_V6/specs/features/auth/tasks.md)
+- 6 个原子任务：T-101(JWT) → T-102(API) → T-103(Store) → T-104(页面) + T-105(守卫) → T-106(集成)
+
+**执行策略**：先 shared（T-001~T-005），再 auth（T-101~T-106），每个任务 TDD 驱动
 
 ---
 

@@ -8,6 +8,14 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
   {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
+  },
+  {
     files: ['**/*.{ts,vue}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
