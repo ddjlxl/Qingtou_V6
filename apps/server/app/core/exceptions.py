@@ -23,3 +23,8 @@ class ForbiddenException(AppException):
 class ValidationException(AppException):
     def __init__(self, message: str):
         super().__init__(code=422, message=message)
+
+
+class BusinessRuleViolationError(AppException):
+    def __init__(self, message: str):
+        super().__init__(code=409, message=message)

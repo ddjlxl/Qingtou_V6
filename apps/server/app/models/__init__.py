@@ -7,6 +7,7 @@ from app.models.operation_log import OperationLog
 from app.models.order import Order
 from app.models.storage_slot import StorageSlot
 from app.models.system_config import SystemConfig
+from app.models.transport_record import TransportRecord
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.models.warehouse import Warehouse
@@ -20,6 +21,7 @@ __all__ = [
     "Vehicle",
     "Driver",
     "Certificate",
+    "TransportRecord",
     "Warehouse",
     "StorageSlot",
     "OperationLog",

@@ -159,7 +159,7 @@ VITE_API_BASE_URL=http://localhost:8000/api
 
 # 后端环境变量
 DATABASE_URL=sqlite:///./qingtou_v6.db
-SECRET_KEY=your-secret-key
+JWT_SECRET=your-secret-key
 ```
 
 ### 数据库迁移

@@ -2,7 +2,7 @@ import enum
 import uuid
 
 import sqlalchemy as sa
-from sqlalchemy import Numeric, String, Text, Uuid
+from sqlalchemy import ForeignKey, Numeric, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from app.models.base import BaseModel
@@ -23,6 +23,7 @@ class Vehicle(BaseModel):
     __tablename__ = "vehicles"
     __table_args__ = (
         sa.Index("ix_vehicles_status", "status"),
+        sa.Index("ix_vehicles_bound_driver", "bound_driver_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -39,8 +40,14 @@ class Vehicle(BaseModel):
     ownership: Mapped[str] = mapped_column(
         String(20), nullable=False, default=Ownership.OWN.value
     )
+    bound_driver_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("drivers.id"), nullable=True
+    )
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, default=VehicleStatus.IDLE.value
+    )
+    is_disabled: Mapped[bool] = mapped_column(
+        sa.Boolean, nullable=False, default=False
     )
     current_lat: Mapped[float | None] = mapped_column(
         Numeric(10, 8), nullable=True

@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-04
+> 最后更新：2026-05-10（fleet 阶段 0 完成）
 
 ---
 
@@ -10,8 +10,8 @@
 | 里程碑 | 阶段 | 状态 |
 |--------|------|------|
 | M1: MVP | Phase 1.1 项目骨架 | ✅ 已完成 |
-| M1: MVP | Phase 1.2 基础设施 | 🔄 进行中 |
-| M1: MVP | Phase 1.3 核心业务 | ⬜ 未开始 |
+| M1: MVP | Phase 1.2 基础设施 | ✅ 已完成 |
+| M1: MVP | Phase 1.3 核心业务 — auth 认证 | ✅ 已完成 |
 | M2: 完整版 | - | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -51,6 +51,46 @@
 - [x] 初始迁移脚本：[alembic/versions/20260503_init_database.py](file:///e:/Qingtou_V6/apps/server/alembic/versions/20260503_init_database.py)
 - [x] SQLite 数据库验证通过：11 张表全部创建成功
 
+### Phase 1.2：基础设施 — shared 公共模块 ✅
+
+- [x] 技术设计文档：[specs/features/shared/requirements.md](file:///e:/Qingtou_V6/specs/features/shared/requirements.md)
+- [x] 任务规划文档：[specs/features/shared/tasks.md](file:///e:/Qingtou_V6/specs/features/shared/tasks.md)
+- [x] 前端 Axios 客户端：
+  - [x] [client.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/api/client.ts) — HTTP 客户端 + 拦截器
+  - [x] [client.test.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/api/client.test.ts) — 单元测试
+  - [x] 支持 token 自动注入、401 自动跳转、统一错误处理
+  - [x] 集成 `ApiResponse<T>` 类型
+- [x] 前端工具函数：
+  - [x] [format.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/utils/format.ts) — 日期/金额格式化
+  - [x] [validate.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/utils/validate.ts) — 手机号/必填验证
+  - [x] [permission.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/utils/permission.ts) — 角色权限检查
+  - [x] 所有工具函数均有对应测试文件
+- [x] 前端通用 UI 组件：
+  - [x] [EmptyState.vue](file:///e:/Qingtou_V6/apps/frontend/src/shared/components/EmptyState.vue) — 空状态组件
+  - [x] [LoadingSpinner.vue](file:///e:/Qingtou_V6/apps/frontend/src/shared/components/LoadingSpinner.vue) — 加载动画组件
+  - [x] 所有组件均有对应测试文件
+- [x] 后端基础设施：
+  - [x] [logger.py](file:///e:/Qingtou_V6/apps/server/app/core/logger.py) — 日志工具（控制台+文件双输出）
+  - [x] [exceptions.py](file:///e:/Qingtou_V6/apps/server/app/core/exceptions.py) — 业务异常类
+  - [x] [exception_handlers.py](file:///e:/Qingtou_V6/apps/server/app/core/exception_handlers.py) — 全局异常处理器
+  - [x] 所有模块均有对应测试文件
+- [x] 模块导出规范：
+  - [x] [frontend/src/shared/index.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/index.ts) — 前端统一导出
+  - [x] [server/app/core/__init__.py](file:///e:/Qingtou_V6/apps/server/app/core/__init__.py) — 后端统一导出
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅
+
+### Phase 1.3：核心业务 — auth 用户认证 ✅
+
+- [x] 需求文档：[specs/features/auth/requirements.md](file:///e:/Qingtou_V6/specs/features/auth/requirements.md)
+- [x] 设计文档：[specs/features/auth/design.md](file:///e:/Qingtou_V6/specs/features/auth/design.md)
+- [x] 任务规划：[specs/features/auth/tasks.md](file:///e:/Qingtou_V6/specs/features/auth/tasks.md)
+- [x] T-101：后端 JWT 安全模块 — [core/security.py](file:///e:/Qingtou_V6/apps/server/app/core/security.py)（11 tests）
+- [x] T-102：后端登录 API — [api/v1/auth.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/auth.py) + [auth_service.py](file:///e:/Qingtou_V6/apps/server/app/services/auth_service.py)（8 tests）
+- [x] T-103：前端认证 Store + API 服务 — [modules/auth/](file:///e:/Qingtou_V6/apps/frontend/src/modules/auth/)（16 tests）
+- [x] T-104：前端登录页面 — [LoginForm.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/auth/components/LoginForm.vue)（6 tests）
+- [x] T-105：路由守卫 + 角色权限 — [router/index.ts](file:///e:/Qingtou_V6/apps/frontend/src/router/index.ts)（3 tests）
+- [x] T-106：集成验证 — type-check ✅ / lint ✅ / test ✅（14 files, 102 tests）
+
 ### 技能迁移 ✅
 
 - [x] 从 V4 迁移 4 个新技能：完成前验证、分支收尾、重构计划、界面设计
@@ -62,20 +102,34 @@
 
 ## 下一步
 
-### Phase 1.2：基础设施（剩余）— 计划已就绪 📋
+### Phase 1.3：核心业务 — fleet 车队管理 🚀
 
-**1. shared 公共模块**（优先）
-- 📄 需求+设计：[specs/features/shared/requirements.md](file:///e:/Qingtou_V6/specs/features/shared/requirements.md)
-- 📄 任务规划：[specs/features/shared/tasks.md](file:///e:/Qingtou_V6/specs/features/shared/tasks.md)
-- 5 个原子任务：T-001(Axios) → T-002(Utils) → T-003(UI组件) → T-004(后端) → T-005(导出验证)
+**auth 用户认证** ✅ 已完成（6/6 任务全部通过）
 
-**2. auth 用户认证**
-- 📄 需求：[specs/features/auth/requirements.md](file:///e:/Qingtou_V6/specs/features/auth/requirements.md)
-- 📄 设计：[specs/features/auth/design.md](file:///e:/Qingtou_V6/specs/features/auth/design.md)
-- 📄 任务规划：[specs/features/auth/tasks.md](file:///e:/Qingtou_V6/specs/features/auth/tasks.md)
-- 6 个原子任务：T-101(JWT) → T-102(API) → T-103(Store) → T-104(页面) + T-105(守卫) → T-106(集成)
+**fleet 车队管理**（阶段 0 已完成 ✅，阶段 1 待开始 ⚡）
+- [x] 需求澄清：[specs/features/fleet/requirements.md](file:///e:/Qingtou_V6/specs/features/fleet/requirements.md)
+- [x] 技术设计：[specs/features/fleet/design.md](file:///e:/Qingtou_V6/specs/features/fleet/design.md)
+- [x] 任务规划：[specs/features/fleet/tasks.md](file:///e:/Qingtou_V6/specs/features/fleet/tasks.md)
+- [ ] 编码实现：42/52 任务待完成
 
-**执行策略**：先 shared（T-001~T-005），再 auth（T-101~T-106），每个任务 TDD 驱动
+| 阶段 | 任务范围 | 任务数 | 状态 | 检查点 Commit |
+|------|---------|--------|------|--------------|
+| 阶段 0: 基础设施 | T-001 ~ T-010 | 10 | ✅ | 未提交（等待手动确认） |
+| 阶段 1: 车辆管理 | T-101 ~ T-109 | 9 | ⬜ | - |
+| 阶段 2: 司机管理 | T-201 ~ T-208 | 8 | ⬜ | - |
+| 阶段 3: 证照管理 | T-301 ~ T-308 | 8 | ⬜ | - |
+| 阶段 4: 运输流水 | T-401 ~ T-408 | 8 | ⬜ | - |
+| 阶段 5: 车队统计 | T-501 ~ T-509 | 9 | ⬜ | - |
+
+**当前任务**：T-101（创建车辆相关类型定义）
+**检查点约定**：每完成一个阶段后 git commit，记录 commit hash 到上表
+
+**新窗口启动指令**：
+```
+继续 fleet 模块编码实现，从阶段 1 Task-101 开始，每完成一个阶段停下来等待我手动确认
+```
+
+后续模块：dispatch 调度中心 → driver 司机端
 
 ---
 

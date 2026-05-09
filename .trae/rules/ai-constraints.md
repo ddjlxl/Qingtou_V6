@@ -203,6 +203,36 @@ export function formatMoney(amount: number, decimals?: number): string { ... }
 
 ---
 
+### 1.8 设计前必须审计现有代码（Design Audit First）
+
+**V6 问题**：fleet 设计文档列出 `BaseButton`、`BaseInput`、`BaseTable` 为"可复用组件"，但实际 `shared/components/` 下只有 `EmptyState` 和 `LoadingSpinner`，且项目已全局使用 Element Plus，根本不需要这些封装
+
+**后果**：
+- 任务规划基于不存在的依赖，编码时才发现缺东西
+- 设计文档与实际代码脱节，失去指导意义
+- 浪费时间去讨论/创建根本不需要的组件
+
+**V6 解决**：
+```
+# 设计文档中引用任何"已有"代码前，必须先读文件确认其存在
+
+# ❌ 禁止：凭想象列可复用资源
+## 可复用抽象
+- 公共组件：EmptyState、LoadingSpinner、BaseButton、BaseInput、BaseTable
+
+# ✅ 正确：只列经过验证的资源
+## 可复用抽象（已审计）
+- 公共组件：EmptyState.vue、LoadingSpinner.vue（已验证存在于 shared/components/）
+- UI 框架：Element Plus（el-button、el-input、el-table、el-select、el-upload 等）
+```
+
+**规则**：
+- 设计文档中引用任何文件、组件、函数前，必须用 `Read` 或 `Glob` 工具确认其存在
+- 声明"可复用"之前，必须确认被复用的东西确实存在且接口匹配
+- 不确定的东西宁可少列，不可多列
+
+---
+
 ### 1.7 外科手术式修改（Surgical Changes）
 
 **V4 问题**：修复一个 Bug 时顺手重构了相邻代码，引入新问题

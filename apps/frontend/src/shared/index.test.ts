@@ -3,6 +3,7 @@ import http from '@/shared/api/client'
 import { formatDate, formatMoney } from '@/shared/utils/format'
 import { isPhone, isRequired } from '@/shared/utils/validate'
 import { hasRole, isAdmin } from '@/shared/utils/permission'
+import { logger } from '@/shared/utils/logger'
 import EmptyState from '@/shared/components/EmptyState.vue'
 import LoadingSpinner from '@/shared/components/LoadingSpinner.vue'
 
@@ -49,5 +50,13 @@ describe('AC-006: shared module exports', () => {
 
   it('exports LoadingSpinner component', () => {
     expect(LoadingSpinner).toBeDefined()
+  })
+
+  it('exports logger', () => {
+    expect(logger).toBeDefined()
+    expect(typeof logger.debug).toBe('function')
+    expect(typeof logger.info).toBe('function')
+    expect(typeof logger.warn).toBe('function')
+    expect(typeof logger.error).toBe('function')
   })
 })

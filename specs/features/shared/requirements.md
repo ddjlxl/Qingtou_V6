@@ -2,7 +2,7 @@
 
 > **版本**：v1.0
 > **创建日期**：2026-05-04
-> **状态**：草稿
+> **状态**：已完成
 > **定位**：基础设施模块，合并 requirements + design（轻量）
 
 ---
@@ -125,9 +125,9 @@ http.interceptors.request.use((config) => {
   return config
 })
 
-// 响应拦截器：统一错误处理
+// 响应拦截器：统一错误处理 + 提取 data 字段
 http.interceptors.response.use(
-  (response) => response.data,
+  (response) => response.data.data,  // 提取 ApiResponse<T> 中的 data 字段
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')

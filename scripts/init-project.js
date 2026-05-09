@@ -27,7 +27,6 @@ class ProjectInitializer {
       'apps/frontend/src/api',
       'apps/frontend/src/assets/styles',
       'apps/frontend/src/assets/images',
-      'apps/frontend/src/components/ui',
       'apps/frontend/src/components/business',
       'apps/frontend/src/components/layout',
       'apps/frontend/src/components/dashboard',
@@ -176,19 +175,6 @@ class ProjectInitializer {
   }
 
   /**
-   * 创建组件示例
-   */
-  createComponentExample() {
-    console.log('\n🧩 创建组件示例...')
-
-    this.writeFile('apps/frontend/src/components/ui/Button/Button.vue', this.getButtonComponent())
-    this.writeFile('apps/frontend/src/components/ui/Button/Button.types.ts', this.getButtonTypes())
-    this.writeFile('apps/frontend/src/components/ui/index.ts', this.getUIComponentsIndex())
-
-    console.log('  ✅ 组件示例创建完成')
-  }
-
-  /**
    * 创建服务层示例
    */
   createServiceExample() {
@@ -198,17 +184,6 @@ class ProjectInitializer {
     this.writeFile('apps/frontend/src/services/index.ts', this.getServicesIndex())
 
     console.log('  ✅ 服务层示例创建完成')
-  }
-
-  /**
-   * 创建测试示例
-   */
-  createTestExample() {
-    console.log('\n🧪 创建测试示例...')
-
-    this.writeFile('apps/frontend/src/components/ui/Button/__tests__/Button.test.ts', this.getButtonTest())
-
-    console.log('  ✅ 测试示例创建完成')
   }
 
   /**
@@ -759,86 +734,6 @@ export const createAuthActions = (state: AuthState) => ({
 `
   }
 
-  getButtonComponent() {
-    return `<template>
-  <button
-    class="btn"
-    :class="buttonClass"
-    :disabled="disabled"
-    @click="handleClick"
-  >
-    <slot />
-  </button>
-</template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import type { ButtonProps } from './Button.types'
-
-const props = withDefaults(defineProps<ButtonProps>(), {
-  type: 'default',
-  size: 'medium',
-  disabled: false
-})
-
-const emit = defineEmits<{
-  click: [event: MouseEvent]
-}>()
-
-const buttonClass = computed(() => ({
-  \`btn--\${props.type}\`: true,
-  \`btn--\${props.size}\`: true,
-  'btn--disabled': props.disabled
-}))
-
-const handleClick = (event: MouseEvent) => {
-  if (!props.disabled) {
-    emit('click', event)
-  }
-}
-</script>
-
-<style scoped>
-.btn {
-  @apply px-4 py-2 rounded font-medium transition-colors;
-}
-
-.btn--default {
-  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
-}
-
-.btn--primary {
-  @apply bg-blue-500 text-white hover:bg-blue-600;
-}
-
-.btn--danger {
-  @apply bg-red-500 text-white hover:bg-red-600;
-}
-
-.btn--disabled {
-  @apply opacity-50 cursor-not-allowed;
-}
-</style>
-`
-  }
-
-  getButtonTypes() {
-    return `export type ButtonType = 'default' | 'primary' | 'danger'
-export type ButtonSize = 'small' | 'medium' | 'large'
-
-export interface ButtonProps {
-  type?: ButtonType
-  size?: ButtonSize
-  disabled?: boolean
-}
-`
-  }
-
-  getUIComponentsIndex() {
-    return `export { default as Button } from './Button/Button.vue'
-`
-  }
-
   getAuthService() {
     return `import apiClient from '@api/client'
 import type { LoginRequest, LoginResponse, ApiResponse } from '@types'
@@ -864,52 +759,6 @@ export const authService = {
 `
   }
 
-  getButtonTest() {
-    return `import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
-import Button from '../Button.vue'
-
-describe('Button', () => {
-  it('renders correctly', () => {
-    const wrapper = mount(Button, {
-      slots: {
-        default: 'Click me'
-      }
-    })
-
-    expect(wrapper.text()).toBe('Click me')
-  })
-
-  it('emits click event when clicked', async () => {
-    const wrapper = mount(Button, {
-      slots: {
-        default: 'Click me'
-      }
-    })
-
-    await wrapper.trigger('click')
-
-    expect(wrapper.emitted('click')).toBeTruthy()
-  })
-
-  it('does not emit click when disabled', async () => {
-    const wrapper = mount(Button, {
-      props: {
-        disabled: true
-      },
-      slots: {
-        default: 'Click me'
-      }
-    })
-
-    await wrapper.trigger('click')
-
-    expect(wrapper.emitted('click')).toBeFalsy()
-  })
-})
-`
-  }
-
   /**
    * 运行初始化
    */
@@ -923,9 +772,7 @@ describe('Button', () => {
       this.createUtilsFiles()
       this.createApiClient()
       this.createStoreExample()
-      this.createComponentExample()
       this.createServiceExample()
-      this.createTestExample()
 
       console.log('\n✅ V6项目初始化完成！')
       console.log('\n下一步：')
@@ -937,17 +784,6 @@ describe('Button', () => {
       console.error('❌ 初始化失败:', error)
       process.exit(1)
     }
-  }
-}
-
-// 命令行接口
-if (require.main === module) {
-  const initializer = new ProjectInitializer()
-  initializer.init()
-}
-
-module.exports = ProjectInitializer
-`
   }
 }
 

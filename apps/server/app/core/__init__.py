@@ -6,6 +6,7 @@ from app.core.exceptions import (
     ForbiddenException,
     ValidationException,
 )
+from app.core.security import create_token, decode_token, hash_password, verify_password
 
 logger = get_logger()
 
@@ -16,4 +17,8 @@ __all__ = [
     "UnauthorizedException",
     "ForbiddenException",
     "ValidationException",
+    "create_token",
+    "decode_token",
+    "hash_password",
+    "verify_password",
 ]

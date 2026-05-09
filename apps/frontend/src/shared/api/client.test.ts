@@ -47,7 +47,7 @@ describe('http client', () => {
       const response = { data: { code: 200, message: 'ok', data: { id: 1 } } } as unknown as AxiosResponse
       const result = handleResponseSuccess(response)
 
-      expect(result).toEqual(response.data)
+      expect(result).toEqual({ id: 1 })
     })
   })
 

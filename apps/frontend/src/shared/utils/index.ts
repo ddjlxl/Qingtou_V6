@@ -1,3 +1,4 @@
 export { formatDate, formatMoney } from './format'
 export { isPhone, isRequired } from './validate'
 export { hasRole, isAdmin } from './permission'
+export { logger } from './logger'

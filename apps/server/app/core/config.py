@@ -1,10 +1,11 @@
+import warnings
+
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./qingtou.db"
-    SECRET_KEY: str = "change-me-in-production"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+    JWT_SECRET: str = "change-me-in-production"
     CORS_ORIGINS: list[str] = ["*"]
 
     class Config:
@@ -13,3 +14,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if settings.JWT_SECRET == "change-me-in-production":
+    warnings.warn(
+        "JWT_SECRET 使用默认值，生产环境请务必通过环境变量修改！",
+        RuntimeWarning,
+    )

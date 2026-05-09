@@ -15,6 +15,7 @@ class OwnerType(str, enum.Enum):
 
 
 class VehicleCertType(str, enum.Enum):
+    VEHICLE_LICENSE = "vehicle_license"
     COMPULSORY_INSURANCE = "compulsory_insurance"
     COMMERCIAL_INSURANCE = "commercial_insurance"
     ANNUAL_INSPECTION = "annual_inspection"
@@ -29,8 +30,8 @@ class DriverCertType(str, enum.Enum):
 class Certificate(BaseModel):
     __tablename__ = "certificates"
     __table_args__ = (
-        sa.Index("ix_cert_owner", "owner_id", "owner_type"),
-        sa.Index("ix_cert_expiry", "expiry_date"),
+        sa.Index("ix_certificates_owner", "owner_type", "owner_id"),
+        sa.Index("ix_certificates_expiry", "expiry_date"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -45,7 +46,7 @@ class Certificate(BaseModel):
         String(20), nullable=False
     )
     cert_type: Mapped[str] = mapped_column(
-        String(30), nullable=False
+        String(50), nullable=False
     )
     cert_name: Mapped[str] = mapped_column(
         String(100), nullable=False
@@ -57,7 +58,7 @@ class Certificate(BaseModel):
         Date, nullable=False
     )
     attachment: Mapped[str | None] = mapped_column(
-        String(255), nullable=True
+        String(500), nullable=True
     )
     remark: Mapped[str | None] = mapped_column(
         Text, nullable=True
