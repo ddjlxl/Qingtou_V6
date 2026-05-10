@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import get_db
-from app.core.security import hash_password
+from app.core.security import create_token, hash_password
 from app.main import app
 from app.models.base import Base
 from app.models.user import User
@@ -73,3 +73,10 @@ async def create_test_user(db: AsyncSession, username: str, password: str, role:
     await db.commit()
     await db.refresh(user)
     return user
+
+
+@pytest_asyncio.fixture
+async def auth_headers(db_session: AsyncSession):
+    user = await create_test_user(db_session, "testuser", "test123")
+    token = create_token(str(user.id))
+    return {"Authorization": f"Bearer {token}"}

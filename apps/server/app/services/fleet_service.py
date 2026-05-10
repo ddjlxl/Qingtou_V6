@@ -85,15 +85,15 @@ async def bind_driver_to_vehicle(
     if existing_vehicle and existing_vehicle.id != vehicle_id:
         if not confirmed:
             return {
-                "needConfirm": True,
+                "need_confirm": True,
                 "message": f"该司机已关联车辆 {existing_vehicle.plate_no}，是否更换关联？",
-                "oldVehicleId": str(existing_vehicle.id),
-                "oldVehiclePlateNo": existing_vehicle.plate_no,
+                "old_vehicle_id": str(existing_vehicle.id),
+                "old_vehicle_plate_no": existing_vehicle.plate_no,
             }
         existing_vehicle.bound_driver_id = None
 
     if existing_vehicle and existing_vehicle.id == vehicle_id:
-        return {"needConfirm": False, "message": "该司机已绑定到当前车辆"}
+        return {"need_confirm": False, "message": "该司机已绑定到当前车辆"}
 
     result = await db.execute(select(Vehicle).where(Vehicle.id == vehicle_id))
     vehicle = result.scalar_one_or_none()
@@ -102,4 +102,4 @@ async def bind_driver_to_vehicle(
 
     vehicle.bound_driver_id = driver_id
     await db.commit()
-    return {"needConfirm": False, "message": "司机绑定成功"}
+    return {"need_confirm": False, "message": "司机绑定成功"}

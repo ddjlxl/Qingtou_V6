@@ -1,11 +1,42 @@
 # Fleet 车队管理任务规划
 
-> **版本**：v1.1
+> **版本**：v1.2
 > **创建日期**：2026-05-06
-> **更新日期**：2026-05-07
+> **更新日期**：2026-05-10
 > **需求文档**：[requirements.md](./requirements.md)
 > **技术方案**：[design.md](./design.md)
 > **规划策略**：垂直切片，每个切片对应一个完整的用户行为
+
+---
+
+## ⚠️ TDD 开发流程
+
+**每个任务必须按 RED → GREEN → REFACTOR 循环执行，测试不是独立任务。**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  任务执行流程（每个任务内部）                                   │
+├─────────────────────────────────────────────────────────────┤
+│  1. RED 阶段：先写失败的测试                                   │
+│     - 根据任务验证标准编写测试用例                               │
+│     - 运行测试，确认失败                                        │
+│                                                              │
+│  2. GREEN 阶段：写最小实现让测试通过                            │
+│     - 只写让测试通过的最小代码                                   │
+│     - 不提前实现未请求的功能                                     │
+│                                                              │
+│  3. REFACTOR 阶段：重构优化                                    │
+│     - 清理代码，保持测试通过                                     │
+│     - 提取公共逻辑，消除重复                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**禁止事项**：
+- ❌ 禁止规划"编写单元测试"类独立任务
+- ❌ 禁止先写实现代码后补测试
+- ❌ 禁止跳过 RED 阶段直接写实现
+
+**执行命令**：后续阶段必须通过 `/feature-implementation` Skill 执行，确保 TDD 流程。
 
 ---
 
@@ -446,46 +477,7 @@ graph TD
 - **验证标准**：
   - [ ] 不同状态显示不同颜色
   - [ ] 标签文字正确
-
-#### Task-108: 编写车辆管理单元测试 🔒
-- **所属切片**：阶段 1: 车辆管理
-- **复杂度**：M
-- **Depends On**：Task-105
-- **对应 AC**：AC-001, AC-002, AC-003, AC-004, AC-018, AC-019, AC-030
-- **通俗解释**：编写车辆管理相关的单元测试
-- **Description**：
-  1. 创建 `apps/frontend/src/modules/fleet/__tests__/VehicleManagement.test.ts`
-  2. 测试表格渲染
-  3. 测试状态筛选
-  4. 创建 `apps/frontend/src/modules/fleet/__tests__/useFleetStore.test.ts`
-  5. 测试 Store 的 actions
-  6. 测试计算属性
-- **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/__tests__/VehicleManagement.test.ts`（新建）
-  - `apps/frontend/src/modules/fleet/__tests__/useFleetStore.test.ts`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 测试覆盖率 ≥ 80%
-
-#### Task-109: 编写车辆管理后端 API 测试 🔒
-- **所属切片**：阶段 1: 车辆管理
-- **复杂度**：M
-- **Depends On**：Task-103
-- **对应 AC**：AC-001, AC-002, AC-003, AC-004, AC-018, AC-019, AC-020
-- **通俗解释**：编写车辆管理后端 API 的集成测试
-- **Description**：
-  1. 创建 `apps/server/tests/test_fleet_vehicles.py`
-  2. 测试新增车辆（正常 + 车牌号重复）
-  3. 测试编辑车辆
-  4. 测试获取车辆列表（含状态筛选）
-  5. 测试删除有历史记录的车辆（应拒绝）
-  6. 测试停用车辆
-  7. 测试车辆可用性检查
-- **Files to Create/Modify**：
-  - `apps/server/tests/test_fleet_vehicles.py`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 覆盖所有 Happy Path 和 Edge Case
+  - [ ] **TDD 测试通过**：组件渲染测试覆盖三种状态
 
 ---
 
@@ -606,41 +598,7 @@ graph TD
 - **验证标准**：
   - [ ] 表单验证正确
   - [ ] 提交成功后关闭弹窗
-
-#### Task-207: 编写司机管理单元测试 🔒
-- **所属切片**：阶段 2: 司机管理
-- **复杂度**：M
-- **Depends On**：Task-205
-- **对应 AC**：AC-005, AC-006, AC-007, AC-021, AC-034, AC-035
-- **通俗解释**：编写司机管理相关的单元测试
-- **Description**：
-  1. 创建 `apps/frontend/src/modules/fleet/__tests__/DriverManagement.test.ts`
-  2. 测试表格渲染
-  3. 测试 Store 的司机相关 actions
-- **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/__tests__/DriverManagement.test.ts`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 测试覆盖率 ≥ 80%
-
-#### Task-208: 编写司机管理后端 API 测试 🔒
-- **所属切片**：阶段 2: 司机管理
-- **复杂度**：M
-- **Depends On**：Task-203
-- **对应 AC**：AC-005, AC-006, AC-007, AC-021, AC-034, AC-035
-- **通俗解释**：编写司机管理后端 API 的集成测试
-- **Description**：
-  1. 创建 `apps/server/tests/test_fleet_drivers.py`
-  2. 测试新增司机
-  3. 测试编辑司机
-  4. 测试获取司机列表
-  5. 测试删除有历史记录的司机（应拒绝）
-  6. 测试停用司机
-- **Files to Create/Modify**：
-  - `apps/server/tests/test_fleet_drivers.py`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 覆盖所有 Happy Path 和 Edge Case
+  - [ ] **TDD 测试通过**：表单验证测试覆盖必填项和格式校验
 
 ---
 
@@ -768,43 +726,7 @@ graph TD
   - [ ] 表单验证正确
   - [ ] 文件上传验证正确
   - [ ] 提交成功后关闭弹窗
-
-#### Task-307: 编写证照管理单元测试 🔒
-- **所属切片**：阶段 3: 证照管理
-- **复杂度**：M
-- **Depends On**：Task-305
-- **对应 AC**：AC-008, AC-009, AC-010, AC-011, AC-023, AC-032
-- **通俗解释**：编写证照管理相关的单元测试
-- **Description**：
-  1. 创建 `apps/frontend/src/modules/fleet/__tests__/CertificateManagement.test.ts`
-  2. 测试表格渲染
-  3. 测试预警筛选
-  4. 测试 Store 的证照相关 actions
-- **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/__tests__/CertificateManagement.test.ts`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 测试覆盖率 ≥ 80%
-
-#### Task-308: 编写证照管理后端 API 测试 🔒
-- **所属切片**：阶段 3: 证照管理
-- **复杂度**：M
-- **Depends On**：Task-303
-- **对应 AC**：AC-008, AC-009, AC-010, AC-011, AC-022, AC-023, AC-032
-- **通俗解释**：编写证照管理后端 API 的集成测试
-- **Description**：
-  1. 创建 `apps/server/tests/test_fleet_certificates.py`
-  2. 测试新增证照（含文件上传）
-  3. 测试编辑证照
-  4. 测试获取证照列表（含预警筛选）
-  5. 测试删除证照
-  6. 测试证照预警数量统计
-  7. 测试文件上传验证（大小、格式）
-- **Files to Create/Modify**：
-  - `apps/server/tests/test_fleet_certificates.py`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 覆盖所有 Happy Path 和 Edge Case
+  - [ ] **TDD 测试通过**：文件上传验证测试覆盖大小和格式限制
 
 ---
 
@@ -932,43 +854,7 @@ graph TD
   - [ ] 文件格式验证正确
   - [ ] 导入结果正确显示
   - [ ] 模板下载功能正常
-
-#### Task-407: 编写运输流水前端测试 🔒
-- **所属切片**：阶段 4: 运输流水
-- **复杂度**：M
-- **Depends On**：Task-405
-- **对应 AC**：AC-012, AC-013, AC-014, AC-015, AC-033
-- **通俗解释**：编写运输流水前端单元测试
-- **Description**：
-  1. 创建 `apps/frontend/src/modules/fleet/__tests__/TransportRecordManagement.test.ts`
-  2. 测试表格渲染、筛选功能、分页功能
-  3. 测试 Store 的运输流水相关 actions
-- **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/__tests__/TransportRecordManagement.test.ts`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 测试覆盖率 ≥ 80%
-
-#### Task-408: 编写运输流水后端导入测试 🔒
-- **所属切片**：阶段 4: 运输流水
-- **复杂度**：M
-- **Depends On**：Task-403
-- **对应 AC**：AC-012, AC-013, AC-014, AC-024, AC-025, AC-026, AC-033
-- **通俗解释**：编写运输流水后端导入逻辑及列表查询的集成测试
-- **Description**：
-  1. 创建 `apps/server/tests/test_fleet_import.py`
-  2. 测试文件格式验证（Excel/txt）
-  3. 测试文件列数验证
-  4. 测试重复记录跳过逻辑
-  5. 测试车辆/司机不存在时的错误处理
-  6. 测试运输流水列表查询（含时间范围筛选）
-  7. 测试运输流水按车辆/司机筛选
-  8. 测试运输流水分页功能
-- **Files to Create/Modify**：
-  - `apps/server/tests/test_fleet_import.py`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 后端导入逻辑测试覆盖所有边界情况
+  - [ ] **TDD 测试通过**：文件导入测试覆盖格式验证和错误处理
 
 ---
 
@@ -1068,49 +954,14 @@ graph TD
   3. 引入 StatisticsTab、VehicleManagement、DriverManagement、CertificateManagement、TransportRecordManagement
   4. 配置路由
 - **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/components/FleetPage.vue`（新建）
-  - `apps/frontend/src/router/index.ts`
+  - `apps/frontend/src/modules/fleet/pages/FleetPage.vue`（新建）
 - **验证标准**：
   - [ ] 页面正确显示 5 个 Tab
   - [ ] Tab 切换正常
   - [ ] 路由配置正确
+  - [ ] **TDD 测试通过**：Tab 切换测试覆盖所有页面
 
-#### Task-507: 编写车队统计单元测试 🔒
-- **所属切片**：阶段 5: 车队统计
-- **复杂度**：M
-- **Depends On**：Task-506
-- **对应 AC**：AC-016, AC-017
-- **通俗解释**：编写车队统计相关的单元测试
-- **Description**：
-  1. 创建 `apps/frontend/src/modules/fleet/__tests__/StatisticsTab.test.ts`
-  2. 测试统计卡片渲染
-  3. 测试点击跳转
-  4. 测试 Store 的统计相关 actions
-- **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/__tests__/StatisticsTab.test.ts`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 测试覆盖率 ≥ 80%
-
-#### Task-508: 编写车队统计后端 API 测试 🔒
-- **所属切片**：阶段 5: 车队统计
-- **复杂度**：M
-- **Depends On**：Task-503
-- **对应 AC**：AC-016, AC-017, AC-022, AC-029
-- **通俗解释**：编写车队统计后端 API 的集成测试
-- **Description**：
-  1. 创建 `apps/server/tests/test_fleet_statistics.py`
-  2. 测试证照预警数量统计（含已过期证照不应计入）
-  3. 测试本月任务数统计
-  4. 测试无数据时的统计结果（预警数为 0，任务数为 0）
-- **Files to Create/Modify**：
-  - `apps/server/tests/test_fleet_statistics.py`（新建）
-- **验证标准**：
-  - [ ] 所有测试通过
-  - [ ] 证照预警数量统计正确（30天内到期，不含已过期）
-  - [ ] 本月任务数统计正确
-
-#### Task-509: 创建模块公共 API 导出 🔒
+#### Task-507: 创建模块公共 API 导出 🔒
 - **所属切片**：阶段 5: 车队统计
 - **复杂度**：S
 - **Depends On**：Task-506
@@ -1133,41 +984,41 @@ graph TD
 
 | AC 编号 | AC 描述 | 覆盖任务 | 状态 |
 |---------|---------|---------|------|
-| AC-001 | 新增车辆成功（关联司机可选） | Task-101, Task-103, Task-105, Task-106, Task-108, Task-109 | ✅ |
-| AC-002 | 编辑车辆成功 | Task-103, Task-105, Task-106, Task-108, Task-109 | ✅ |
-| AC-003 | 查看车辆列表 | Task-105, Task-107, Task-108, Task-109 | ✅ |
-| AC-004 | 按状态筛选车辆 | Task-105, Task-107, Task-108, Task-109 | ✅ |
-| AC-005 | 新增司机成功 | Task-201, Task-202, Task-205, Task-206, Task-207, Task-208 | ✅ |
-| AC-006 | 编辑司机成功 | Task-202, Task-205, Task-206, Task-207, Task-208 | ✅ |
-| AC-007 | 查看司机列表 | Task-204, Task-205, Task-207, Task-208 | ✅ |
-| AC-008 | 新增证照成功 | Task-301, Task-302, Task-305, Task-306, Task-307, Task-308 | ✅ |
-| AC-009 | 编辑证照成功 | Task-302, Task-305, Task-306, Task-307, Task-308 | ✅ |
-| AC-010 | 查看证照列表 | Task-304, Task-305, Task-307, Task-308 | ✅ |
-| AC-011 | 预警筛选证照 | Task-304, Task-305, Task-307, Task-308 | ✅ |
-| AC-012 | 导入运输流水 | Task-401, Task-402, Task-405, Task-406, Task-407, Task-408 | ✅ |
-| AC-013 | 查看流水列表 | Task-404, Task-405, Task-407, Task-408 | ✅ |
-| AC-014 | 筛选流水记录 | Task-404, Task-405, Task-407, Task-408 | ✅ |
-| AC-015 | 流水统计 | Task-401, Task-402, Task-405, Task-407 | ✅ |
-| AC-016 | 证照预警卡片 | Task-501, Task-502, Task-504, Task-505, Task-507, Task-508 | ✅ |
-| AC-017 | 本月任务数卡片 | Task-501, Task-502, Task-504, Task-505, Task-507, Task-508 | ✅ |
-| AC-018 | 车牌号重复检查 | Task-105, Task-106, Task-108, Task-109 | ✅ |
-| AC-019 | 车辆停用功能 | Task-001, Task-103, Task-105, Task-108, Task-109 | ✅ |
-| AC-020 | 车辆可用性检查 | Task-008, Task-103, Task-109 | ✅ |
-| AC-021 | 司机停用功能 | Task-002, Task-202, Task-205, Task-207, Task-208 | ✅ |
-| AC-034 | 手机号格式校验 | Task-201, Task-202, Task-203, Task-206, Task-207, Task-208 | ✅ |
-| AC-035 | 手机号重复检查 | Task-201, Task-202, Task-203, Task-206, Task-207, Task-208 | ✅ |
-| AC-022 | 证照预警显示 | Task-302, Task-305, Task-307, Task-308, Task-505, Task-508 | ✅ |
-| AC-023 | 证照上传验证 | Task-302, Task-305, Task-306, Task-307, Task-308 | ✅ |
-| AC-024 | 文件格式验证 | Task-402, Task-405, Task-406, Task-408 | ✅ |
-| AC-025 | 文件列数验证 | Task-405, Task-408 | ✅ |
-| AC-026 | 重复记录跳过 | Task-405, Task-408 | ✅ |
+| AC-001 | 新增车辆成功（关联司机可选） | Task-101, Task-103, Task-105, Task-106 | ✅ |
+| AC-002 | 编辑车辆成功 | Task-103, Task-105, Task-106 | ✅ |
+| AC-003 | 查看车辆列表 | Task-105, Task-107 | ✅ |
+| AC-004 | 按状态筛选车辆 | Task-105, Task-107 | ✅ |
+| AC-005 | 新增司机成功 | Task-201, Task-202, Task-205, Task-206 | ✅ |
+| AC-006 | 编辑司机成功 | Task-202, Task-205, Task-206 | ✅ |
+| AC-007 | 查看司机列表 | Task-204, Task-205 | ✅ |
+| AC-008 | 新增证照成功 | Task-301, Task-302, Task-305, Task-306 | ✅ |
+| AC-009 | 编辑证照成功 | Task-302, Task-305, Task-306 | ✅ |
+| AC-010 | 查看证照列表 | Task-304, Task-305 | ✅ |
+| AC-011 | 预警筛选证照 | Task-304, Task-305 | ✅ |
+| AC-012 | 导入运输流水 | Task-401, Task-402, Task-405, Task-406 | ✅ |
+| AC-013 | 查看流水列表 | Task-404, Task-405 | ✅ |
+| AC-014 | 筛选流水记录 | Task-404, Task-405 | ✅ |
+| AC-015 | 流水统计 | Task-401, Task-402, Task-405 | ✅ |
+| AC-016 | 证照预警卡片 | Task-501, Task-502, Task-504, Task-505 | ✅ |
+| AC-017 | 本月任务数卡片 | Task-501, Task-502, Task-504, Task-505 | ✅ |
+| AC-018 | 车牌号重复检查 | Task-105, Task-106 | ✅ |
+| AC-019 | 车辆停用功能 | Task-001, Task-103, Task-105 | ✅ |
+| AC-020 | 车辆可用性检查 | Task-008, Task-103 | ✅ |
+| AC-021 | 司机停用功能 | Task-002, Task-202, Task-205 | ✅ |
+| AC-034 | 手机号格式校验 | Task-201, Task-202, Task-203, Task-206 | ✅ |
+| AC-035 | 手机号重复检查 | Task-201, Task-202, Task-203, Task-206 | ✅ |
+| AC-022 | 证照预警显示 | Task-302, Task-305, Task-505 | ✅ |
+| AC-023 | 证照上传验证 | Task-302, Task-305, Task-306 | ✅ |
+| AC-024 | 文件格式验证 | Task-402, Task-405, Task-406 | ✅ |
+| AC-025 | 文件列数验证 | Task-405 | ✅ |
+| AC-026 | 重复记录跳过 | Task-405 | ✅ |
 | AC-027 | 车辆状态更新 | Task-008, Task-103（后端 API，供 dispatch 模块调用） | ✅ |
 | AC-028 | 车辆超时检查 | Task-008（fleet 侧服务函数）, dispatch 模块定时任务（归属 dispatch） | ✅ |
-| AC-029 | 证照预警检查 | Task-007（定时任务调度器）, Task-008（服务函数）, Task-305, Task-505, Task-508 | ✅ |
+| AC-029 | 证照预警检查 | Task-007（定时任务调度器）, Task-008（服务函数）, Task-305, Task-505 | ✅ |
 | AC-030 | 司机关联冲突 | Task-105, Task-106 | ✅ |
 | AC-031 | 权限控制 | 路由守卫（已在 auth 模块实现） | ✅ |
-| AC-032 | 删除证照 | Task-302, Task-305, Task-307 | ✅ |
-| AC-033 | 运输流水分页 | Task-401, Task-404, Task-405, Task-407, Task-408 | ✅ |
+| AC-032 | 删除证照 | Task-302, Task-305 | ✅ |
+| AC-033 | 运输流水分页 | Task-401, Task-404, Task-405 | ✅ |
 
 ---
 
@@ -1178,41 +1029,43 @@ graph TD
 - [ ] 端到端验证：数据库迁移成功，定时任务调度器就绪，所有表结构正确
 
 ### 阶段 1 验证
-- [ ] Task-101 至 Task-109 验证标准全部通过
+- [ ] Task-101 至 Task-107 验证标准全部通过（含 TDD 测试）
 - [ ] 端到端验证：用户可以新增车辆、编辑车辆、查看列表、筛选状态、停用车辆
 
 ### 阶段 2 验证
-- [ ] Task-201 至 Task-208 验证标准全部通过
+- [ ] Task-201 至 Task-206 验证标准全部通过（含 TDD 测试）
 - [ ] 端到端验证：用户可以新增司机、编辑司机、查看列表、停用司机
 
 ### 阶段 3 验证
-- [ ] Task-301 至 Task-308 验证标准全部通过
+- [ ] Task-301 至 Task-306 验证标准全部通过（含 TDD 测试）
 - [ ] 端到端验证：用户可以新增证照、编辑证照、查看列表、预警筛选
 
 ### 阶段 4 验证
-- [ ] Task-401 至 Task-408 验证标准全部通过
+- [ ] Task-401 至 Task-406 验证标准全部通过（含 TDD 测试）
 - [ ] 端到端验证：用户可以导入运输流水、查看列表、筛选、查看统计
 
 ### 阶段 5 验证
-- [ ] Task-501 至 Task-509 验证标准全部通过
+- [ ] Task-501 至 Task-507 验证标准全部通过（含 TDD 测试）
 - [ ] 端到端验证：用户可以查看证照预警数、本月任务数，点击跳转正常
 
 ---
 
 ## 任务统计
 
-- **总任务数**：52 个
+- **总任务数**：42 个（移除 10 个独立测试任务）
 - **基础设施任务**：10 个
-- **车辆管理任务**：9 个
-- **司机管理任务**：8 个
-- **证照管理任务**：8 个
-- **运输流水任务**：8 个
-- **车队统计任务**：9 个
+- **车辆管理任务**：7 个
+- **司机管理任务**：6 个
+- **证照管理任务**：6 个
+- **运输流水任务**：6 个
+- **车队统计任务**：7 个
 
 **复杂度分布**：
 - S（简单）：14 个
-- M（中等）：37 个
+- M（中等）：27 个
 - L（复杂）：1 个
+
+**TDD 说明**：测试已融入各任务的验证标准，不再作为独立任务规划。每个任务执行时必须按 RED → GREEN → REFACTOR 循环进行。
 
 ---
 

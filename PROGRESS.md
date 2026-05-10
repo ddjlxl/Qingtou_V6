@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-10（fleet 阶段 0 完成）
+> 最后更新：2026-05-10（fleet 阶段 2 完成）
 
 ---
 
@@ -91,6 +91,35 @@
 - [x] T-105：路由守卫 + 角色权限 — [router/index.ts](file:///e:/Qingtou_V6/apps/frontend/src/router/index.ts)（3 tests）
 - [x] T-106：集成验证 — type-check ✅ / lint ✅ / test ✅（14 files, 102 tests）
 
+### Phase 1.3：核心业务 — fleet 车队管理（阶段 0 + 阶段 1）✅
+
+**阶段 0：基础设施** ✅
+- [x] T-001 ~ T-010：数据库模型、Pydantic Schema、验证器、服务层、API 路由骨架
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅（56 tests）
+
+**阶段 1：车辆管理** ✅
+- [x] T-101：车辆类型定义 — [types/vehicle.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/vehicle.ts)
+- [x] T-102：前端车辆 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
+- [x] T-103：后端车辆 CRUD API — [api/v1/fleet.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet.py)
+- [x] T-104：前端车辆 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
+- [x] T-105：车辆管理组件 — [components/VehicleManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/VehicleManagement.vue)
+- [x] T-106：车辆表单弹窗 — [components/VehicleFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/VehicleFormDialog.vue)
+- [x] T-107：StatusTag 状态标签 — [components/StatusTag.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/StatusTag.vue)
+- [x] T-108：前端单元测试 — [__tests__/](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/__tests__/)（17 tests）
+- [x] T-109：后端 API 测试 — [tests/test_fleet_vehicles.py](file:///e:/Qingtou_V6/apps/server/tests/test_fleet_vehicles.py)（17 tests）
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅（前端 115 tests + 后端 73 tests）
+
+**阶段 2：司机管理** ✅
+- [x] T-201：司机类型定义 — [types/driver.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/driver.ts)
+- [x] T-202：前端司机 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
+- [x] T-203：后端司机 CRUD API — [api/v1/fleet.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet.py)
+- [x] T-204：前端司机 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
+- [x] T-205：司机管理组件 — [components/DriverManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/DriverManagement.vue)
+- [x] T-206：司机表单弹窗 — [components/DriverFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/DriverFormDialog.vue)
+- [x] T-207：前端单元测试 — [__tests__/](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/__tests__/)（26 tests）
+- [x] T-208：后端 API 测试 — [tests/test_fleet_drivers.py](file:///e:/Qingtou_V6/apps/server/tests/test_fleet_drivers.py)（15 tests）
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅（前端 141 tests + 后端 88 tests）
+
 ### 技能迁移 ✅
 
 - [x] 从 V4 迁移 4 个新技能：完成前验证、分支收尾、重构计划、界面设计
@@ -98,7 +127,7 @@
 - [x] 技能总数：17 → 21
 - [x] 相关文档已同步更新
 
----
+离苦集，也会提高人的风俗哇SXDCFROP【]\---
 
 ## 下一步
 
@@ -106,27 +135,27 @@
 
 **auth 用户认证** ✅ 已完成（6/6 任务全部通过）
 
-**fleet 车队管理**（阶段 0 已完成 ✅，阶段 1 待开始 ⚡）
+**fleet 车队管理**（阶段 0 ✅，阶段 1 ✅，阶段 2 ✅）
 - [x] 需求澄清：[specs/features/fleet/requirements.md](file:///e:/Qingtou_V6/specs/features/fleet/requirements.md)
 - [x] 技术设计：[specs/features/fleet/design.md](file:///e:/Qingtou_V6/specs/features/fleet/design.md)
 - [x] 任务规划：[specs/features/fleet/tasks.md](file:///e:/Qingtou_V6/specs/features/fleet/tasks.md)
-- [ ] 编码实现：42/52 任务待完成
+- [ ] 编码实现：25/52 任务待完成
 
 | 阶段 | 任务范围 | 任务数 | 状态 | 检查点 Commit |
 |------|---------|--------|------|--------------|
 | 阶段 0: 基础设施 | T-001 ~ T-010 | 10 | ✅ | 未提交（等待手动确认） |
-| 阶段 1: 车辆管理 | T-101 ~ T-109 | 9 | ⬜ | - |
-| 阶段 2: 司机管理 | T-201 ~ T-208 | 8 | ⬜ | - |
+| 阶段 1: 车辆管理 | T-101 ~ T-109 | 9 | ✅ | 未提交（等待手动确认） |
+| 阶段 2: 司机管理 | T-201 ~ T-208 | 8 | ✅ | 未提交（等待手动确认） |
 | 阶段 3: 证照管理 | T-301 ~ T-308 | 8 | ⬜ | - |
 | 阶段 4: 运输流水 | T-401 ~ T-408 | 8 | ⬜ | - |
 | 阶段 5: 车队统计 | T-501 ~ T-509 | 9 | ⬜ | - |
 
-**当前任务**：T-101（创建车辆相关类型定义）
+**当前任务**：T-301（创建证照相关类型定义）
 **检查点约定**：每完成一个阶段后 git commit，记录 commit hash 到上表
 
 **新窗口启动指令**：
 ```
-继续 fleet 模块编码实现，从阶段 1 Task-101 开始，每完成一个阶段停下来等待我手动确认
+继续 fleet 模块编码实现，从阶段 3 Task-301 开始，每完成一个阶段停下来等待我手动确认
 ```
 
 后续模块：dispatch 调度中心 → driver 司机端
