@@ -13,6 +13,12 @@ import type {
   UpdateDriverRequest,
   DriverListParams,
 } from '../types/driver'
+import type {
+  Certificate,
+  CreateCertificateRequest,
+  UpdateCertificateRequest,
+  CertificateListParams,
+} from '../types/certificate'
 import type { PaginatedResponse, VehicleAvailability } from '../types'
 
 export const fleetService = {
@@ -75,5 +81,45 @@ export const fleetService = {
 
   disableDriver(id: string) {
     return http.put<void>(`/v1/fleet/drivers/${id}/disable`)
+  },
+
+  getCertificates(params?: CertificateListParams) {
+    return http.get<PaginatedResponse<Certificate>>('/v1/fleet/certificates', { params })
+  },
+
+  createCertificate(data: CreateCertificateRequest) {
+    const formData = new FormData()
+    formData.append('owner_id', data.ownerId)
+    formData.append('owner_type', data.ownerType)
+    formData.append('cert_type', data.certType)
+    formData.append('cert_name', data.certName)
+    formData.append('issue_date', data.issueDate)
+    formData.append('expiry_date', data.expiryDate)
+    if (data.attachment) {
+      formData.append('attachment', data.attachment)
+    }
+    if (data.remark) {
+      formData.append('remark', data.remark)
+    }
+    return http.post<Certificate>('/v1/fleet/certificates', formData)
+  },
+
+  updateCertificate(id: string, data: UpdateCertificateRequest) {
+    const formData = new FormData()
+    if (data.certType) formData.append('cert_type', data.certType)
+    if (data.certName) formData.append('cert_name', data.certName)
+    if (data.issueDate) formData.append('issue_date', data.issueDate)
+    if (data.expiryDate) formData.append('expiry_date', data.expiryDate)
+    if (data.attachment) formData.append('attachment', data.attachment)
+    if (data.remark !== undefined && data.remark !== '') formData.append('remark', data.remark)
+    return http.put<Certificate>(`/v1/fleet/certificates/${id}`, formData)
+  },
+
+  deleteCertificate(id: string) {
+    return http.delete<void>(`/v1/fleet/certificates/${id}`)
+  },
+
+  getCertificateWarningCount() {
+    return http.get<{ count: number }>('/v1/fleet/certificates/warning-count')
   },
 }

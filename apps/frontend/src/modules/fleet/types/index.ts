@@ -1,5 +1,6 @@
 export * from './vehicle'
 export * from './driver'
+export * from './certificate'
 
 export interface PaginatedResponse<T> {
   items: T[]

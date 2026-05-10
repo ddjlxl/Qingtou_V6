@@ -4,6 +4,12 @@ import { fleetService } from '../services/fleetService'
 import type { Vehicle, CreateVehicleRequest, UpdateVehicleRequest, VehicleListParams } from '../types/vehicle'
 import { VehicleStatus } from '../types/vehicle'
 import type { Driver, CreateDriverRequest, UpdateDriverRequest, DriverListParams } from '../types/driver'
+import type {
+  Certificate,
+  CreateCertificateRequest,
+  UpdateCertificateRequest,
+  CertificateListParams,
+} from '../types/certificate'
 
 export const useFleetStore = defineStore('fleet', () => {
   const vehicles = ref<Vehicle[]>([])
@@ -166,6 +172,71 @@ export const useFleetStore = defineStore('fleet', () => {
     }
   }
 
+  const certificates = ref<Certificate[]>([])
+  const certificateLoading = ref(false)
+  const certificateError = ref<string | null>(null)
+
+  async function fetchCertificates(params?: CertificateListParams) {
+    certificateLoading.value = true
+    certificateError.value = null
+    try {
+      const result = await fleetService.getCertificates(params)
+      certificates.value = result.items
+      return result
+    } catch (e) {
+      certificateError.value = e instanceof Error ? e.message : '获取证照列表失败'
+    } finally {
+      certificateLoading.value = false
+    }
+  }
+
+  async function createCertificate(data: CreateCertificateRequest) {
+    certificateLoading.value = true
+    certificateError.value = null
+    try {
+      const cert = await fleetService.createCertificate(data)
+      certificates.value.unshift(cert)
+      return cert
+    } catch (e) {
+      certificateError.value = e instanceof Error ? e.message : '新增证照失败'
+      throw e
+    } finally {
+      certificateLoading.value = false
+    }
+  }
+
+  async function updateCertificate(id: string, data: UpdateCertificateRequest) {
+    certificateLoading.value = true
+    certificateError.value = null
+    try {
+      const cert = await fleetService.updateCertificate(id, data)
+      const index = certificates.value.findIndex((c) => c.id === id)
+      if (index !== -1) {
+        certificates.value[index] = cert
+      }
+      return cert
+    } catch (e) {
+      certificateError.value = e instanceof Error ? e.message : '编辑证照失败'
+      throw e
+    } finally {
+      certificateLoading.value = false
+    }
+  }
+
+  async function deleteCertificate(id: string) {
+    certificateLoading.value = true
+    certificateError.value = null
+    try {
+      await fleetService.deleteCertificate(id)
+      certificates.value = certificates.value.filter((c) => c.id !== id)
+    } catch (e) {
+      certificateError.value = e instanceof Error ? e.message : '删除证照失败'
+      throw e
+    } finally {
+      certificateLoading.value = false
+    }
+  }
+
   function resetState() {
     vehicles.value = []
     vehicleLoading.value = false
@@ -173,6 +244,9 @@ export const useFleetStore = defineStore('fleet', () => {
     drivers.value = []
     driverLoading.value = false
     driverError.value = null
+    certificates.value = []
+    certificateLoading.value = false
+    certificateError.value = null
   }
 
   return {
@@ -194,6 +268,13 @@ export const useFleetStore = defineStore('fleet', () => {
     updateDriver,
     disableDriver,
     deleteDriver,
+    certificates,
+    certificateLoading,
+    certificateError,
+    fetchCertificates,
+    createCertificate,
+    updateCertificate,
+    deleteCertificate,
     resetState,
   }
 })

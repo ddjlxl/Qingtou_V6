@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -82,3 +82,50 @@ class DriverListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class CertificateCreate(BaseModel):
+    owner_id: uuid.UUID
+    owner_type: str = Field(..., pattern="^(vehicle|driver)$")
+    cert_type: str = Field(..., min_length=1, max_length=50)
+    cert_name: str = Field(..., min_length=1, max_length=100)
+    issue_date: date
+    expiry_date: date
+    remark: Optional[str] = Field(None, max_length=500)
+
+
+class CertificateUpdate(BaseModel):
+    cert_type: Optional[str] = Field(None, min_length=1, max_length=50)
+    cert_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    issue_date: Optional[date] = None
+    expiry_date: Optional[date] = None
+    remark: Optional[str] = Field(None, max_length=500)
+
+
+class CertificateResponse(BaseModel):
+    id: str
+    owner_id: str
+    owner_type: str
+    owner_name: str | None = None
+    cert_type: str
+    cert_name: str
+    issue_date: date
+    expiry_date: date
+    attachment: str | None = None
+    remark: str | None = None
+    is_expiring_soon: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class CertificateListResponse(BaseModel):
+    items: list[CertificateResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class CertificateWarningCountResponse(BaseModel):
+    count: int
