@@ -1,15 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Welcome from '@/views/Welcome.vue'
 import { LoginForm, useAuthStore } from '@/modules/auth'
+import { AppLayout } from '@/shared/components'
+import { FleetPage } from '@/modules/fleet'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      name: 'Welcome',
-      component: Welcome,
+      component: AppLayout,
       meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          redirect: '/fleet',
+        },
+        {
+          path: 'fleet',
+          name: 'Fleet',
+          component: FleetPage,
+        },
+      ],
     },
     {
       path: '/login',

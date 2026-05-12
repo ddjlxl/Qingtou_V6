@@ -22,7 +22,7 @@ from app.services.fleet_service import delete_certificate_attachment
 
 router = APIRouter(tags=["车队管理-证照"])
 
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf"}
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
 

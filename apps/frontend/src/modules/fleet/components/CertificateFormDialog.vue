@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useFleetStore } from '../stores/useFleetStore'
 import { OwnerType, VehicleCertType, DriverCertType } from '../types/certificate'
-import type { Certificate, CreateCertificateRequest, UpdateCertificateRequest } from '../types/certificate'
+import type { Certificate, CreateCertificateRequest, UpdateCertificateRequest, CertType } from '../types/certificate'
 import { isApiError } from '@/shared/utils'
 
 const props = defineProps<{
@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:visible': [value: boolean]
+  'update:model-value': [value: boolean]
   success: []
 }>()
 
@@ -23,10 +24,10 @@ const isEdit = ref(false)
 const submitting = ref(false)
 
 const rules = {
-  ownerId: [{ required: true, message: '请输入所属对象ID', trigger: 'blur' }],
+  ownerId: [{ required: true, message: '请输入所属对象ID', trigger: 'change' }],
   ownerType: [{ required: true, message: '请选择所属类型', trigger: 'change' }],
   certType: [{ required: true, message: '请选择证照类型', trigger: 'change' }],
-  certName: [{ required: true, message: '请输入证照名称', trigger: 'blur' }],
+  certName: [{ required: true, message: '请输入证照名称', trigger: 'change' }],
   issueDate: [{ required: true, message: '请选择签发日期', trigger: 'change' }],
   expiryDate: [{ required: true, message: '请选择到期日期', trigger: 'change' }],
 }
@@ -105,6 +106,9 @@ watch(
       } else {
         resetForm()
       }
+      nextTick(() => {
+        formRef.value?.clearValidate()
+      })
     }
   },
   { immediate: true }
@@ -122,7 +126,7 @@ async function handleSubmit() {
   try {
     if (isEdit.value && props.certificate) {
       const data: UpdateCertificateRequest = {
-        certType: form.value.certType,
+        certType: form.value.certType as CertType,
         certName: form.value.certName,
         issueDate: form.value.issueDate,
         expiryDate: form.value.expiryDate,
@@ -134,7 +138,7 @@ async function handleSubmit() {
       const data: CreateCertificateRequest = {
         ownerId: form.value.ownerId,
         ownerType: form.value.ownerType as OwnerType,
-        certType: form.value.certType,
+        certType: form.value.certType as CertType,
         certName: form.value.certName,
         issueDate: form.value.issueDate,
         expiryDate: form.value.expiryDate,
@@ -167,7 +171,12 @@ async function handleSubmit() {
       :rules="rules"
       label-width="100px"
     >
-      <el-form-item v-if="!isEdit" label="所属类型" prop="ownerType" required>
+      <el-form-item
+        v-if="!isEdit"
+        label="所属类型"
+        prop="ownerType"
+        required
+      >
         <el-select
           v-model="form.ownerType"
           style="width: 100%"
@@ -181,11 +190,23 @@ async function handleSubmit() {
         </el-select>
       </el-form-item>
 
-      <el-form-item v-if="!isEdit" label="所属对象ID" prop="ownerId" required>
-        <el-input v-model="form.ownerId" placeholder="请输入车辆或司机ID" />
+      <el-form-item
+        v-if="!isEdit"
+        label="所属对象ID"
+        prop="ownerId"
+        required
+      >
+        <el-input
+          v-model="form.ownerId"
+          placeholder="请输入车辆或司机ID"
+        />
       </el-form-item>
 
-      <el-form-item label="证照类型" prop="certType" required>
+      <el-form-item
+        label="证照类型"
+        prop="certType"
+        required
+      >
         <el-select
           v-model="form.certType"
           style="width: 100%"
@@ -199,11 +220,22 @@ async function handleSubmit() {
         </el-select>
       </el-form-item>
 
-      <el-form-item label="证照名称" prop="certName" required>
-        <el-input v-model="form.certName" placeholder="请输入证照名称" />
+      <el-form-item
+        label="证照名称"
+        prop="certName"
+        required
+      >
+        <el-input
+          v-model="form.certName"
+          placeholder="请输入证照名称"
+        />
       </el-form-item>
 
-      <el-form-item label="签发日期" prop="issueDate" required>
+      <el-form-item
+        label="签发日期"
+        prop="issueDate"
+        required
+      >
         <el-date-picker
           v-model="form.issueDate"
           type="date"
@@ -213,7 +245,11 @@ async function handleSubmit() {
         />
       </el-form-item>
 
-      <el-form-item label="到期日期" prop="expiryDate" required>
+      <el-form-item
+        label="到期日期"
+        prop="expiryDate"
+        required
+      >
         <el-date-picker
           v-model="form.expiryDate"
           type="date"
@@ -233,7 +269,9 @@ async function handleSubmit() {
     </el-form>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
       <el-button
         type="primary"
         :loading="submitting"

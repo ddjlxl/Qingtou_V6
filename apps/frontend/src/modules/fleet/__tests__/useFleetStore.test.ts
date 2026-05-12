@@ -5,6 +5,7 @@ const mockGetVehicles = vi.fn()
 const mockCreateVehicle = vi.fn()
 const mockUpdateVehicle = vi.fn()
 const mockDisableVehicle = vi.fn()
+const mockBindDriverToVehicle = vi.fn()
 
 vi.mock('../services/fleetService', () => ({
   fleetService: {
@@ -12,6 +13,7 @@ vi.mock('../services/fleetService', () => ({
     createVehicle: (...args: unknown[]) => mockCreateVehicle(...args),
     updateVehicle: (...args: unknown[]) => mockUpdateVehicle(...args),
     disableVehicle: (...args: unknown[]) => mockDisableVehicle(...args),
+    bindDriverToVehicle: (...args: unknown[]) => mockBindDriverToVehicle(...args),
   },
 }))
 
@@ -127,6 +129,64 @@ describe('useFleetStore', () => {
     })
   })
 
+  describe('bindDriverToVehicle', () => {
+    it('calls fleetService.bindDriverToVehicle with correct params', async () => {
+      const store = useFleetStore()
+      mockBindDriverToVehicle.mockResolvedValue({
+        needConfirm: false,
+        message: '司机绑定成功',
+      })
+
+      const result = await store.bindDriverToVehicle('v1', 'd1', false)
+
+      expect(mockBindDriverToVehicle).toHaveBeenCalledWith('v1', {
+        driverId: 'd1',
+        confirmed: false,
+      })
+      expect(result.needConfirm).toBe(false)
+    })
+
+    it('calls with confirmed=true', async () => {
+      const store = useFleetStore()
+      mockBindDriverToVehicle.mockResolvedValue({
+        needConfirm: false,
+        message: '司机绑定成功',
+      })
+
+      await store.bindDriverToVehicle('v1', 'd1', true)
+
+      expect(mockBindDriverToVehicle).toHaveBeenCalledWith('v1', {
+        driverId: 'd1',
+        confirmed: true,
+      })
+    })
+
+    it('returns needConfirm=true when driver already bound', async () => {
+      const store = useFleetStore()
+      mockBindDriverToVehicle.mockResolvedValue({
+        needConfirm: true,
+        message: '该司机已关联车辆 粤B67890，是否更换关联？',
+        oldVehicleId: 'v2',
+        oldVehiclePlateNo: '粤B67890',
+      })
+
+      const result = await store.bindDriverToVehicle('v1', 'd2', false)
+
+      expect(result.needConfirm).toBe(true)
+      expect(result.oldVehicleId).toBe('v2')
+      expect(result.oldVehiclePlateNo).toBe('粤B67890')
+    })
+
+    it('sets error on failure', async () => {
+      const store = useFleetStore()
+      mockBindDriverToVehicle.mockRejectedValue(new Error('车辆不存在'))
+
+      await expect(
+        store.bindDriverToVehicle('v1', 'd1', false)
+      ).rejects.toThrow('车辆不存在')
+      expect(store.vehicleError).toBe('车辆不存在')
+    })
+  })
   describe('computed properties', () => {
     it('idleVehicles filters correctly', () => {
       const store = useFleetStore()

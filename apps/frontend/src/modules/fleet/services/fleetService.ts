@@ -19,6 +19,13 @@ import type {
   UpdateCertificateRequest,
   CertificateListParams,
 } from '../types/certificate'
+import type {
+  TransportRecord,
+  TransportRecordListParams,
+  TransportRecordStatistics,
+  ImportResult,
+} from '../types/transport-record'
+import type { FleetStatistics } from '../types/statistics'
 import type { PaginatedResponse, VehicleAvailability } from '../types'
 
 export const fleetService = {
@@ -121,5 +128,27 @@ export const fleetService = {
 
   getCertificateWarningCount() {
     return http.get<{ count: number }>('/v1/fleet/certificates/warning-count')
+  },
+
+  getTransportRecords(params?: TransportRecordListParams) {
+    return http.get<PaginatedResponse<TransportRecord>>('/v1/fleet/transport-records', { params })
+  },
+
+  importTransportRecords(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return http.post<ImportResult>('/v1/fleet/transport-records/import', formData)
+  },
+
+  getTransportRecordStatistics() {
+    return http.get<TransportRecordStatistics>('/v1/fleet/transport-records/statistics')
+  },
+
+  downloadTemplate() {
+    return http.get<Blob>('/v1/fleet/transport-records/template', { responseType: 'blob' })
+  },
+
+  getStatistics() {
+    return http.get<FleetStatistics>('/v1/fleet/statistics')
   },
 }

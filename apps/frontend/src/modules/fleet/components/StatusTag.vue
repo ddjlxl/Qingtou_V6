@@ -21,7 +21,10 @@ const statusConfig = computed(() => {
 </script>
 
 <template>
-  <el-tag :type="statusConfig.type" size="small">
+  <el-tag
+    :type="statusConfig.type"
+    size="small"
+  >
     {{ statusConfig.label }}
   </el-tag>
 </template>

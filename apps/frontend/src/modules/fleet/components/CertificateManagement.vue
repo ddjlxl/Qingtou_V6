@@ -88,7 +88,12 @@ onMounted(() => {
       >
         即将到期
       </el-button>
-      <el-button type="primary" @click="handleAdd">新增证照</el-button>
+      <el-button
+        type="primary"
+        @click="handleAdd"
+      >
+        新增证照
+      </el-button>
     </div>
 
     <el-alert
@@ -105,34 +110,69 @@ onMounted(() => {
       :data="fleetStore.certificates"
       style="width: 100%"
     >
-      <el-table-column prop="certType" label="证照类型" min-width="120">
+      <el-table-column
+        prop="certType"
+        label="证照类型"
+        min-width="120"
+      >
         <template #default="{ row }">
           {{ getCertTypeLabel(row.certType) }}
         </template>
       </el-table-column>
-      <el-table-column prop="certName" label="证照名称" min-width="120" />
-      <el-table-column prop="ownerType" label="所属类型" min-width="100">
+      <el-table-column
+        prop="certName"
+        label="证照名称"
+        min-width="120"
+      />
+      <el-table-column
+        prop="ownerType"
+        label="所属类型"
+        min-width="100"
+      >
         <template #default="{ row }">
           {{ getOwnerTypeLabel(row.ownerType) }}
         </template>
       </el-table-column>
-      <el-table-column prop="ownerName" label="所属对象" min-width="120">
+      <el-table-column
+        prop="ownerName"
+        label="所属对象"
+        min-width="120"
+      >
         <template #default="{ row }">
           {{ row.ownerName || '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="expiryDate" label="有效期至" min-width="120" />
-      <el-table-column label="状态" min-width="100">
+      <el-table-column
+        prop="expiryDate"
+        label="有效期至"
+        min-width="120"
+      />
+      <el-table-column
+        label="状态"
+        min-width="100"
+      >
         <template #default="{ row }">
-          <el-tag v-if="row.isExpiringSoon" type="warning" size="small">
+          <el-tag
+            v-if="row.isExpiringSoon"
+            type="warning"
+            size="small"
+          >
             即将到期
           </el-tag>
-          <el-tag v-else type="success" size="small">
+          <el-tag
+            v-else
+            type="success"
+            size="small"
+          >
             正常
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="150" fixed="right">
+      <el-table-column
+        label="操作"
+        min-width="150"
+        fixed="right"
+      >
         <template #default="{ row }">
           <el-button
             type="primary"

@@ -18,8 +18,18 @@
       <div class="links">
         <h2>快速链接 Quick Links</h2>
         <ul>
-          <li><a href="http://localhost:9528/docs" target="_blank">API 文档</a></li>
-          <li><a href="https://github.com" target="_blank">项目仓库</a></li>
+          <li>
+            <a
+              href="http://localhost:9528/docs"
+              target="_blank"
+            >API 文档</a>
+          </li>
+          <li>
+            <a
+              href="https://github.com"
+              target="_blank"
+            >项目仓库</a>
+          </li>
         </ul>
       </div>
     </div>

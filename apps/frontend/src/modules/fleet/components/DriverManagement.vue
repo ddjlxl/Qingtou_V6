@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useFleetStore } from '../stores/useFleetStore'
 import type { Driver } from '../types/driver'
 import { isApiError } from '@/shared/utils'
+import EmptyState from '@/shared/components/EmptyState.vue'
 import DriverFormDialog from './DriverFormDialog.vue'
 
 const fleetStore = useFleetStore()
@@ -70,7 +71,12 @@ onMounted(() => {
 <template>
   <div class="driver-management">
     <div class="toolbar">
-      <el-button type="primary" @click="handleAdd">新增司机</el-button>
+      <el-button
+        type="primary"
+        @click="handleAdd"
+      >
+        新增司机
+      </el-button>
     </div>
 
     <el-table
@@ -81,14 +87,30 @@ onMounted(() => {
       <template #empty>
         <EmptyState description="暂无司机数据" />
       </template>
-      <el-table-column prop="name" label="姓名" min-width="120" />
-      <el-table-column prop="phone" label="手机号" min-width="140" />
-      <el-table-column prop="boundVehiclePlateNo" label="关联车辆" min-width="120">
+      <el-table-column
+        prop="name"
+        label="姓名"
+        min-width="120"
+      />
+      <el-table-column
+        prop="phone"
+        label="手机号"
+        min-width="140"
+      />
+      <el-table-column
+        prop="boundVehiclePlateNo"
+        label="关联车辆"
+        min-width="120"
+      >
         <template #default="{ row }">
           {{ row.boundVehiclePlateNo || '-' }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="180" fixed="right">
+      <el-table-column
+        label="操作"
+        min-width="180"
+        fixed="right"
+      >
         <template #default="{ row }">
           <el-button
             type="primary"

@@ -102,7 +102,12 @@ onMounted(() => {
           :value="opt.value"
         />
       </el-select>
-      <el-button type="primary" @click="handleAdd">新增车辆</el-button>
+      <el-button
+        type="primary"
+        @click="handleAdd"
+      >
+        新增车辆
+      </el-button>
     </div>
 
     <el-table
@@ -110,23 +115,43 @@ onMounted(() => {
       :data="fleetStore.vehicles"
       style="width: 100%"
     >
-      <el-table-column prop="plateNo" label="车牌号" min-width="120" />
-      <el-table-column prop="ownership" label="归属性质" min-width="100">
+      <el-table-column
+        prop="plateNo"
+        label="车牌号"
+        min-width="120"
+      />
+      <el-table-column
+        prop="ownership"
+        label="归属性质"
+        min-width="100"
+      >
         <template #default="{ row }">
           {{ row.ownership === 'own' ? '自有车辆' : '外协车辆' }}
         </template>
       </el-table-column>
-      <el-table-column prop="boundDriverName" label="关联司机" min-width="120">
+      <el-table-column
+        prop="boundDriverName"
+        label="关联司机"
+        min-width="120"
+      >
         <template #default="{ row }">
           {{ row.boundDriverName || '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" min-width="100">
+      <el-table-column
+        prop="status"
+        label="状态"
+        min-width="100"
+      >
         <template #default="{ row }">
           <StatusTag :status="row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="180" fixed="right">
+      <el-table-column
+        label="操作"
+        min-width="180"
+        fixed="right"
+      >
         <template #default="{ row }">
           <el-button
             type="primary"

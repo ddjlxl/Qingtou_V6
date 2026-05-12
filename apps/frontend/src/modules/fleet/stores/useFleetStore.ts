@@ -10,6 +10,13 @@ import type {
   UpdateCertificateRequest,
   CertificateListParams,
 } from '../types/certificate'
+import type {
+  TransportRecord,
+  TransportRecordListParams,
+  TransportRecordStatistics,
+  ImportResult,
+} from '../types/transport-record'
+import type { FleetStatistics } from '../types/statistics'
 
 export const useFleetStore = defineStore('fleet', () => {
   const vehicles = ref<Vehicle[]>([])
@@ -85,6 +92,27 @@ export const useFleetStore = defineStore('fleet', () => {
       }
     } catch (e) {
       vehicleError.value = e instanceof Error ? e.message : '停用车辆失败'
+      throw e
+    } finally {
+      vehicleLoading.value = false
+    }
+  }
+
+  async function bindDriverToVehicle(
+    vehicleId: string,
+    driverId: string,
+    confirmed: boolean
+  ) {
+    vehicleLoading.value = true
+    vehicleError.value = null
+    try {
+      const result = await fleetService.bindDriverToVehicle(vehicleId, {
+        driverId,
+        confirmed,
+      })
+      return result
+    } catch (e) {
+      vehicleError.value = e instanceof Error ? e.message : '绑定司机失败'
       throw e
     } finally {
       vehicleLoading.value = false
@@ -237,6 +265,91 @@ export const useFleetStore = defineStore('fleet', () => {
     }
   }
 
+  const transportRecords = ref<TransportRecord[]>([])
+  const transportRecordLoading = ref(false)
+  const transportRecordError = ref<string | null>(null)
+  const transportRecordTotal = ref(0)
+  const transportRecordStatistics = ref<TransportRecordStatistics | null>(null)
+
+  async function fetchTransportRecords(params?: TransportRecordListParams) {
+    transportRecordLoading.value = true
+    transportRecordError.value = null
+    try {
+      const result = await fleetService.getTransportRecords(params)
+      transportRecords.value = result.items
+      transportRecordTotal.value = result.total
+      return result
+    } catch (e) {
+      transportRecordError.value = e instanceof Error ? e.message : '获取运输流水失败'
+      throw e
+    } finally {
+      transportRecordLoading.value = false
+    }
+  }
+
+  async function importTransportRecords(file: File): Promise<ImportResult> {
+    transportRecordLoading.value = true
+    transportRecordError.value = null
+    try {
+      const result = await fleetService.importTransportRecords(file)
+      return result
+    } catch (e) {
+      transportRecordError.value = e instanceof Error ? e.message : '导入运输流水失败'
+      throw e
+    } finally {
+      transportRecordLoading.value = false
+    }
+  }
+
+  async function fetchTransportRecordStatistics() {
+    transportRecordLoading.value = true
+    transportRecordError.value = null
+    try {
+      const result = await fleetService.getTransportRecordStatistics()
+      transportRecordStatistics.value = result
+      return result
+    } catch (e) {
+      transportRecordError.value = e instanceof Error ? e.message : '获取运输统计失败'
+      throw e
+    } finally {
+      transportRecordLoading.value = false
+    }
+  }
+
+  async function downloadTransportRecordTemplate() {
+    try {
+      const blob = await fleetService.downloadTemplate()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'transport_record_template.txt'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (e) {
+      transportRecordError.value = e instanceof Error ? e.message : '下载模板失败'
+      throw e
+    }
+  }
+
+  const statistics = ref<FleetStatistics | null>(null)
+  const statisticsLoading = ref(false)
+  const statisticsError = ref<string | null>(null)
+
+  async function fetchStatistics() {
+    statisticsLoading.value = true
+    statisticsError.value = null
+    try {
+      const result = await fleetService.getStatistics()
+      statistics.value = result
+    } catch (e) {
+      statisticsError.value = e instanceof Error ? e.message : '获取统计数据失败'
+    } finally {
+      statisticsLoading.value = false
+    }
+  }
+
   function resetState() {
     vehicles.value = []
     vehicleLoading.value = false
@@ -247,6 +360,14 @@ export const useFleetStore = defineStore('fleet', () => {
     certificates.value = []
     certificateLoading.value = false
     certificateError.value = null
+    transportRecords.value = []
+    transportRecordLoading.value = false
+    transportRecordError.value = null
+    transportRecordTotal.value = 0
+    transportRecordStatistics.value = null
+    statistics.value = null
+    statisticsLoading.value = false
+    statisticsError.value = null
   }
 
   return {
@@ -260,6 +381,7 @@ export const useFleetStore = defineStore('fleet', () => {
     createVehicle,
     updateVehicle,
     disableVehicle,
+    bindDriverToVehicle,
     drivers,
     driverLoading,
     driverError,
@@ -275,6 +397,19 @@ export const useFleetStore = defineStore('fleet', () => {
     createCertificate,
     updateCertificate,
     deleteCertificate,
+    transportRecords,
+    transportRecordLoading,
+    transportRecordError,
+    transportRecordTotal,
+    transportRecordStatistics,
+    fetchTransportRecords,
+    importTransportRecords,
+    fetchTransportRecordStatistics,
+    downloadTransportRecordTemplate,
+    statistics,
+    statisticsLoading,
+    statisticsError,
+    fetchStatistics,
     resetState,
   }
 })

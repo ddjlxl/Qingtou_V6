@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { useFleetStore } from '../stores/useFleetStore'
@@ -28,11 +28,11 @@ const form = ref({
 
 const rules = {
   name: [
-    { required: true, message: '请输入司机姓名', trigger: 'blur' },
+    { required: true, message: '请输入司机姓名', trigger: 'change' },
   ],
   phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' },
+    { required: true, message: '请输入手机号', trigger: 'change' },
+    { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'change' },
   ],
 }
 
@@ -47,6 +47,9 @@ watch(
         form.value.name = ''
         form.value.phone = ''
       }
+      nextTick(() => {
+        formRef.value?.clearValidate()
+      })
     }
   }
 )
@@ -98,13 +101,19 @@ async function handleSubmit() {
       :rules="rules"
       label-width="100px"
     >
-      <el-form-item label="姓名" prop="name">
+      <el-form-item
+        label="姓名"
+        prop="name"
+      >
         <el-input
           v-model="form.name"
           placeholder="请输入司机姓名"
         />
       </el-form-item>
-      <el-form-item label="手机号" prop="phone">
+      <el-form-item
+        label="手机号"
+        prop="phone"
+      >
         <el-input
           v-model="form.phone"
           placeholder="请输入手机号"
@@ -112,8 +121,14 @@ async function handleSubmit() {
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleSubmit">
+      <el-button @click="handleClose">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="loading"
+        @click="handleSubmit"
+      >
         保存
       </el-button>
     </template>

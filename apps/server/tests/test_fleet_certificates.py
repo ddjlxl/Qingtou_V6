@@ -131,6 +131,54 @@ class TestCreateCertificate:
 
         assert response.status_code == 422
 
+    @pytest.mark.asyncio
+    async def test_create_certificate_invalid_file_format(
+        self, client: AsyncClient, db_session, auth_headers
+    ):
+        vehicle = await create_test_vehicle(db_session, "粤A12345")
+
+        response = await client.post(
+            "/api/v1/fleet/certificates",
+            data={
+                "owner_id": str(vehicle.id),
+                "owner_type": "vehicle",
+                "cert_type": "vehicle_license",
+                "cert_name": "行驶证",
+                "issue_date": "2026-01-01",
+                "expiry_date": "2027-01-01",
+            },
+            files={"attachment": ("test.pdf", b"fake pdf content", "application/pdf")},
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 422
+        assert "文件格式不支持" in response.json()["message"]
+
+    @pytest.mark.asyncio
+    async def test_create_certificate_oversized_file(
+        self, client: AsyncClient, db_session, auth_headers
+    ):
+        vehicle = await create_test_vehicle(db_session, "粤A12345")
+
+        large_content = b"x" * (6 * 1024 * 1024)
+
+        response = await client.post(
+            "/api/v1/fleet/certificates",
+            data={
+                "owner_id": str(vehicle.id),
+                "owner_type": "vehicle",
+                "cert_type": "vehicle_license",
+                "cert_name": "行驶证",
+                "issue_date": "2026-01-01",
+                "expiry_date": "2027-01-01",
+            },
+            files={"attachment": ("test.jpg", large_content, "image/jpeg")},
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 422
+        assert "文件大小不能超过" in response.json()["message"]
+
 
 class TestListCertificates:
     @pytest.mark.asyncio

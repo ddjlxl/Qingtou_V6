@@ -129,3 +129,44 @@ class CertificateListResponse(BaseModel):
 
 class CertificateWarningCountResponse(BaseModel):
     count: int
+
+
+class TransportRecordResponse(BaseModel):
+    id: str
+    order_no: str
+    customer_info: str
+    origin: str
+    destination: str
+    container_no: str
+    vehicle_id: str
+    vehicle_plate_no: str | None = None
+    driver_id: str
+    driver_name: str | None = None
+    imported_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class TransportRecordListResponse(BaseModel):
+    items: list[TransportRecordResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class TransportRecordStatisticsResponse(BaseModel):
+    by_driver: list[dict]
+    by_vehicle: list[dict]
+
+
+class ImportResultResponse(BaseModel):
+    total_rows: int
+    success_count: int
+    duplicate_count: int
+    error_count: int
+    errors: list[dict] | None = None
+
+
+class FleetStatisticsResponse(BaseModel):
+    certificate_warning_count: int
+    month_task_count: int

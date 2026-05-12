@@ -558,8 +558,7 @@ apps/frontend/src/modules/fleet/
 │   ├── DriverFormDialog.vue             # 新增/编辑司机弹窗
 │   ├── CertificateManagement.vue        # Tab 4: 证照管理（含列表表格）
 │   ├── CertificateFormDialog.vue        # 新增/编辑证照弹窗
-│   ├── TransportRecordManagement.vue    # Tab 5: 运输流水（含列表表格）
-│   ├── ImportDialog.vue                 # 导入运输流水弹窗
+│   ├── TransportRecordManagement.vue    # Tab 5: 运输流水（含列表表格、导入）
 │   └── StatusTag.vue                    # 状态标签组件（颜色区分）
 ├── stores/
 │   └── useFleetStore.ts                 # Fleet 状态管理

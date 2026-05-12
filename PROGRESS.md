@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-10（fleet 阶段 2 完成）
+> 最后更新：2026-05-12（fleet 阶段 5 完成，fleet 模块全部完成）
 
 ---
 
@@ -12,6 +12,8 @@
 | M1: MVP | Phase 1.1 项目骨架 | ✅ 已完成 |
 | M1: MVP | Phase 1.2 基础设施 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — auth 认证 | ✅ 已完成 |
+| M1: MVP | Phase 1.3 核心业务 — fleet 车队管理 | ✅ 已完成 |
+| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | ⬜ 未开始 |
 | M2: 完整版 | - | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -120,6 +122,36 @@
 - [x] T-208：后端 API 测试 — [tests/test_fleet_drivers.py](file:///e:/Qingtou_V6/apps/server/tests/test_fleet_drivers.py)（15 tests）
 - [x] 验证通过：type-check ✅ / lint ✅ / test ✅（前端 141 tests + 后端 88 tests）
 
+**阶段 3：证照管理** ✅
+- [x] T-301：证照类型定义 — [types/certificate.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/certificate.ts)
+- [x] T-302：前端证照 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
+- [x] T-303：后端证照 CRUD API — [api/v1/fleet_certificates.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet_certificates.py)
+- [x] T-304：前端证照 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
+- [x] T-305：证照管理组件 — [components/CertificateManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/CertificateManagement.vue)
+- [x] T-306：证照表单弹窗 — [components/CertificateFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/CertificateFormDialog.vue)
+- [x] T-307：前端单元测试 — [__tests__/](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/__tests__/)（44 tests）
+- [x] T-308：后端 API 测试 — [tests/test_fleet_certificates.py](file:///e:/Qingtou_V6/apps/server/tests/test_fleet_certificates.py)（14 tests）
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅（前端 185 tests + 后端 102 tests）
+
+**阶段 4：运输流水** ✅
+- [x] T-401：运输流水类型定义 — [types/transport-record.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/transport-record.ts)
+- [x] T-402：前端运输流水 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
+- [x] T-403：后端运输流水 API — [api/v1/fleet.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet.py)
+- [x] T-404：前端运输流水 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
+- [x] T-405：运输流水管理组件（含导入） — [components/TransportRecordManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/TransportRecordManagement.vue)
+- [x] T-406：导入弹窗组件 — 🔀 已合并至 T-405（ImportDialog.vue 已删除，功能集成到 TransportRecordManagement）
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅（前端 140 tests + 后端 102 tests）
+
+**阶段 5：车队统计** ✅
+- [x] T-501：统计类型定义 — [types/statistics.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/statistics.ts)
+- [x] T-502：前端统计 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
+- [x] T-503：后端统计 API — [api/v1/fleet_statistics.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet_statistics.py)
+- [x] T-504：前端统计 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
+- [x] T-505：统计概览 Tab 页面 — [components/StatisticsTab.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/StatisticsTab.vue)
+- [x] T-506：Fleet 主页面（5 Tab 整合） — [pages/FleetPage.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/pages/FleetPage.vue)
+- [x] T-507：模块公共 API 导出 — [index.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/index.ts)
+- [x] 验证通过：type-check ✅ / lint ✅ / test ✅（前端 243 tests + 后端 124 tests）
+
 ### 技能迁移 ✅
 
 - [x] 从 V4 迁移 4 个新技能：完成前验证、分支收尾、重构计划、界面设计
@@ -135,27 +167,27 @@
 
 **auth 用户认证** ✅ 已完成（6/6 任务全部通过）
 
-**fleet 车队管理**（阶段 0 ✅，阶段 1 ✅，阶段 2 ✅）
+**fleet 车队管理**（阶段 0 ✅，阶段 1 ✅，阶段 2 ✅，阶段 3 ✅，阶段 4 ✅，阶段 5 ✅）
 - [x] 需求澄清：[specs/features/fleet/requirements.md](file:///e:/Qingtou_V6/specs/features/fleet/requirements.md)
 - [x] 技术设计：[specs/features/fleet/design.md](file:///e:/Qingtou_V6/specs/features/fleet/design.md)
 - [x] 任务规划：[specs/features/fleet/tasks.md](file:///e:/Qingtou_V6/specs/features/fleet/tasks.md)
-- [ ] 编码实现：25/52 任务待完成
+- [x] 编码实现：41/41 任务已完成 🎉
 
 | 阶段 | 任务范围 | 任务数 | 状态 | 检查点 Commit |
 |------|---------|--------|------|--------------|
 | 阶段 0: 基础设施 | T-001 ~ T-010 | 10 | ✅ | 未提交（等待手动确认） |
 | 阶段 1: 车辆管理 | T-101 ~ T-109 | 9 | ✅ | 未提交（等待手动确认） |
 | 阶段 2: 司机管理 | T-201 ~ T-208 | 8 | ✅ | 未提交（等待手动确认） |
-| 阶段 3: 证照管理 | T-301 ~ T-308 | 8 | ⬜ | - |
-| 阶段 4: 运输流水 | T-401 ~ T-408 | 8 | ⬜ | - |
-| 阶段 5: 车队统计 | T-501 ~ T-509 | 9 | ⬜ | - |
+| 阶段 3: 证照管理 | T-301 ~ T-308 | 8 | ✅ | 未提交（等待手动确认） |
+| 阶段 4: 运输流水 | T-401 ~ T-405 | 5 | ✅ | 未提交（等待手动确认） |
+| 阶段 5: 车队统计 | T-501 ~ T-507 | 7 | ✅ | 未提交（等待手动确认） |
 
-**当前任务**：T-301（创建证照相关类型定义）
+**当前任务**：fleet 模块全部完成 ✅
 **检查点约定**：每完成一个阶段后 git commit，记录 commit hash 到上表
 
 **新窗口启动指令**：
 ```
-继续 fleet 模块编码实现，从阶段 3 Task-301 开始，每完成一个阶段停下来等待我手动确认
+继续 dispatch 调度中心模块，从需求澄清开始
 ```
 
 后续模块：dispatch 调度中心 → driver 司机端

@@ -31,7 +31,7 @@ async function handleLogin() {
   loading.value = true
   try {
     await authStore.login(form.value.username, form.value.password)
-    router.push('/')
+    router.push('/fleet')
   } catch (err: unknown) {
     const message = isApiError(err) ? err.message : '登录失败'
     ElMessage.error(message)
@@ -67,6 +67,7 @@ async function handleLogin() {
             type="primary"
             size="large"
             :loading="loading"
+            native-type="submit"
             class="login-button"
           >
             登录

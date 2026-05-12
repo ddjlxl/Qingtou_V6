@@ -62,11 +62,15 @@ export function convertRequestData(
 }
 
 export function handleResponseSuccess<T = unknown>(response: AxiosResponse<ApiResponse<T>>): T {
-  const data = response.data.data
-  if (data === null || data === undefined) {
-    return data as T
+  const body = response.data as unknown as Record<string, unknown>
+  if (body && typeof body === 'object' && 'data' in body && 'code' in body) {
+    const data = body.data
+    if (data === null || data === undefined) {
+      return data as T
+    }
+    return camelcaseKeys(data as Record<string, unknown>, { deep: true }) as T
   }
-  return camelcaseKeys(data as Record<string, unknown>, { deep: true }) as T
+  return camelcaseKeys(body as Record<string, unknown>, { deep: true }) as T
 }
 
 export function handleResponseError(error: AxiosError): Promise<never> {

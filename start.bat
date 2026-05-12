@@ -111,7 +111,7 @@ if not exist "apps\server\.installed" (
 
 echo.
 echo [5/6] Checking port availability...
-netstat -ano | findstr ":%FRONTEND_PORT%" >nul 2>&1
+netstat -ano | findstr "LISTENING" | findstr ":%FRONTEND_PORT%" >nul 2>&1
 if %errorlevel% equ 0 (
     echo ERROR: Port %FRONTEND_PORT% is already in use
     echo TIP: Close the program using this port or change port in script
@@ -125,7 +125,7 @@ if %errorlevel% equ 0 (
     echo [%date% %time%] Port %FRONTEND_PORT% available >> %LOG_FILE%
 )
 
-netstat -ano | findstr ":%BACKEND_PORT%" >nul 2>&1
+netstat -ano | findstr "LISTENING" | findstr ":%BACKEND_PORT%" >nul 2>&1
 if %errorlevel% equ 0 (
     echo ERROR: Port %BACKEND_PORT% is already in use
     echo TIP: Close the program using this port or change port in script

@@ -74,7 +74,7 @@ describe('LoginForm', () => {
     await wrapper.find('form').trigger('submit')
 
     await wrapper.vm.$nextTick()
-    expect(mockPush).toHaveBeenCalledWith('/')
+    expect(mockPush).toHaveBeenCalledWith('/fleet')
   })
 
   it('shows error message on login failure', async () => {

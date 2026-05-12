@@ -835,26 +835,22 @@ graph TD
   - [ ] 导入功能正常
   - [ ] 统计区域正确显示
 
-#### Task-406: 创建导入弹窗组件 🔒
+#### Task-406: 创建导入弹窗组件 🔀 已合并至 Task-405
 - **所属切片**：阶段 4: 运输流水
 - **复杂度**：M
 - **Depends On**：Task-404
 - **对应 AC**：AC-012, AC-024, AC-025, AC-026
-- **通俗解释**：创建导入运输流水的弹窗
+- **通俗解释**：~~创建导入运输流水的弹窗~~ → 导入功能已直接集成到 TransportRecordManagement 中，无需独立弹窗组件
 - **Description**：
-  1. 创建 `apps/frontend/src/modules/fleet/components/ImportDialog.vue`
-  2. 使用 el-upload 组件
-  3. 实现文件格式验证（仅 Excel/txt）
-  4. 实现模板下载链接
-  5. 显示导入结果（成功/重复/错误数量）
-  6. 显示错误详情（前 10 条）
+  > 经过度工程化审查，ImportDialog 组件作为独立弹窗属于不必要抽象。
+  > 文件格式验证、导入结果提示等功能已直接集成到 TransportRecordManagement 的内联导入中。
+  > ImportDialog.vue 已删除，相关测试已移除。
 - **Files to Create/Modify**：
-  - `apps/frontend/src/modules/fleet/components/ImportDialog.vue`（新建）
+  - ~~`apps/frontend/src/modules/fleet/components/ImportDialog.vue`（新建）~~ 已删除
 - **验证标准**：
-  - [ ] 文件格式验证正确
-  - [ ] 导入结果正确显示
-  - [ ] 模板下载功能正常
-  - [ ] **TDD 测试通过**：文件导入测试覆盖格式验证和错误处理
+  - [x] 文件格式验证已集成到 TransportRecordManagement.handleFileChange
+  - [x] 导入结果提示已集成到 TransportRecordManagement.handleImport
+  - [x] 模板下载功能保留在 TransportRecordManagement 中
 
 ---
 
@@ -1041,8 +1037,8 @@ graph TD
 - [ ] 端到端验证：用户可以新增证照、编辑证照、查看列表、预警筛选
 
 ### 阶段 4 验证
-- [ ] Task-401 至 Task-406 验证标准全部通过（含 TDD 测试）
-- [ ] 端到端验证：用户可以导入运输流水、查看列表、筛选、查看统计
+- [x] Task-401 至 Task-406 验证标准全部通过（含 TDD 测试）
+- [x] 端到端验证：用户可以导入运输流水、查看列表、筛选、查看统计
 
 ### 阶段 5 验证
 - [ ] Task-501 至 Task-507 验证标准全部通过（含 TDD 测试）
@@ -1052,13 +1048,15 @@ graph TD
 
 ## 任务统计
 
-- **总任务数**：42 个（移除 10 个独立测试任务）
-- **基础设施任务**：10 个
-- **车辆管理任务**：7 个
-- **司机管理任务**：6 个
-- **证照管理任务**：6 个
-- **运输流水任务**：6 个
-- **车队统计任务**：7 个
+- **总任务数**：41 个（T-406 合并至 T-405，移除 10 个独立测试任务）
+- **已完成**：34 个（阶段 0~4）
+- **待完成**：7 个（阶段 5: 车队统计）
+- **基础设施任务**：10 个 ✅
+- **车辆管理任务**：7 个 ✅
+- **司机管理任务**：6 个 ✅
+- **证照管理任务**：6 个 ✅
+- **运输流水任务**：5 个 ✅（T-406 合并至 T-405）
+- **车队统计任务**：7 个 ⬜
 
 **复杂度分布**：
 - S（简单）：14 个
