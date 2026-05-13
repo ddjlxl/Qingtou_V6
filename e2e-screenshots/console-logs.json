@@ -1,0 +1,41 @@
+{
+  "console_logs": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "location": {
+        "url": "http://localhost:9527/@vite/client",
+        "lineNumber": 826,
+        "columnNumber": 8
+      }
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "location": {
+        "url": "http://localhost:9527/@vite/client",
+        "lineNumber": 930,
+        "columnNumber": 11
+      }
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "location": {
+        "url": "http://localhost:9527/@vite/client",
+        "lineNumber": 826,
+        "columnNumber": 8
+      }
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "location": {
+        "url": "http://localhost:9527/@vite/client",
+        "lineNumber": 930,
+        "columnNumber": 11
+      }
+    }
+  ],
+  "page_errors": []
+}

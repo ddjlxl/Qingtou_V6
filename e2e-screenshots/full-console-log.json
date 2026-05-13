@@ -1,0 +1,14 @@
+[
+  {
+    "source": "console",
+    "type": "debug",
+    "text": "[vite] connecting...",
+    "location": "{'url': 'http://localhost:9527/@vite/client', 'lineNumber': 826, 'columnNumber': 8}"
+  },
+  {
+    "source": "console",
+    "type": "debug",
+    "text": "[vite] connected.",
+    "location": "{'url': 'http://localhost:9527/@vite/client', 'lineNumber': 930, 'columnNumber': 11}"
+  }
+]
