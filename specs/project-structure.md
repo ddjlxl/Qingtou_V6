@@ -51,10 +51,11 @@ Qingtou_V6/
 │   │   │   │   │   └── __tests__/
 │   │   │   │   │
 │   │   │   │   ├── fleet/               # 车队管理
-│   │   │   │   │   ├── components/      # VehicleTable, DriverCard...
+│   │   │   │   │   ├── components/      # VehicleManagement, DriverManagement, CertificateManagement, TransportRecordManagement, StatisticsTab, StatusTag, FormDialogs...
+│   │   │   │   │   ├── pages/           # FleetPage.vue
 │   │   │   │   │   ├── stores/          # useFleetStore.ts
 │   │   │   │   │   ├── services/        # fleetService.ts
-│   │   │   │   │   ├── types/           # fleet.types.ts
+│   │   │   │   │   ├── types/           # vehicle.ts, driver.ts, certificate.ts, transport-record.ts, statistics.ts, index.ts
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── __tests__/
 │   │   │   │   │
@@ -147,34 +148,38 @@ Qingtou_V6/
 │       │   │   │   ├── dashboard.py      # 看板接口
 │       │   │   │   ├── dispatch.py       # 调度接口
 │       │   │   │   ├── fleet.py          # 车队接口
+│       │   │   │   ├── fleet_certificates.py  # 证照接口
+│       │   │   │   ├── fleet_drivers.py       # 司机接口
+│       │   │   │   ├── fleet_statistics.py    # 统计接口
+│       │   │   │   ├── fleet_transport_records.py  # 运输流水接口
+│       │   │   │   ├── fleet_vehicles.py      # 车辆接口
 │       │   │   │   ├── warehouse.py      # 仓库接口
 │       │   │   │   ├── settings.py       # 设置接口
 │       │   │   │   └── help_center.py    # 帮助中心接口
 │       │   │   └── deps.py               # 依赖注入（get_db, get_current_user）
 │       │   ├── models/                   # SQLAlchemy 数据模型
 │       │   │   ├── __init__.py
+│       │   │   ├── base.py
 │       │   │   ├── user.py
-│       │   │   ├── task.py
+│       │   │   ├── order.py
 │       │   │   ├── vehicle.py
 │       │   │   ├── driver.py
+│       │   │   ├── certificate.py
+│       │   │   ├── transport_record.py
 │       │   │   ├── warehouse.py
-│       │   │   └── operation_log.py
+│       │   │   ├── storage_slot.py
+│       │   │   ├── common_address.py
+│       │   │   ├── operation_log.py
+│       │   │   ├── system_config.py
+│       │   │   └── help_article.py
 │       │   ├── schemas/                  # Pydantic 请求/响应模型
 │       │   │   ├── __init__.py
 │       │   │   ├── auth.py
-│       │   │   ├── task.py
-│       │   │   ├── vehicle.py
-│       │   │   ├── driver.py
-│       │   │   ├── warehouse.py
-│       │   │   └── common.py
+│       │   │   └── fleet.py
 │       │   ├── services/                 # 业务逻辑层
 │       │   │   ├── __init__.py
 │       │   │   ├── auth_service.py
-│       │   │   ├── task_service.py
-│       │   │   ├── vehicle_service.py
-│       │   │   ├── driver_service.py
-│       │   │   ├── warehouse_service.py
-│       │   │   └── ocr_service.py        # OCR 识别服务
+│       │   │   └── fleet_service.py
 │       │   ├── core/                     # 核心配置
 │       │   │   ├── __init__.py
 │       │   │   ├── config.py             # 应用配置（读取 .env）

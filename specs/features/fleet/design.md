@@ -550,7 +550,6 @@ export interface FleetStatistics {
 ```
 apps/frontend/src/modules/fleet/
 ├── components/
-│   ├── FleetPage.vue                    # 主页面（包含5个Tab）
 │   ├── StatisticsTab.vue                # Tab 1: 统计概览（含统计卡片内联）
 │   ├── VehicleManagement.vue            # Tab 2: 车辆管理（含列表表格）
 │   ├── VehicleFormDialog.vue            # 新增/编辑车辆弹窗
@@ -560,6 +559,8 @@ apps/frontend/src/modules/fleet/
 │   ├── CertificateFormDialog.vue        # 新增/编辑证照弹窗
 │   ├── TransportRecordManagement.vue    # Tab 5: 运输流水（含列表表格、导入）
 │   └── StatusTag.vue                    # 状态标签组件（颜色区分）
+├── pages/
+│   └── FleetPage.vue                    # 主页面（包含5个Tab）
 ├── stores/
 │   └── useFleetStore.ts                 # Fleet 状态管理
 ├── services/

@@ -21,8 +21,8 @@
 ## 当前状态
 
 - **里程碑**：M1 MVP
-- **已完成**：Phase 1.1 骨架 ✅ / 1.2 基础设施 ✅ / 1.3 auth 认证 ✅
-- **下一步**：fleet 车队管理
+- **已完成**：Phase 1.1 骨架 ✅ / 1.2 基础设施 ✅ / 1.3 auth 认证 ✅ / 1.3 fleet 车队管理 ✅
+- **下一步**：dispatch 调度中心
 
 ---
 
@@ -31,7 +31,7 @@
 | 模块 | 前端位置 | 后端位置 | 状态 |
 |------|---------|---------|------|
 | auth | `apps/frontend/src/modules/auth/` | `apps/server/app/api/v1/auth.py` | ✅ |
-| fleet | `apps/frontend/src/modules/fleet/` | `apps/server/app/api/v1/fleet.py` | ⬜ |
+| fleet | `apps/frontend/src/modules/fleet/` | `apps/server/app/api/v1/fleet*.py` | ✅ |
 | dispatch | `apps/frontend/src/modules/dispatch/` | `apps/server/app/api/v1/dispatch.py` | ⬜ |
 | warehouse | `apps/frontend/src/modules/warehouse/` | `apps/server/app/api/v1/warehouse.py` | ⬜ |
 | dashboard | `apps/frontend/src/modules/dashboard/` | `apps/server/app/api/v1/dashboard.py` | ⬜ |
