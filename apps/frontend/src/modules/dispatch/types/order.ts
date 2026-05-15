@@ -32,9 +32,7 @@ export interface Order {
   customerName: string | null
   customerPhone: string | null
   originName: string | null
-  originAddress: string | null
   destName: string | null
-  destAddress: string | null
   waypoints: string[] | null
   containerNo: string | null
   containerType: ContainerType | null
@@ -75,9 +73,7 @@ export interface CreateOrderRequest {
   customerName?: string
   customerPhone?: string
   originName?: string
-  originAddress?: string
   destName?: string
-  destAddress?: string
   waypoints?: string[]
   containerNo?: string
   containerType?: ContainerType
@@ -93,9 +89,7 @@ export interface UpdateOrderRequest {
   customerName?: string
   customerPhone?: string
   originName?: string
-  originAddress?: string
   destName?: string
-  destAddress?: string
   waypoints?: string[]
   containerNo?: string
   containerType?: ContainerType

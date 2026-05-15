@@ -127,9 +127,7 @@ class User(BaseModel):
 | customer_name | VARCHAR(100) | NOT NULL | 客户名称 |
 | customer_phone | VARCHAR(20) | NULL | 客户电话 |
 | origin_name | VARCHAR(200) | NOT NULL | 起运地名称 |
-| origin_address | VARCHAR(500) | NOT NULL | 起运地地址 |
 | dest_name | VARCHAR(200) | NOT NULL | 目的地名称 |
-| dest_address | VARCHAR(500) | NOT NULL | 目的地地址 |
 | container_no | VARCHAR(20) | NULL | 箱号 |
 | container_type | VARCHAR(10) | NULL | 20GP/40GP/40HQ/45HQ |
 | seal_no | VARCHAR(20) | NULL | 封号 |

@@ -72,9 +72,7 @@ class Order(BaseModel):
         String(20), nullable=True
     )
     origin_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    origin_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     dest_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    dest_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     container_no: Mapped[str | None] = mapped_column(
         String(20), nullable=True
     )

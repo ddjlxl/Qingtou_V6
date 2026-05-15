@@ -103,15 +103,13 @@
 
 #### 迁移内容
 
-**5 字段改 NULL**（支持骨架任务——所有字段可选）：
+**3 字段改 NULL**（支持骨架任务——所有字段可选）：
 
 | 字段 | 当前 | 迁移后 | 对应 AC |
 |------|------|--------|---------|
 | `customer_name` | `nullable=False` | `nullable=True` | → AC-002 |
 | `origin_name` | `nullable=False` | `nullable=True` | → AC-002 |
-| `origin_address` | `nullable=False` | `nullable=True` | → AC-002 |
 | `dest_name` | `nullable=False` | `nullable=True` | → AC-002 |
-| `dest_address` | `nullable=False` | `nullable=True` | → AC-002 |
 
 **3 新字段**：
 
@@ -194,12 +192,10 @@ class Order(BaseModel):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default=OrderStatus.PENDING.value)
     priority: Mapped[str] = mapped_column(String(20), nullable=False, default=Priority.NORMAL.value)
 
-    # === 迁移：5 字段改 NULL ===
+    # === 迁移：3 字段改 NULL ===
     customer_name: Mapped[str | None] = mapped_column(String(100), nullable=True)   # 原 nullable=False
     origin_name: Mapped[str | None] = mapped_column(String(200), nullable=True)     # 原 nullable=False
-    origin_address: Mapped[str | None] = mapped_column(String(500), nullable=True)  # 原 nullable=False
     dest_name: Mapped[str | None] = mapped_column(String(200), nullable=True)       # 原 nullable=False
-    dest_address: Mapped[str | None] = mapped_column(String(500), nullable=True)    # 原 nullable=False
 
     customer_phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     container_no: Mapped[str | None] = mapped_column(String(20), nullable=True)
@@ -334,9 +330,7 @@ class OrderCreate(BaseModel):
     customer_name: Optional[str] = Field(None, max_length=100)
     customer_phone: Optional[str] = Field(None, max_length=20)
     origin_name: Optional[str] = Field(None, max_length=200)
-    origin_address: Optional[str] = Field(None, max_length=500)
     dest_name: Optional[str] = Field(None, max_length=200)
-    dest_address: Optional[str] = Field(None, max_length=500)
     waypoints: Optional[list[str]] = None                                    # → AC-005
     container_no: Optional[str] = Field(None, max_length=20)
     container_type: Optional[str] = Field(None, pattern="^(20GP|40GP|40HQ|45HQ)$")
@@ -361,9 +355,7 @@ class OrderUpdate(BaseModel):
     customer_name: Optional[str] = Field(None, max_length=100)
     customer_phone: Optional[str] = Field(None, max_length=20)
     origin_name: Optional[str] = Field(None, max_length=200)
-    origin_address: Optional[str] = Field(None, max_length=500)
     dest_name: Optional[str] = Field(None, max_length=200)
-    dest_address: Optional[str] = Field(None, max_length=500)
     waypoints: Optional[list[str]] = None
     container_no: Optional[str] = Field(None, max_length=20)
     container_type: Optional[str] = Field(None, pattern="^(20GP|40GP|40HQ|45HQ)$")
@@ -387,9 +379,7 @@ class OrderResponse(BaseModel):
     customer_name: str | None = None
     customer_phone: str | None = None
     origin_name: str | None = None
-    origin_address: str | None = None
     dest_name: str | None = None
-    dest_address: str | None = None
     waypoints: list[str] | None = None
     container_no: str | None = None
     container_type: str | None = None
@@ -748,9 +738,7 @@ async def get_last_business_address(
     if last_order:
         return {
             "origin_name": last_order.origin_name,
-            "origin_address": last_order.origin_address,
             "dest_name": last_order.dest_name,
-            "dest_address": last_order.dest_address,
         }
     return {}
 ```

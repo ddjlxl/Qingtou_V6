@@ -32,9 +32,7 @@ const form = reactive({
   customerName: '',
   customerPhone: '',
   originName: '',
-  originAddress: '',
   destName: '',
-  destAddress: '',
   waypoints: [] as string[],
   containerNo: '',
   containerType: '' as ContainerType | '',
@@ -75,6 +73,15 @@ const dialogTitle = computed(() => {
   return isEditMode.value ? '编辑任务' : '新建任务'
 })
 
+const routeSummary = computed(() => {
+  const parts: string[] = []
+  if (form.originName) parts.push(form.originName)
+  const validWaypoints = form.waypoints.filter((w) => w.trim())
+  if (validWaypoints.length > 0) parts.push(...validWaypoints)
+  if (form.destName) parts.push(form.destName)
+  return parts.length > 0 ? parts.join(' → ') : ''
+})
+
 watch(
   () => props.visible,
   (val) => {
@@ -95,13 +102,11 @@ watch(
     if (!val || props.mode !== 'create') return
     try {
       const result = await dispatchService.getRouteTemplate(val)
-      if (result.originName && !form.originName) {
+      if (result.originName) {
         form.originName = result.originName
       }
-      if (result.waypoints && result.waypoints.length > 0 && form.waypoints.length === 0) {
-        form.waypoints = [...result.waypoints]
-      }
-      if (result.destName && !form.destName) {
+      form.waypoints = result.waypoints ? [...result.waypoints] : []
+      if (result.destName) {
         form.destName = result.destName
       }
     } catch {
@@ -148,9 +153,7 @@ function fillFormFromOrder(order: Order) {
   form.customerName = order.customerName || ''
   form.customerPhone = order.customerPhone || ''
   form.originName = order.originName || ''
-  form.originAddress = order.originAddress || ''
   form.destName = order.destName || ''
-  form.destAddress = order.destAddress || ''
   form.waypoints = order.waypoints || []
   form.containerNo = order.containerNo || ''
   form.containerType = (order.containerType as ContainerType) || ''
@@ -166,9 +169,7 @@ function resetForm() {
   form.customerName = ''
   form.customerPhone = ''
   form.originName = ''
-  form.originAddress = ''
   form.destName = ''
-  form.destAddress = ''
   form.waypoints = []
   form.containerNo = ''
   form.containerType = ''
@@ -213,9 +214,7 @@ function buildRequest(): CreateOrderRequest | UpdateOrderRequest {
     customerName: form.customerName || undefined,
     customerPhone: form.customerPhone || undefined,
     originName: form.originName || undefined,
-    originAddress: form.originAddress || undefined,
     destName: form.destName || undefined,
-    destAddress: form.destAddress || undefined,
     waypoints: form.waypoints.filter((w) => w.trim()).length > 0
       ? form.waypoints.filter((w) => w.trim())
       : undefined,
@@ -287,7 +286,7 @@ function handleClose() {
   <el-dialog
     :model-value="visible"
     :title="dialogTitle"
-    width="720px"
+    width="800px"
     :close-on-click-modal="false"
     @update:model-value="handleClose"
   >
@@ -296,153 +295,6 @@ function handleClose() {
       :model="form"
       label-width="100px"
     >
-      <el-divider content-position="left">
-        客户信息
-      </el-divider>
-      <el-row :gutter="16">
-        <el-col :span="12">
-          <el-form-item label="客户名称">
-            <el-input
-              v-model="form.customerName"
-              placeholder="请输入客户名称"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="联系电话">
-            <el-input
-              v-model="form.customerPhone"
-              placeholder="请输入联系电话"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-divider content-position="left">
-        路线规划
-      </el-divider>
-      <el-row :gutter="16">
-        <el-col :span="12">
-          <el-form-item label="起运地">
-            <el-input
-              v-model="form.originName"
-              placeholder="请输入起运地"
-            >
-              <template #append>
-                <el-button @click="openAddressDialog()">
-                  常用
-                </el-button>
-              </template>
-            </el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="起运地地址">
-            <el-input
-              v-model="form.originAddress"
-              placeholder="详细地址"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <div class="order-form__waypoints">
-        <div
-          v-for="(_, index) in form.waypoints"
-          :key="index"
-          class="order-form__waypoint-item"
-        >
-          <el-form-item :label="`途径点${index + 1}`">
-            <el-input
-              v-model="form.waypoints[index]"
-              placeholder="请输入途径点"
-            >
-              <template #append>
-                <el-button
-                  type="danger"
-                  :icon="'Delete'"
-                  @click="removeWaypoint(index)"
-                />
-              </template>
-            </el-input>
-          </el-form-item>
-        </div>
-        <el-button
-          type="primary"
-          link
-          @click="addWaypoint"
-        >
-          + 添加途径点
-        </el-button>
-      </div>
-
-      <el-row :gutter="16">
-        <el-col :span="12">
-          <el-form-item label="目的地">
-            <el-input
-              v-model="form.destName"
-              placeholder="请输入目的地"
-            >
-              <template #append>
-                <el-button @click="openAddressDialog()">
-                  常用
-                </el-button>
-              </template>
-            </el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="目的地地址">
-            <el-input
-              v-model="form.destAddress"
-              placeholder="详细地址"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-divider content-position="left">
-        集装箱信息
-      </el-divider>
-      <el-row :gutter="16">
-        <el-col :span="8">
-          <el-form-item label="箱号">
-            <el-input
-              :model-value="form.containerNo"
-              placeholder="4位字母+7位数字"
-              @input="onContainerNoInput"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="箱型">
-            <el-select
-              v-model="form.containerType"
-              placeholder="请选择箱型"
-              clearable
-              teleported
-              style="width: 100%"
-            >
-              <el-option
-                v-for="opt in containerTypeOptions"
-                :key="opt.value"
-                :label="opt.label"
-                :value="opt.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="封号">
-            <el-input
-              :model-value="form.sealNo"
-              placeholder="请输入封号"
-              @input="onSealNoInput"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
       <el-divider content-position="left">
         业务信息
       </el-divider>
@@ -475,6 +327,161 @@ function handleClose() {
                 :label="opt.label"
               />
             </el-checkbox-group>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-divider content-position="left">
+        路线规划
+      </el-divider>
+      <el-row :gutter="16">
+        <el-col :span="14">
+          <el-form-item label="起运地">
+            <el-input
+              v-model="form.originName"
+              placeholder="请输入起运地"
+              clearable
+            >
+              <template #append>
+                <el-button @click="openAddressDialog()">
+                  常用
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+
+          <div class="order-form__waypoints">
+            <div
+              v-for="(_, index) in form.waypoints"
+              :key="index"
+              class="order-form__waypoint-item"
+            >
+              <el-form-item :label="`途径点${index + 1}`">
+                <el-input
+                  v-model="form.waypoints[index]"
+                  placeholder="请输入途径点"
+                >
+                  <template #append>
+                    <el-button
+                      type="danger"
+                      :icon="'Delete'"
+                      @click="removeWaypoint(index)"
+                    />
+                  </template>
+                </el-input>
+              </el-form-item>
+            </div>
+            <el-button
+              type="primary"
+              link
+              @click="addWaypoint"
+            >
+              + 添加途径点
+            </el-button>
+          </div>
+
+          <el-form-item label="目的地">
+            <el-input
+              v-model="form.destName"
+              placeholder="请输入目的地"
+              clearable
+            >
+              <template #append>
+                <el-button @click="openAddressDialog()">
+                  常用
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="10">
+          <el-card
+            shadow="never"
+            class="order-form__route-summary"
+          >
+            <template #header>
+              <span>路线预览</span>
+            </template>
+            <p
+              v-if="routeSummary"
+              class="order-form__route-text"
+            >
+              {{ routeSummary }}
+            </p>
+            <p
+              v-else
+              class="order-form__route-placeholder"
+            >
+              填写起运地和目的地后自动生成
+            </p>
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <el-divider content-position="left">
+        集装箱信息
+      </el-divider>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="箱号">
+            <el-input
+              :model-value="form.containerNo"
+              placeholder="4位字母+7位数字"
+              clearable
+              @input="onContainerNoInput"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="箱型">
+            <el-select
+              v-model="form.containerType"
+              placeholder="请选择箱型"
+              clearable
+              teleported
+              style="width: 100%"
+            >
+              <el-option
+                v-for="opt in containerTypeOptions"
+                :key="opt.value"
+                :label="opt.label"
+                :value="opt.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="封号">
+            <el-input
+              :model-value="form.sealNo"
+              placeholder="请输入封号"
+              clearable
+              @input="onSealNoInput"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-divider content-position="left">
+        客户信息
+      </el-divider>
+      <el-row :gutter="16">
+        <el-col :span="12">
+          <el-form-item label="客户名称">
+            <el-input
+              v-model="form.customerName"
+              placeholder="请输入客户名称"
+              clearable
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="联系电话">
+            <el-input
+              v-model="form.customerPhone"
+              placeholder="请输入联系电话"
+              clearable
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -534,6 +541,7 @@ function handleClose() {
           type="textarea"
           :rows="3"
           placeholder="请输入备注信息"
+          clearable
         />
       </el-form-item>
     </el-form>
@@ -598,5 +606,22 @@ function handleClose() {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.order-form__route-summary {
+  background: #f5f7fa;
+}
+
+.order-form__route-text {
+  margin: 0;
+  font-size: 14px;
+  color: #303133;
+  word-break: break-all;
+}
+
+.order-form__route-placeholder {
+  margin: 0;
+  font-size: 13px;
+  color: #c0c4cc;
 }
 </style>

@@ -162,9 +162,7 @@ async def create_order(
         customer_name=data.get("customer_name"),
         customer_phone=data.get("customer_phone"),
         origin_name=origin_name,
-        origin_address=data.get("origin_address"),
         dest_name=dest_name,
-        dest_address=data.get("dest_address"),
         waypoints=json.dumps(data["waypoints"], ensure_ascii=False) if data.get("waypoints") else None,
         container_no=container_no,
         container_type=data.get("container_type"),
@@ -234,8 +232,8 @@ async def update_order(
         raise AppException(code=422, message="起运地和目的地不能相同")
 
     updatable_fields = [
-        "customer_name", "customer_phone", "origin_name", "origin_address",
-        "dest_name", "dest_address", "container_type", "business_type", "remark",
+        "customer_name", "customer_phone", "origin_name",
+        "dest_name", "container_type", "business_type", "remark",
     ]
     for field in updatable_fields:
         if field in data and data[field] is not None:

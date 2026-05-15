@@ -1,8 +1,8 @@
 # V6 项目 AI 开发约束机制
 
-> **版本**：v1.2  
+> **版本**：v1.3  
 > **创建日期**：2026-05-04  
-> **更新日期**：2026-05-13  
+> **更新日期**：2026-05-15  
 > **定位**：记录 V4 踩过的坑，解释"为什么要有这些规则"  
 > **详细规则**：见 [development-standards.md](../../specs/development-standards.md)
 
@@ -86,6 +86,8 @@ if (import.meta.env.DEV) {
 - 新人看不懂
 
 **V6 解决**：超过 300 行必须拆分
+
+**自动检查**：ESLint `max-lines` 和 `max-lines-per-function` 规则会自动检查，IDE 中红线提示。
 
 ```
 # 拆分示例
