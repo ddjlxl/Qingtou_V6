@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-12（fleet 阶段 5 完成，fleet 模块全部完成）
+> 最后更新：2026-05-14（dispatch 技术设计完成）
 
 ---
 
@@ -13,7 +13,7 @@
 | M1: MVP | Phase 1.2 基础设施 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — auth 认证 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — fleet 车队管理 | ✅ 已完成 |
-| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | ⬜ 未开始 |
+| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | 📐 技术设计已完成 |
 | M2: 完整版 | - | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -185,9 +185,25 @@
 **当前任务**：fleet 模块全部完成 ✅
 **检查点约定**：每完成一个阶段后 git commit，记录 commit hash 到上表
 
+### Phase 1.3：核心业务 — dispatch 调度中心 📋
+
+- [x] 需求文档：[specs/features/dispatch/requirements.md](file:///e:/Qingtou_V6/specs/features/dispatch/requirements.md)（42 条 AC）
+- [x] 技术设计文档：[specs/features/dispatch/design.md](file:///e:/Qingtou_V6/specs/features/dispatch/design.md)
+  - Order 模型迁移：5 字段改 NULL + 3 新字段 + 3 个 relationship
+  - 新建 DispatchAddress 模型
+  - 12 个 API 接口（含路由注册顺序警告）
+  - 前端组件结构 + Pinia Store
+  - 核心逻辑：任务创建/分配事务/状态流转/超时检测/删除流程
+  - AC 覆盖：42/42 ✅
+  - 两轮审查 + 6 个问题修复
+- [ ] 任务规划
+- [ ] 编码实现
+
 **新窗口启动指令**：
 ```
-继续 dispatch 调度中心模块，从需求澄清开始
+继续 dispatch 调度中心模块，从任务规划开始。
+技术设计文档：specs/features/dispatch/design.md（已完成，两轮审查通过）
+关键设计决策：Order 模型迁移、DispatchAddress 独立表、分配补偿事务、APScheduler 超时检测
 ```
 
 后续模块：dispatch 调度中心 → driver 司机端

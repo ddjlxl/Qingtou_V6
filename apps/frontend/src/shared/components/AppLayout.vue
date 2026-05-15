@@ -5,6 +5,7 @@ import { useAuthStore } from '@/modules/auth'
 import {
   Menu as IconMenu,
   Van,
+  Location,
   SwitchButton,
   ArrowDown,
 } from '@element-plus/icons-vue'
@@ -54,6 +55,14 @@ function handleLogout() {
           </el-icon>
           <template #title>
             车队管理
+          </template>
+        </el-menu-item>
+        <el-menu-item index="/dispatch">
+          <el-icon>
+            <Location />
+          </el-icon>
+          <template #title>
+            调度中心
           </template>
         </el-menu-item>
       </el-menu>

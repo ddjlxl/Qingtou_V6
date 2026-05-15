@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { LoginForm, useAuthStore } from '@/modules/auth'
 import { AppLayout } from '@/shared/components'
 import { FleetPage } from '@/modules/fleet'
+import { DispatchPage } from '@/modules/dispatch'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +20,12 @@ const router = createRouter({
           path: 'fleet',
           name: 'Fleet',
           component: FleetPage,
+        },
+        {
+          path: 'dispatch',
+          name: 'Dispatch',
+          component: DispatchPage,
+          meta: { requiresAuth: true, roles: ['admin', 'dispatcher'] },
         },
       ],
     },

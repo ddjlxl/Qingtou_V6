@@ -1,6 +1,8 @@
 from app.models.base import Base, BaseModel
+from app.models.business_type_route import BusinessTypeRoute
 from app.models.certificate import Certificate
 from app.models.common_address import CommonAddress
+from app.models.dispatch_address import DispatchAddress
 from app.models.driver import Driver
 from app.models.help_article import HelpArticle
 from app.models.operation_log import OperationLog
@@ -15,9 +17,11 @@ from app.models.warehouse import Warehouse
 __all__ = [
     "Base",
     "BaseModel",
+    "BusinessTypeRoute",
     "User",
     "Order",
     "CommonAddress",
+    "DispatchAddress",
     "Vehicle",
     "Driver",
     "Certificate",
