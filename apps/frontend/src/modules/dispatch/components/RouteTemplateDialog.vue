@@ -118,7 +118,7 @@ function handleClose() {
             <label>途径点</label>
             <div class="route-template-item__waypoints">
               <div
-                v-for="(wp, idx) in editingMap[tpl.businessType].waypoints"
+                v-for="(_, idx) in editingMap[tpl.businessType].waypoints"
                 :key="idx"
                 class="route-template-item__waypoint-row"
               >

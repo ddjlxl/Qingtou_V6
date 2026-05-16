@@ -458,34 +458,42 @@ async def delete_dispatch_address(
     await db.commit()
 
 
-async def check_order_overdue() -> None:
+async def check_order_overdue(db: AsyncSession | None = None) -> None:
+    if db is not None:
+        await _do_check_order_overdue(db)
+        return
+
     from app.core.database import AsyncSessionLocal
 
+    async with AsyncSessionLocal() as session:
+        await _do_check_order_overdue(session)
+
+
+async def _do_check_order_overdue(db: AsyncSession) -> None:
     four_hours_ago = datetime.now(timezone.utc) - timedelta(hours=4)
 
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(Order).where(
-                Order.status == OrderStatus.ASSIGNED.value,
-                Order.assigned_at < four_hours_ago,
-            )
+    result = await db.execute(
+        select(Order).where(
+            Order.status == OrderStatus.ASSIGNED.value,
+            Order.assigned_at < four_hours_ago,
         )
-        overdue_orders = result.scalars().all()
+    )
+    overdue_orders = result.scalars().all()
 
-        for order in overdue_orders:
-            order.status = OrderStatus.OVERDUE.value
-            if order.vehicle_id:
-                vehicle_result = await db.execute(
-                    select(Vehicle).where(Vehicle.id == order.vehicle_id)
-                )
-                vehicle = vehicle_result.scalar_one_or_none()
-                if vehicle:
-                    vehicle.status = VehicleStatus.OVERDUE.value
+    for order in overdue_orders:
+        order.status = OrderStatus.OVERDUE.value
+        if order.vehicle_id:
+            vehicle_result = await db.execute(
+                select(Vehicle).where(Vehicle.id == order.vehicle_id)
+            )
+            vehicle = vehicle_result.scalar_one_or_none()
+            if vehicle:
+                vehicle.status = VehicleStatus.OVERDUE.value
 
-        if overdue_orders:
-            logger.info("超时检测完成，标记 %d 个超时任务", len(overdue_orders))
+    if overdue_orders:
+        logger.info("超时检测完成，标记 %d 个超时任务", len(overdue_orders))
 
-        await db.commit()
+    await db.commit()
 
 
 async def get_order_status_counts(db: AsyncSession) -> dict:

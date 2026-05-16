@@ -114,6 +114,8 @@ async function bindDriverWithConfirm(vehicleId: string, driverId: string | null)
     await fleetStore.bindDriverToVehicle(vehicleId, driverId ?? '', true)
   }
 }
+
+defineExpose({ form, formRef, handleSubmit })
 </script>
 
 <template>

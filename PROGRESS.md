@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-14（dispatch 技术设计完成）
+> 最后更新：2026-05-16（dispatch 编码实现中）
 
 ---
 
@@ -13,7 +13,7 @@
 | M1: MVP | Phase 1.2 基础设施 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — auth 认证 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — fleet 车队管理 | ✅ 已完成 |
-| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | 📐 技术设计已完成 |
+| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | 🔄 编码实现中 |
 | M2: 完整版 | - | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -102,7 +102,7 @@
 **阶段 1：车辆管理** ✅
 - [x] T-101：车辆类型定义 — [types/vehicle.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/vehicle.ts)
 - [x] T-102：前端车辆 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
-- [x] T-103：后端车辆 CRUD API — [api/v1/fleet.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet.py)
+- [x] T-103：后端车辆 CRUD API — [api/v1/fleet_vehicles.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet_vehicles.py)
 - [x] T-104：前端车辆 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
 - [x] T-105：车辆管理组件 — [components/VehicleManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/VehicleManagement.vue)
 - [x] T-106：车辆表单弹窗 — [components/VehicleFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/VehicleFormDialog.vue)
@@ -114,7 +114,7 @@
 **阶段 2：司机管理** ✅
 - [x] T-201：司机类型定义 — [types/driver.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/driver.ts)
 - [x] T-202：前端司机 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
-- [x] T-203：后端司机 CRUD API — [api/v1/fleet.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet.py)
+- [x] T-203：后端司机 CRUD API — [api/v1/fleet_drivers.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet_drivers.py)
 - [x] T-204：前端司机 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
 - [x] T-205：司机管理组件 — [components/DriverManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/DriverManagement.vue)
 - [x] T-206：司机表单弹窗 — [components/DriverFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/DriverFormDialog.vue)
@@ -136,7 +136,7 @@
 **阶段 4：运输流水** ✅
 - [x] T-401：运输流水类型定义 — [types/transport-record.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/types/transport-record.ts)
 - [x] T-402：前端运输流水 API 服务 — [services/fleetService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/services/fleetService.ts)
-- [x] T-403：后端运输流水 API — [api/v1/fleet.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet.py)
+- [x] T-403：后端运输流水 API — [api/v1/fleet_transport_records.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/fleet_transport_records.py)
 - [x] T-404：前端运输流水 Store — [stores/useFleetStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/stores/useFleetStore.ts)
 - [x] T-405：运输流水管理组件（含导入） — [components/TransportRecordManagement.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/fleet/components/TransportRecordManagement.vue)
 - [x] T-406：导入弹窗组件 — 🔀 已合并至 T-405（ImportDialog.vue 已删除，功能集成到 TransportRecordManagement）
@@ -185,19 +185,30 @@
 **当前任务**：fleet 模块全部完成 ✅
 **检查点约定**：每完成一个阶段后 git commit，记录 commit hash 到上表
 
-### Phase 1.3：核心业务 — dispatch 调度中心 📋
+### Phase 1.3：核心业务 — dispatch 调度中心 🔄
 
 - [x] 需求文档：[specs/features/dispatch/requirements.md](file:///e:/Qingtou_V6/specs/features/dispatch/requirements.md)（42 条 AC）
 - [x] 技术设计文档：[specs/features/dispatch/design.md](file:///e:/Qingtou_V6/specs/features/dispatch/design.md)
   - Order 模型迁移：5 字段改 NULL + 3 新字段 + 3 个 relationship
-  - 新建 DispatchAddress 模型
-  - 12 个 API 接口（含路由注册顺序警告）
+  - 新建 DispatchAddress 模型 + BusinessTypeRoute 模型
+  - 14 个 API 接口
   - 前端组件结构 + Pinia Store
   - 核心逻辑：任务创建/分配事务/状态流转/超时检测/删除流程
   - AC 覆盖：42/42 ✅
-  - 两轮审查 + 6 个问题修复
-- [ ] 任务规划
-- [ ] 编码实现
+- [x] 后端 API：[api/v1/dispatch.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/dispatch.py) — 14 个端点
+- [x] 后端 Service：[services/dispatch_service.py](file:///e:/Qingtou_V6/apps/server/app/services/dispatch_service.py) — 17 个函数
+- [x] 后端 Model：[models/dispatch_address.py](file:///e:/Qingtou_V6/apps/server/app/models/dispatch_address.py) + [models/business_type_route.py](file:///e:/Qingtou_V6/apps/server/app/models/business_type_route.py)
+- [x] 前端 Page：[pages/DispatchPage.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/pages/DispatchPage.vue)
+- [x] 前端 Store：[stores/useDispatchStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/stores/useDispatchStore.ts)
+- [x] 前端 Service：[services/dispatchService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/services/dispatchService.ts)
+- [x] 前端 Types：[types/order.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/types/order.ts)
+- [x] 前端 Components：OrderFormDialog、OrderTable、AssignDialog、AddressDialog、RouteTemplateDialog + 5 个 section 组件
+- [x] 前端 Composables：[composables/useOrderForm.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/composables/useOrderForm.ts)
+- [x] 前端测试：[__tests__/OrderFormDialog.test.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/__tests__/OrderFormDialog.test.ts)（9 tests）
+- [ ] 任务规划文档（待创建 tasks.md）
+- [ ] 后端测试补充
+- [ ] 文件超行拆分（OrderFormDialog 561 行、OrderTable 358 行、dispatch_service.py 419 行）
+- [ ] ESLint error 修复（11 个 vue/no-mutating-props）
 
 **新窗口启动指令**：
 ```

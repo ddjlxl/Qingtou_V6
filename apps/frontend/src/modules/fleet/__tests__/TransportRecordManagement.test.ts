@@ -186,7 +186,7 @@ describe('TransportRecordManagement', () => {
 
   it('does not show statistics section when statistics is null', () => {
     const wrapper = createWrapper()
-    expect(wrapper.find('.statistics-section').exists()).toBe(false)
+    expect(wrapper.find('.transport-statistics').exists()).toBe(false)
   })
 
   it('shows statistics section when statistics data exists', () => {
@@ -195,7 +195,7 @@ describe('TransportRecordManagement', () => {
       byVehicle: [{ vehicleId: 'v1', vehiclePlateNo: '粤A12345', count: 3 }],
     }
     const wrapper = createWrapper()
-    expect(wrapper.find('.statistics-section').exists()).toBe(true)
+    expect(wrapper.find('.transport-statistics').exists()).toBe(true)
     expect(wrapper.text()).toContain('张三')
     expect(wrapper.text()).toContain('5 单')
     expect(wrapper.text()).toContain('粤A12345')

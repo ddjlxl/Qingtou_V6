@@ -5,6 +5,8 @@ import { useFleetStore } from '../stores/useFleetStore'
 import { fleetService } from '../services/fleetService'
 import { isApiError } from '@/shared/utils'
 import EmptyState from '@/shared/components/EmptyState.vue'
+import TransportFilterBar from './TransportFilterBar.vue'
+import TransportStatistics from './TransportStatistics.vue'
 
 const fleetStore = useFleetStore()
 
@@ -127,121 +129,23 @@ onMounted(() => {
 
 <template>
   <div class="transport-record-management">
-    <div class="filter-bar">
-      <el-date-picker
-        v-model="dateRange"
-        type="daterange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        value-format="YYYY-MM-DD"
-        style="width: 260px"
-      />
-      <el-select
-        v-model="vehicleFilter"
-        placeholder="选择车辆"
-        clearable
-        style="width: 160px"
-      >
-        <el-option
-          v-for="v in vehicleOptions"
-          :key="v.id"
-          :label="v.plate_no"
-          :value="v.id"
-        />
-      </el-select>
-      <el-select
-        v-model="driverFilter"
-        placeholder="选择司机"
-        clearable
-        style="width: 160px"
-      >
-        <el-option
-          v-for="d in driverOptions"
-          :key="d.id"
-          :label="d.name"
-          :value="d.id"
-        />
-      </el-select>
-      <el-button
-        type="primary"
-        @click="handleSearch"
-      >
-        查询
-      </el-button>
-      <el-button @click="handleReset">
-        重置
-      </el-button>
-    </div>
+    <TransportFilterBar
+      :date-range="dateRange"
+      :vehicle-filter="vehicleFilter"
+      :driver-filter="driverFilter"
+      :vehicle-options="vehicleOptions"
+      :driver-options="driverOptions"
+      :import-loading="importLoading"
+      @update:date-range="dateRange = $event"
+      @update:vehicle-filter="vehicleFilter = $event"
+      @update:driver-filter="driverFilter = $event"
+      @search="handleSearch"
+      @reset="handleReset"
+      @file-change="handleFileChange"
+      @download-template="handleDownloadTemplate"
+    />
 
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <el-upload
-          :show-file-list="false"
-          :before-upload="() => false"
-          :on-change="handleFileChange"
-          accept=".txt,.xlsx"
-        >
-          <el-button
-            type="primary"
-            :loading="importLoading"
-          >
-            导入运输流水
-          </el-button>
-        </el-upload>
-        <el-button @click="handleDownloadTemplate">
-          下载模板
-        </el-button>
-      </div>
-    </div>
-
-    <div
-      v-if="fleetStore.transportRecordStatistics"
-      class="statistics-section"
-    >
-      <div class="statistics-group">
-        <div class="statistics-title">
-          司机任务统计
-        </div>
-        <div
-          v-for="item in fleetStore.transportRecordStatistics.byDriver"
-          :key="item.driverId"
-          class="statistics-item"
-        >
-          <span>{{ item.driverName }}</span>
-          <el-tag type="primary">
-            {{ item.count }} 单
-          </el-tag>
-        </div>
-        <div
-          v-if="fleetStore.transportRecordStatistics.byDriver.length === 0"
-          class="statistics-empty"
-        >
-          暂无数据
-        </div>
-      </div>
-      <div class="statistics-group">
-        <div class="statistics-title">
-          车辆任务统计
-        </div>
-        <div
-          v-for="item in fleetStore.transportRecordStatistics.byVehicle"
-          :key="item.vehicleId"
-          class="statistics-item"
-        >
-          <span>{{ item.vehiclePlateNo }}</span>
-          <el-tag type="success">
-            {{ item.count }} 单
-          </el-tag>
-        </div>
-        <div
-          v-if="fleetStore.transportRecordStatistics.byVehicle.length === 0"
-          class="statistics-empty"
-        >
-          暂无数据
-        </div>
-      </div>
-    </div>
+    <TransportStatistics :statistics="fleetStore.transportRecordStatistics" />
 
     <el-alert
       v-if="fleetStore.transportRecordError"
@@ -332,58 +236,6 @@ onMounted(() => {
 <style scoped>
 .transport-record-management {
   padding: 16px 0;
-}
-
-.filter-bar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.toolbar-left {
-  display: flex;
-  gap: 8px;
-}
-
-.statistics-section {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 16px;
-}
-
-.statistics-group {
-  flex: 1;
-  background: #f5f7fa;
-  border-radius: 4px;
-  padding: 12px 16px;
-}
-
-.statistics-title {
-  font-size: 13px;
-  color: #909399;
-  margin-bottom: 8px;
-}
-
-.statistics-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
-  font-size: 14px;
-}
-
-.statistics-empty {
-  font-size: 13px;
-  color: #c0c4cc;
 }
 
 .error-alert {
