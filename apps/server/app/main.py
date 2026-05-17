@@ -10,7 +10,10 @@ from app.api.v1.fleet import router as fleet_router
 from app.core.config import settings
 from app.core.database import engine
 from app.core.exception_handlers import register_exception_handlers
+from app.core.logger import setup_logger
 from app.scheduler import init_scheduler, shutdown_scheduler
+
+logger = setup_logger("main")
 
 
 @asynccontextmanager
@@ -18,8 +21,9 @@ async def lifespan(app: FastAPI):
     try:
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
+        logger.info("数据库连接成功")
     except Exception as e:
-        raise RuntimeError(f"数据库连接失败，请检查 PostgreSQL 服务是否启动: {e}") from e
+        logger.warning("数据库连接失败，scheduler 将继续启动: %s", e)
 
     init_scheduler()
     yield
