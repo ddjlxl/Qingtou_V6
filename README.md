@@ -1,7 +1,7 @@
 # 青投供应链V6
 
 > **版本**：v6.0.0  
-> **技术栈**：Vue 3 + FastAPI + SQLite  
+> **技术栈**：Vue 3 + FastAPI + PostgreSQL  
 > **项目类型**：物流运输调度管理系统  
 > **创建日期**：2026-04-30  
 
@@ -33,7 +33,7 @@
 
 ### 后端技术
 - **框架**：FastAPI
-- **数据库**：SQLite（开发） / PostgreSQL（生产）
+- **数据库**：PostgreSQL
 - **ORM**：SQLAlchemy
 - **数据校验**：Pydantic V2
 - **认证**：JWT Token
@@ -158,7 +158,7 @@ pytest --cov        # 生成覆盖率报告
 VITE_API_BASE_URL=http://localhost:8000/api
 
 # 后端环境变量
-DATABASE_URL=sqlite:///./qingtou_v6.db
+DATABASE_URL=postgresql+asyncpg://user:password@127.0.0.1:5432/qingtou_v6
 JWT_SECRET=your-secret-key
 ```
 
@@ -199,7 +199,7 @@ chore: 构建/配置相关
 ### 常见问题
 1. **前端启动失败**：检查Node.js版本和pnpm安装
 2. **后端启动失败**：检查Python版本和依赖安装
-3. **数据库连接失败**：检查数据库文件权限
+3. **数据库连接失败**：检查 PostgreSQL 服务是否启动、连接串配置是否正确
 
 ### 问题反馈
 - 创建Issue描述问题

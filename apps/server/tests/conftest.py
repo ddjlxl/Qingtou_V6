@@ -1,4 +1,5 @@
 import asyncio
+import os
 import uuid
 from collections.abc import AsyncGenerator
 
@@ -14,7 +15,15 @@ from app.main import app
 from app.models.base import Base
 from app.models.user import User
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+USE_POSTGRES = os.getenv("USE_POSTGRES_TEST", "").lower() in ("1", "true", "yes")
+
+if USE_POSTGRES:
+    TEST_DATABASE_URL = os.getenv(
+        "TEST_DATABASE_URL",
+        "postgresql+asyncpg://user:password@127.0.0.1:5432/qingtou_v6_test",
+    )
+else:
+    TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)

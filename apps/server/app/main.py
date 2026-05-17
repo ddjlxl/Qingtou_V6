@@ -2,17 +2,25 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api.v1.auth import router as auth_router
 from app.api.v1.dispatch import router as dispatch_router
 from app.api.v1.fleet import router as fleet_router
 from app.core.config import settings
+from app.core.database import engine
 from app.core.exception_handlers import register_exception_handlers
 from app.scheduler import init_scheduler, shutdown_scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+    except Exception as e:
+        raise RuntimeError(f"数据库连接失败，请检查 PostgreSQL 服务是否启动: {e}") from e
+
     init_scheduler()
     yield
     shutdown_scheduler()
@@ -40,5 +48,11 @@ app.include_router(fleet_router, prefix="/api/v1")
 
 
 @app.get("/api/health")
-def health_check():
-    return {"status": "ok"}
+async def health_check():
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        db_status = "ok"
+    except Exception:
+        db_status = "unavailable"
+    return {"status": "ok", "database": db_status}

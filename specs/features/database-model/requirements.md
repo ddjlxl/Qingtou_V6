@@ -3,6 +3,10 @@
 > **版本**：v1.0
 > **创建日期**：2026-05-03
 > **状态**：草稿 - 待审查
+>
+> ⚠️ **注意**：本文档为 v1.0 原始需求文档，数据类型描述（如 `DATETIME`、`ENUM`）为概念级表示。
+> 实际实现以 [design.md v1.2](design.md) 为准，已迁移至 PostgreSQL，使用 `TIMESTAMP WITH TIME ZONE`、`VARCHAR + CheckConstraint` 等 PostgreSQL 原生类型。
+> 详见 design.md 中「从 SQLite 迁移的变更记录（v1.2）」章节。
 
 ---
 
