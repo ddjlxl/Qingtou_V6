@@ -74,7 +74,7 @@ class TestCreateOrderAPI:
     async def test_create_skeleton_order(self, client: AsyncClient, db_session, auth_headers):
         response = await client.post(
             "/api/v1/dispatch/orders",
-            json={},
+            json={"container_status": "heavy"},
             headers=auth_headers,
         )
 
@@ -97,6 +97,7 @@ class TestCreateOrderAPI:
                 "container_no": "ABCD1234567",
                 "container_type": "40GP",
                 "business_type": "heavy_transport",
+                "container_status": "heavy",
             },
             headers=auth_headers,
         )
@@ -116,6 +117,7 @@ class TestCreateOrderAPI:
                 "customer_name": "",
                 "origin_name": "",
                 "container_no": "",
+                "container_status": "empty",
             },
             headers=auth_headers,
         )

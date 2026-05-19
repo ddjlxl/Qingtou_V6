@@ -620,16 +620,16 @@ class TestCompleteOrder:
         assert result.status == OrderStatus.COMPLETED.value
 
     @pytest.mark.asyncio
-    async def test_complete_pending_order_raises(self, db_session: AsyncSession):
+    async def test_complete_pending_order_succeeds(self, db_session: AsyncSession):
+        """AC-011: PENDING 状态（无司机）的任务也可以完成"""
         from app.services.dispatch_service import complete_order
 
         dispatcher_id = uuid.uuid4()
         order = await create_test_order(db_session, dispatcher_id)
 
-        with pytest.raises(AppException) as exc_info:
-            await complete_order(db_session, order.id)
+        result = await complete_order(db_session, order.id)
 
-        assert exc_info.value.code == 422
+        assert result.status == OrderStatus.COMPLETED.value
 
     @pytest.mark.asyncio
     async def test_complete_order_not_found(self, db_session: AsyncSession):

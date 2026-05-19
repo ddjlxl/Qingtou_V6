@@ -24,6 +24,9 @@ class OrderCreate(BaseModel):
     business_type: Optional[str] = Field(
         None, pattern="^(heavy_transport|empty_transport|short_haul)$"
     )
+    container_status: str = Field(
+        ..., pattern="^(heavy|empty)$"
+    )
     documents: Optional[list[str]] = None
     driver_id: Optional[uuid.UUID] = None
     vehicle_id: Optional[uuid.UUID] = None
@@ -58,6 +61,7 @@ class OrderUpdate(BaseModel):
     business_type: Optional[str] = Field(
         None, pattern="^(heavy_transport|empty_transport|short_haul)$"
     )
+    container_status: Optional[str] = Field(None, pattern="^(heavy|empty)$")
     documents: Optional[list[str]] = None
     remark: Optional[str] = Field(None, max_length=500)
 
@@ -88,6 +92,7 @@ class OrderResponse(BaseModel):
     container_type: str | None = None
     seal_no: str | None = None
     business_type: str | None = None
+    container_status: str | None = None
     documents: list[str] | None = None
     driver_id: str | None = None
     driver_name: str | None = None

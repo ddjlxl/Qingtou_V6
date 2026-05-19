@@ -34,6 +34,11 @@ class DocumentType(str, enum.Enum):
     RECTIFICATION = "rectification"
 
 
+class ContainerStatus(str, enum.Enum):
+    HEAVY = "heavy"
+    EMPTY = "empty"
+
+
 class ContainerType(str, enum.Enum):
     GP20 = "20GP"
     GP40 = "40GP"
@@ -82,6 +87,9 @@ class Order(BaseModel):
     seal_no: Mapped[str | None] = mapped_column(String(20), nullable=True)
     waypoints: Mapped[str | None] = mapped_column(Text, nullable=True)
     business_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    container_status: Mapped[str | None] = mapped_column(
+        String(10), nullable=True
+    )
     documents: Mapped[str | None] = mapped_column(Text, nullable=True)
     driver_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("drivers.id"), nullable=True
@@ -138,4 +146,10 @@ class Order(BaseModel):
     def validate_business_type(self, _: str, value: str | None) -> str | None:
         if value is not None and value not in {b.value for b in BusinessType}:
             raise ValueError(f"Invalid business type: {value}")
+        return value
+
+    @validates("container_status")
+    def validate_container_status(self, _: str, value: str | None) -> str | None:
+        if value is not None and value not in {c.value for c in ContainerStatus}:
+            raise ValueError(f"Invalid container status: {value}")
         return value

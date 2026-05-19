@@ -25,6 +25,11 @@ export enum ContainerType {
   HQ45 = '45HQ',
 }
 
+export enum ContainerStatus {
+  HEAVY = 'heavy',
+  EMPTY = 'empty',
+}
+
 export interface Order {
   id: string
   orderNo: string
@@ -38,6 +43,7 @@ export interface Order {
   containerType: ContainerType | null
   sealNo: string | null
   businessType: BusinessType | null
+  containerStatus: ContainerStatus | null
   documents: DocumentType[] | null
   driverId: string | null
   driverName: string | null
@@ -79,6 +85,7 @@ export interface CreateOrderRequest {
   containerType?: ContainerType
   sealNo?: string
   businessType?: BusinessType
+  containerStatus?: ContainerStatus
   documents?: DocumentType[]
   driverId?: string
   vehicleId?: string
@@ -95,6 +102,7 @@ export interface UpdateOrderRequest {
   containerType?: ContainerType
   sealNo?: string
   businessType?: BusinessType
+  containerStatus?: ContainerStatus
   documents?: DocumentType[]
   remark?: string
 }

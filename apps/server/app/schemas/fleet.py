@@ -135,6 +135,7 @@ class TransportRecordResponse(BaseModel):
     id: str
     order_no: str
     customer_info: str
+    container_status: str | None = None
     origin: str
     destination: str
     container_no: str

@@ -11,7 +11,7 @@ from app.core.database import get_db
 from app.core.exceptions import AppException
 from app.models.driver import Driver
 from app.models.transport_record import TransportRecord
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.vehicle import Vehicle
 from app.schemas.fleet import (
     ImportResultResponse,
@@ -28,6 +28,12 @@ from app.services.fleet_service import (
 router = APIRouter(tags=["车队管理-运输流水"])
 
 
+def _require_non_driver(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role == UserRole.DRIVER.value:
+        raise AppException(code=403, message="仅管理员/调度员可访问")
+    return current_user
+
+
 def _record_to_response(
     record: TransportRecord,
     vehicle_plate_no: str | None = None,
@@ -37,6 +43,7 @@ def _record_to_response(
         id=str(record.id),
         order_no=record.order_no,
         customer_info=record.customer_info,
+        container_status=record.container_status,
         origin=record.origin,
         destination=record.destination,
         container_no=record.container_no,
@@ -57,7 +64,7 @@ async def list_transport_records(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     base_query = select(TransportRecord)
     count_query = select(func.count(TransportRecord.id))
@@ -140,7 +147,7 @@ async def list_transport_records(
 async def import_transport_records(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     _validate_import_filename(file.filename or "")
 
@@ -159,16 +166,16 @@ async def import_transport_records(
 @router.get("/transport-records/statistics", response_model=TransportRecordStatisticsResponse)
 async def get_statistics(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     return await get_transport_record_statistics(db)
 
 
 @router.get("/transport-records/template")
 async def download_template(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
-    template_content = "任务编号\t客户信息\t起运地\t目的地\t箱号\t执行车辆(车牌号)\t执行司机(手机号)\n"
+    template_content = "任务编号\t客户信息\t起运地\t目的地\t箱号\t执行车辆(车牌号)\t执行司机(手机号)\t空重箱状态\n"
     template_bytes = template_content.encode("utf-8")
 
     return StreamingResponse(

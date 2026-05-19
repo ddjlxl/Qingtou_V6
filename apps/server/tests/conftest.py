@@ -87,6 +87,7 @@ async def client(db_session: AsyncSession):
 
     from app.api.v1.auth import router as auth_router
     from app.api.v1.dispatch import router as dispatch_router
+    from app.api.v1.driver import router as driver_router
     from app.api.v1.fleet import router as fleet_router
     from app.core.exception_handlers import register_exception_handlers
 
@@ -104,6 +105,7 @@ async def client(db_session: AsyncSession):
     )
     test_app.include_router(auth_router, prefix="/api/v1")
     test_app.include_router(dispatch_router, prefix="/api/v1")
+    test_app.include_router(driver_router, prefix="/api/v1")
     test_app.include_router(fleet_router, prefix="/api/v1")
     test_app.dependency_overrides[get_db] = override_get_db
 

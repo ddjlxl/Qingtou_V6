@@ -27,6 +27,9 @@ class TransportRecord(BaseModel):
     customer_info: Mapped[str] = mapped_column(
         String(200), nullable=False
     )
+    container_status: Mapped[str | None] = mapped_column(
+        String(10), nullable=True
+    )
     origin: Mapped[str] = mapped_column(
         String(200), nullable=False
     )

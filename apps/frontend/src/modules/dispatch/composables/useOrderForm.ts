@@ -5,9 +5,10 @@ import {
   BusinessType,
   DocumentType,
   ContainerType,
+  ContainerStatus,
 } from '../types/order'
 import type { Order } from '../types/order'
-import { containerTypeOptions, businessTypeOptions, documentOptions } from './useOrderFormOptions'
+import { containerTypeOptions, containerStatusOptions, businessTypeOptions, documentOptions } from './useOrderFormOptions'
 import { useOrderFormRules } from './useOrderFormRules'
 import { useOrderFormWatchers } from './useOrderFormWatchers'
 import {
@@ -30,6 +31,7 @@ export interface OrderFormState {
   containerType: ContainerType | ''
   sealNo: string
   businessType: BusinessType | ''
+  containerStatus: ContainerStatus | ''
   documents: DocumentType[]
   driverId: string
   vehicleId: string
@@ -62,6 +64,7 @@ export function useOrderForm(options: {
     form,
     formRules,
     containerTypeOptions,
+    containerStatusOptions,
     businessTypeOptions,
     documentOptions,
     canCreateAndAssign,

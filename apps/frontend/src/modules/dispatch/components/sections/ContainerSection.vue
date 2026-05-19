@@ -1,22 +1,29 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { OrderFormState } from '../../composables/useOrderForm'
-import { ContainerType } from '../../types/order'
+import { ContainerType, ContainerStatus } from '../../types/order'
 
 const props = defineProps<{
   form: OrderFormState
   containerTypeOptions: { value: string; label: string }[]
+  containerStatusOptions: { value: string; label: string }[]
 }>()
 
 const emit = defineEmits<{
   containerNoInput: [val: string]
   sealNoInput: [val: string]
   'update:containerType': [value: ContainerType | '']
+  'update:containerStatus': [value: ContainerStatus | '']
 }>()
 
 const containerType = computed({
   get: () => props.form.containerType,
   set: (val) => emit('update:containerType', val),
+})
+
+const containerStatus = computed({
+  get: () => props.form.containerStatus,
+  set: (val) => emit('update:containerStatus', val),
 })
 </script>
 
@@ -25,7 +32,25 @@ const containerType = computed({
     集装箱信息
   </el-divider>
   <el-row :gutter="16">
-    <el-col :span="8">
+    <el-col :span="6">
+      <el-form-item label="空重箱" prop="containerStatus">
+        <el-select
+          v-model="containerStatus"
+          placeholder="请选择"
+          clearable
+          teleported
+          style="width: 100%"
+        >
+          <el-option
+            v-for="opt in containerStatusOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          />
+        </el-select>
+      </el-form-item>
+    </el-col>
+    <el-col :span="6">
       <el-form-item label="箱号">
         <el-input
           :model-value="form.containerNo"
@@ -35,7 +60,7 @@ const containerType = computed({
         />
       </el-form-item>
     </el-col>
-    <el-col :span="8">
+    <el-col :span="6">
       <el-form-item label="箱型">
         <el-select
           v-model="containerType"
@@ -53,7 +78,7 @@ const containerType = computed({
         </el-select>
       </el-form-item>
     </el-col>
-    <el-col :span="8">
+    <el-col :span="6">
       <el-form-item label="封号">
         <el-input
           :model-value="form.sealNo"

@@ -28,6 +28,7 @@ const {
   form,
   formRules,
   containerTypeOptions,
+  containerStatusOptions,
   businessTypeOptions,
   documentOptions,
   canCreateAndAssign,
@@ -159,9 +160,11 @@ function handleClose() {
       <ContainerSection
         :form="form"
         :container-type-options="containerTypeOptions"
+        :container-status-options="containerStatusOptions"
         @container-no-input="onContainerNoInput"
         @seal-no-input="onSealNoInput"
         @update:container-type="form.containerType = $event"
+        @update:container-status="form.containerStatus = $event"
       />
 
       <CustomerSection

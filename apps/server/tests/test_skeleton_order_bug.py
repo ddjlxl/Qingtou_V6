@@ -26,7 +26,7 @@ async def test_create_skeleton_order_should_succeed(client: AsyncClient, db_sess
     
     response = await client.post(
         "/api/v1/dispatch/orders",
-        json={},
+        json={"container_status": "heavy"},
         headers={"Authorization": f"Bearer {token}"}
     )
     
@@ -65,6 +65,7 @@ async def test_create_order_with_empty_strings_should_succeed(client: AsyncClien
             "origin_name": "",
             "dest_name": "",
             "container_no": "",
+            "container_status": "heavy",
         },
         headers={"Authorization": f"Bearer {token}"}
     )

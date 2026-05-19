@@ -1,10 +1,15 @@
-import { BusinessType, DocumentType, ContainerType } from '../types/order'
+import { BusinessType, DocumentType, ContainerType, ContainerStatus } from '../types/order'
 
 export const containerTypeOptions = [
   { value: ContainerType.GP20, label: '20GP' },
   { value: ContainerType.GP40, label: '40GP' },
   { value: ContainerType.HQ40, label: '40HQ' },
   { value: ContainerType.HQ45, label: '45HQ' },
+]
+
+export const containerStatusOptions = [
+  { value: ContainerStatus.HEAVY, label: '重箱' },
+  { value: ContainerStatus.EMPTY, label: '空箱' },
 ]
 
 export const businessTypeOptions = [

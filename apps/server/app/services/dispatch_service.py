@@ -11,6 +11,7 @@ from app.models.business_type_route import BusinessTypeRoute
 from app.models.dispatch_address import DispatchAddress
 from app.models.driver import Driver
 from app.models.order import BusinessType, Order, OrderStatus
+from app.models.transport_record import TransportRecord
 from app.models.vehicle import Vehicle, VehicleStatus
 
 logger = setup_logger("dispatch_service")
@@ -168,6 +169,7 @@ async def create_order(
         container_type=data.get("container_type"),
         seal_no=seal_no,
         business_type=data.get("business_type"),
+        container_status=data.get("container_status"),
         documents=json.dumps(data["documents"], ensure_ascii=False) if data.get("documents") else None,
         remark=data.get("remark"),
     )
@@ -233,7 +235,8 @@ async def update_order(
 
     updatable_fields = [
         "customer_name", "customer_phone", "origin_name",
-        "dest_name", "container_type", "business_type", "remark",
+        "dest_name", "container_type", "business_type",
+        "container_status", "remark",
     ]
     for field in updatable_fields:
         if field in data and data[field] is not None:
@@ -302,6 +305,7 @@ async def complete_order(
         raise AppException(code=404, message="任务不存在")
 
     allowed_statuses = {
+        OrderStatus.PENDING.value,
         OrderStatus.ASSIGNED.value,
         OrderStatus.TRANSITING.value,
         OrderStatus.OVERDUE.value,
@@ -319,6 +323,21 @@ async def complete_order(
         vehicle = vehicle_result.scalar_one_or_none()
         if vehicle:
             vehicle.status = VehicleStatus.IDLE.value
+
+    if order.driver_id and order.vehicle_id:
+        record = TransportRecord(
+            id=uuid.uuid4(),
+            order_no=order.order_no,
+            customer_info=order.customer_name or "",
+            container_status=order.container_status,
+            origin=order.origin_name or "",
+            destination=order.dest_name or "",
+            container_no=order.container_no or "",
+            vehicle_id=order.vehicle_id,
+            driver_id=order.driver_id,
+            imported_at=datetime.now(timezone.utc),
+        )
+        db.add(record)
 
     await db.commit()
     await db.refresh(order)
@@ -341,6 +360,14 @@ async def delete_order(
         vehicle = vehicle_result.scalar_one_or_none()
         if vehicle and vehicle.status != VehicleStatus.IDLE.value:
             vehicle.status = VehicleStatus.IDLE.value
+
+    # 同步删除关联的运输流水
+    record_result = await db.execute(
+        select(TransportRecord).where(TransportRecord.order_no == order.order_no)
+    )
+    record = record_result.scalar_one_or_none()
+    if record:
+        await db.delete(record)
 
     await db.delete(order)
     await db.commit()

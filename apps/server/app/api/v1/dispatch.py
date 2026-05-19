@@ -81,6 +81,7 @@ def _order_to_response(order: Order) -> OrderResponse:
         container_type=order.container_type,
         seal_no=order.seal_no,
         business_type=order.business_type,
+        container_status=order.container_status,
         documents=documents,
         driver_id=str(order.driver_id) if order.driver_id else None,
         driver_name=order.driver.name if order.driver else None,

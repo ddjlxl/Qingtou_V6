@@ -1,7 +1,7 @@
 import { reactive } from 'vue'
 import type { OrderFormState } from './useOrderForm'
 import type { Order, CreateOrderRequest, UpdateOrderRequest } from '../types/order'
-import { BusinessType, ContainerType } from '../types/order'
+import { BusinessType, ContainerType, ContainerStatus } from '../types/order'
 
 export function createInitialFormState(): OrderFormState {
   return reactive<OrderFormState>({
@@ -14,6 +14,7 @@ export function createInitialFormState(): OrderFormState {
     containerType: '',
     sealNo: '',
     businessType: '',
+    containerStatus: '',
     documents: [],
     driverId: '',
     vehicleId: '',
@@ -40,6 +41,7 @@ export function fillFormFromOrder(form: OrderFormState, order: Order) {
   form.containerType = (order.containerType as ContainerType) || ''
   form.sealNo = order.sealNo || ''
   form.businessType = (order.businessType as BusinessType) || ''
+  form.containerStatus = (order.containerStatus as ContainerStatus) || ''
   form.documents = order.documents || []
   form.remark = order.remark || ''
   form.driverId = ''
@@ -56,6 +58,7 @@ export function resetForm(form: OrderFormState) {
   form.containerType = ''
   form.sealNo = ''
   form.businessType = ''
+  form.containerStatus = ''
   form.documents = []
   form.driverId = ''
   form.vehicleId = ''
@@ -91,6 +94,7 @@ export function buildRequest(form: OrderFormState): CreateOrderRequest | UpdateO
     containerType: (form.containerType as ContainerType) || undefined,
     sealNo: form.sealNo || undefined,
     businessType: (form.businessType as BusinessType) || undefined,
+    containerStatus: (form.containerStatus as ContainerStatus) || undefined,
     documents: form.documents.length > 0 ? form.documents : undefined,
     remark: form.remark || undefined,
   }
