@@ -102,7 +102,7 @@ AI最大的问题是什么？**没有记忆。**
 - 下一步：fleet 车队管理
 
 项目认知：
-- 技术栈：Vue 3 + TypeScript + Element Plus + FastAPI + SQLite
+- 技术栈：Vue 3 + TypeScript + Element Plus + FastAPI + PostgreSQL
 - 核心功能：运营看板、调度中心、车队管理、仓库管理、系统设置、帮助中心、司机端
 - 开发约束：无any类型、无console.log、文件不超过300行
 ```

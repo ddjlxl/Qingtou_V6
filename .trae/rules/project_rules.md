@@ -76,7 +76,7 @@
 
 | 类别 | ✅ 允许使用 | ❌ 禁止使用 |
 |------|------------|------------|
-| 数据库 | **SQLite**（开发+生产统一，aiosqlite 异步驱动） | PostgreSQL、MySQL、MongoDB |
+| 数据库 | **PostgreSQL**（asyncpg 异步驱动） | SQLite、MySQL、MongoDB |
 
 ### 3.4 开发工具
 

@@ -4,7 +4,7 @@
 
 - **前端框架**：Vue 3 + TypeScript
 - **后端框架**：Node.js + Express
-- **数据库**：SQLite（开发）/ PostgreSQL（生产）
+- **数据库**：PostgreSQL（asyncpg 异步驱动）
 - **部署**：Vercel（前端） + Railway（后端）
 - **样式**：Tailwind CSS
 
