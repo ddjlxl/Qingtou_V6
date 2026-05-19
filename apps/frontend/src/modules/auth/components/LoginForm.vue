@@ -31,7 +31,12 @@ async function handleLogin() {
   loading.value = true
   try {
     await authStore.login(form.value.username, form.value.password)
-    router.push('/fleet')
+    const role = authStore.userRole
+    if (role === 'driver') {
+      router.push('/driver')
+    } else {
+      router.push('/fleet')
+    }
   } catch (err: unknown) {
     const message = isApiError(err) ? err.message : '登录失败'
     ElMessage.error(message)

@@ -8,6 +8,7 @@ import {
   Location,
   SwitchButton,
   ArrowDown,
+  List,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -19,6 +20,8 @@ const isCollapsed = ref(false)
 const activeMenu = computed(() => route.path)
 
 const displayName = computed(() => authStore.user?.name || authStore.user?.username || '')
+
+const isDriver = computed(() => authStore.userRole === 'driver')
 
 function handleLogout() {
   authStore.logout()
@@ -49,22 +52,35 @@ function handleLogout() {
         router
         class="app-menu"
       >
-        <el-menu-item index="/fleet">
+        <el-menu-item
+          v-if="isDriver"
+          index="/driver"
+        >
           <el-icon>
-            <Van />
+            <List />
           </el-icon>
           <template #title>
-            车队管理
+            我的任务
           </template>
         </el-menu-item>
-        <el-menu-item index="/dispatch">
-          <el-icon>
-            <Location />
-          </el-icon>
-          <template #title>
-            调度中心
-          </template>
-        </el-menu-item>
+        <template v-if="!isDriver">
+          <el-menu-item index="/fleet">
+            <el-icon>
+              <Van />
+            </el-icon>
+            <template #title>
+              车队管理
+            </template>
+          </el-menu-item>
+          <el-menu-item index="/dispatch">
+            <el-icon>
+              <Location />
+            </el-icon>
+            <template #title>
+              调度中心
+            </template>
+          </el-menu-item>
+        </template>
       </el-menu>
     </el-aside>
 
