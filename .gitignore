@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 .env.local
+.env.*.local
 *.log
 .DS_Store
 coverage/
@@ -27,3 +28,34 @@ Desktop.ini
 
 *.bak
 *.tmp
+
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# Screenshots
+*.png
+!apps/frontend/public/**/*.png
+
+# Coverage
+.coverage
+htmlcov/
+
+# Temporary test scripts & data
+test_*.py
+test_*.json
+!apps/server/tests/
+quick_test.py
+reset_test_db.py
+inspect_dialog_structure.py
+
+# Docker
+docker-compose.yml
+docker/
+
+# E2E screenshots
+e2e-screenshots/
+
+# Trae config
+.trae/
