@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { useFleetStore } from '../stores/useFleetStore'
 import type { Driver } from '../types/driver'
@@ -24,6 +24,7 @@ const loading = ref(false)
 const form = ref({
   name: '',
   phone: '',
+  boundVehicleId: null as string | null,
 })
 
 const rules = {
@@ -40,18 +41,22 @@ watch(
   () => props.visible,
   (val) => {
     if (val) {
+      fleetStore.fetchVehicles()
       if (props.driver) {
         form.value.name = props.driver.name
         form.value.phone = props.driver.phone
+        form.value.boundVehicleId = props.driver.boundVehicleId ?? null
       } else {
         form.value.name = ''
         form.value.phone = ''
+        form.value.boundVehicleId = null
       }
       nextTick(() => {
         formRef.value?.clearValidate()
       })
     }
-  }
+  },
+  { immediate: true }
 )
 
 function handleClose() {
@@ -69,6 +74,17 @@ async function handleSubmit() {
         name: form.value.name,
         phone: form.value.phone,
       })
+
+      const currentVehicleId = props.driver.boundVehicleId ?? null
+      const newVehicleId = form.value.boundVehicleId
+      if (newVehicleId !== currentVehicleId) {
+        if (newVehicleId) {
+          await bindDriverWithConfirm(props.driver.id, newVehicleId)
+        } else {
+          await fleetStore.bindDriverToVehicle(currentVehicleId!, '', false)
+        }
+      }
+
       ElMessage.success('司机信息已更新')
     } else {
       await fleetStore.createDriver({
@@ -80,10 +96,28 @@ async function handleSubmit() {
     emit('success')
     handleClose()
   } catch (err: unknown) {
+    if (err === 'cancel') return
     const message = isApiError(err) ? err.message : '操作失败'
     ElMessage.error(message)
   } finally {
     loading.value = false
+  }
+}
+
+async function bindDriverWithConfirm(driverId: string, vehicleId: string) {
+  const result = await fleetStore.bindDriverToVehicle(vehicleId, driverId, false)
+
+  if (result.needConfirm) {
+    try {
+      await ElMessageBox.confirm(
+        result.message,
+        '更换关联确认',
+        { type: 'warning' }
+      )
+    } catch {
+      throw 'cancel'
+    }
+    await fleetStore.bindDriverToVehicle(vehicleId, driverId, true)
   }
 }
 </script>
@@ -118,6 +152,26 @@ async function handleSubmit() {
           v-model="form.phone"
           placeholder="请输入手机号"
         />
+      </el-form-item>
+      <el-form-item
+        v-if="driver"
+        label="关联车辆"
+        prop="boundVehicleId"
+      >
+        <el-select
+          v-model="form.boundVehicleId"
+          placeholder="请选择车辆"
+          clearable
+          style="width: 100%"
+        >
+          <el-option
+            v-for="vehicle in fleetStore.vehicles"
+            :key="vehicle.id"
+            :label="vehicle.plateNo"
+            :value="vehicle.id"
+            :disabled="vehicle.isDisabled"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>

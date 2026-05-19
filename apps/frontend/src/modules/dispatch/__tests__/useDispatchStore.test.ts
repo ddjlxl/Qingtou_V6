@@ -33,7 +33,7 @@ import { OrderStatus } from '../types/order'
 function makeOrder(overrides: Record<string, unknown> = {}) {
   return {
     id: 'o1',
-    orderNo: 'DD202605150001',
+    orderNo: 'T202605150001',
     status: OrderStatus.PENDING,
     customerName: null,
     customerPhone: null,
@@ -178,7 +178,7 @@ describe('useDispatchStore', () => {
   describe('fetchOrders', () => {
     it('loads orders into state', async () => {
       const store = useDispatchStore()
-      const orders = [makeOrder(), makeOrder({ id: 'o2', orderNo: 'DD202605150002' })]
+      const orders = [makeOrder(), makeOrder({ id: 'o2', orderNo: 'T202605150002' })]
       mockGetOrders.mockResolvedValue(makeOrderListResponse({
         items: orders,
         total: 2,

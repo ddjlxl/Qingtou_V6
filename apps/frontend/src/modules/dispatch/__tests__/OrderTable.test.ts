@@ -13,7 +13,7 @@ const defaultStoreState = {
   orders: [
     {
       id: 'o1',
-      orderNo: 'DD202605150001',
+      orderNo: 'T202605150001',
       status: 'pending',
       customerName: '测试客户',
       customerPhone: '13800138000',

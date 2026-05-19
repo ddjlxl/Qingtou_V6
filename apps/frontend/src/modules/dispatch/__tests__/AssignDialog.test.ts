@@ -27,7 +27,7 @@ import type { Order } from '../types/order'
 
 const testOrder = {
   id: 'o1',
-  orderNo: 'DD202605150001',
+  orderNo: 'T202605150001',
   originName: '上海港',
   destName: '昆山工厂',
 } as Order
@@ -69,7 +69,7 @@ describe('AssignDialog', () => {
     await wrapper.setProps({ visible: true })
     await nextTick()
     const text = document.body.textContent || ''
-    expect(text).toContain('DD202605150001')
+    expect(text).toContain('T202605150001')
     expect(text).toContain('上海港')
     expect(text).toContain('昆山工厂')
   })

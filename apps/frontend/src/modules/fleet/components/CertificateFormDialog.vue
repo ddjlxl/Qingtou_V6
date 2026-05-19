@@ -24,7 +24,7 @@ const isEdit = ref(false)
 const submitting = ref(false)
 
 const rules = {
-  ownerId: [{ required: true, message: '请输入所属对象ID', trigger: 'change' }],
+  ownerId: [{ required: true, message: '请选择所属对象', trigger: 'change' }],
   ownerType: [{ required: true, message: '请选择所属类型', trigger: 'change' }],
   certType: [{ required: true, message: '请选择证照类型', trigger: 'change' }],
   certName: [{ required: true, message: '请输入证照名称', trigger: 'change' }],
@@ -66,6 +66,17 @@ const certTypeOptions = computed(() => {
     : driverCertTypeOptions
 })
 
+const ownerOptions = computed(() => {
+  if (form.value.ownerType === OwnerType.VEHICLE) {
+    return fleetStore.vehicles
+      .filter((v) => !v.isDisabled)
+      .map((v) => ({ label: v.plateNo, value: v.id }))
+  }
+  return fleetStore.drivers
+    .filter((d) => !d.isDisabled)
+    .map((d) => ({ label: d.name, value: d.id }))
+})
+
 function resetForm() {
   form.value = {
     ownerId: '',
@@ -82,6 +93,7 @@ function resetForm() {
 watch(
   () => form.value.ownerType,
   () => {
+    form.value.ownerId = ''
     form.value.certType = form.value.ownerType === OwnerType.VEHICLE
       ? VehicleCertType.VEHICLE_LICENSE
       : DriverCertType.DRIVING_LICENSE
@@ -89,9 +101,21 @@ watch(
 )
 
 watch(
+  () => form.value.certType,
+  (newType) => {
+    const matched = certTypeOptions.value.find((opt) => opt.value === newType)
+    if (matched) {
+      form.value.certName = matched.label
+    }
+  }
+)
+
+watch(
   () => props.visible,
   (val) => {
     if (val) {
+      fleetStore.fetchVehicles()
+      fleetStore.fetchDrivers()
       if (props.certificate) {
         isEdit.value = true
         form.value = {
@@ -192,14 +216,23 @@ async function handleSubmit() {
 
       <el-form-item
         v-if="!isEdit"
-        label="所属对象ID"
+        label="所属对象"
         prop="ownerId"
         required
       >
-        <el-input
+        <el-select
           v-model="form.ownerId"
-          placeholder="请输入车辆或司机ID"
-        />
+          placeholder="请选择所属对象"
+          style="width: 100%"
+          filterable
+        >
+          <el-option
+            v-for="opt in ownerOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          />
+        </el-select>
       </el-form-item>
 
       <el-form-item

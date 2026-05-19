@@ -17,6 +17,7 @@ export interface CreateDriverRequest {
 export interface UpdateDriverRequest {
   name?: string
   phone?: string
+  boundVehicleId?: string | null
 }
 
 export interface DriverListParams {

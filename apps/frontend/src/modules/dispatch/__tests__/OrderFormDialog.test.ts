@@ -107,8 +107,8 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
     })
   })
 
-  describe('已填写字段不被覆盖', () => {
-    it('启运地已填写时不会被模板覆盖', async () => {
+  describe('切换业务类型时覆盖路线字段', () => {
+    it('启运地已填写时会被新模板覆盖', async () => {
       mockGetRouteTemplate.mockResolvedValue({
         originName: '上海港',
         waypoints: ['苏州物流园'],
@@ -122,12 +122,12 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
       await nextTick()
       await nextTick()
 
-      expect(wrapper.vm.form.originName).toBe('用户自定义启运地')
+      expect(wrapper.vm.form.originName).toBe('上海港')
       expect(wrapper.vm.form.waypoints).toEqual(['苏州物流园'])
       expect(wrapper.vm.form.destName).toBe('昆山工厂')
     })
 
-    it('目的地已填写时不会被模板覆盖', async () => {
+    it('目的地已填写时会被新模板覆盖', async () => {
       mockGetRouteTemplate.mockResolvedValue({
         originName: '上海港',
         waypoints: ['苏州物流园'],
@@ -143,10 +143,10 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
 
       expect(wrapper.vm.form.originName).toBe('上海港')
       expect(wrapper.vm.form.waypoints).toEqual(['苏州物流园'])
-      expect(wrapper.vm.form.destName).toBe('用户自定义目的地')
+      expect(wrapper.vm.form.destName).toBe('昆山工厂')
     })
 
-    it('途径点已填写时不会被模板覆盖', async () => {
+    it('途径点已填写时会被新模板覆盖', async () => {
       mockGetRouteTemplate.mockResolvedValue({
         originName: '上海港',
         waypoints: ['苏州物流园'],
@@ -161,7 +161,7 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
       await nextTick()
 
       expect(wrapper.vm.form.originName).toBe('上海港')
-      expect(wrapper.vm.form.waypoints).toEqual(['用户自定义途径点'])
+      expect(wrapper.vm.form.waypoints).toEqual(['苏州物流园'])
       expect(wrapper.vm.form.destName).toBe('昆山工厂')
     })
   })
@@ -195,7 +195,7 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
         mode: 'edit',
         order: {
           id: 'o1',
-          orderNo: 'DD202605150001',
+          orderNo: 'T202605150001',
           status: 'pending',
           customerName: '测试客户',
           customerPhone: null,
@@ -236,7 +236,7 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
   })
 
   describe('切换业务类型', () => {
-    it('从重箱运输切换到空箱运输时已填字段保留、空字段填充', async () => {
+    it('Bug: 切换业务类型后路线规划应跟随变化', async () => {
       mockGetRouteTemplate
         .mockResolvedValueOnce({
           originName: '上海港',
@@ -259,10 +259,6 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
       expect(wrapper.vm.form.waypoints).toEqual(['苏州物流园'])
       expect(wrapper.vm.form.destName).toBe('昆山工厂')
 
-      wrapper.vm.form.originName = ''
-      wrapper.vm.form.waypoints = []
-      wrapper.vm.form.destName = ''
-
       wrapper.vm.form.businessType = BusinessType.EMPTY_TRANSPORT
       await nextTick()
       await nextTick()
@@ -270,6 +266,32 @@ describe('OrderFormDialog - 业务类型选择自动填充路线', () => {
       expect(wrapper.vm.form.originName).toBe('宁波港')
       expect(wrapper.vm.form.waypoints).toEqual([])
       expect(wrapper.vm.form.destName).toBe('杭州仓库')
+    })
+
+    it('清空业务类型后路线规划也应清空', async () => {
+      mockGetRouteTemplate.mockResolvedValue({
+        originName: '上海港',
+        waypoints: ['苏州物流园'],
+        destName: '昆山工厂',
+      })
+
+      const wrapper = createWrapper()
+
+      wrapper.vm.form.businessType = BusinessType.HEAVY_TRANSPORT
+      await nextTick()
+      await nextTick()
+
+      expect(wrapper.vm.form.originName).toBe('上海港')
+      expect(wrapper.vm.form.waypoints).toEqual(['苏州物流园'])
+      expect(wrapper.vm.form.destName).toBe('昆山工厂')
+
+      wrapper.vm.form.businessType = ''
+      await nextTick()
+      await nextTick()
+
+      expect(wrapper.vm.form.originName).toBe('')
+      expect(wrapper.vm.form.waypoints).toEqual([])
+      expect(wrapper.vm.form.destName).toBe('')
     })
   })
 })

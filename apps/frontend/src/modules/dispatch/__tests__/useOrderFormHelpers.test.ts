@@ -16,7 +16,7 @@ import type { Order } from '../types/order'
 function makeOrder(overrides: Partial<Order> = {}): Order {
   return {
     id: 'o1',
-    orderNo: 'DD202605150001',
+    orderNo: 'T202605150001',
     status: OrderStatus.PENDING,
     customerName: null,
     customerPhone: null,

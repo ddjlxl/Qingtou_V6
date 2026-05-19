@@ -2,12 +2,28 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import { nextTick } from 'vue'
 
 const mockCreateCertificate = vi.fn()
 const mockUpdateCertificate = vi.fn()
+const mockFetchVehicles = vi.fn()
+const mockFetchDrivers = vi.fn()
+
+const mockVehicles = [
+  { id: 'v1', plateNo: '粤A12345', isDisabled: false },
+  { id: 'v2', plateNo: '粤B67890', isDisabled: true },
+]
+const mockDrivers = [
+  { id: 'd1', name: '张三', isDisabled: false },
+  { id: 'd2', name: '李四', isDisabled: true },
+]
 
 vi.mock('../stores/useFleetStore', () => ({
   useFleetStore: () => ({
+    vehicles: mockVehicles,
+    drivers: mockDrivers,
+    fetchVehicles: mockFetchVehicles,
+    fetchDrivers: mockFetchDrivers,
     createCertificate: mockCreateCertificate,
     updateCertificate: mockUpdateCertificate,
   }),
@@ -89,5 +105,58 @@ describe('CertificateFormDialog', () => {
     dialog.vm.$emit('update:model-value', false)
     expect(wrapper.emitted('update:visible')).toBeTruthy()
     expect(wrapper.emitted('update:visible')![0]).toEqual([false])
+  })
+
+  it('calls fetchVehicles and fetchDrivers when dialog opens', () => {
+    wrapper = createWrapper()
+    expect(mockFetchVehicles).toHaveBeenCalled()
+    expect(mockFetchDrivers).toHaveBeenCalled()
+  })
+
+  it('computes ownerOptions from vehicles excluding disabled when ownerType is vehicle', () => {
+    wrapper = createWrapper()
+    expect(wrapper.vm.form.ownerType).toBe(OwnerType.VEHICLE)
+    const vm = wrapper.vm as unknown as { ownerOptions: { label: string; value: string }[] }
+    expect(vm.ownerOptions).toEqual([{ label: '粤A12345', value: 'v1' }])
+  })
+
+  it('computes ownerOptions from drivers excluding disabled when ownerType is driver', async () => {
+    wrapper = createWrapper()
+    wrapper.vm.form.ownerType = OwnerType.DRIVER
+    await nextTick()
+    const vm = wrapper.vm as unknown as { ownerOptions: { label: string; value: string }[] }
+    expect(vm.ownerOptions).toEqual([{ label: '张三', value: 'd1' }])
+  })
+
+  it('clears ownerId when ownerType changes', async () => {
+    wrapper = createWrapper()
+    wrapper.vm.form.ownerId = 'v1'
+    await wrapper.vm.$nextTick()
+    wrapper.vm.form.ownerType = OwnerType.DRIVER
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.form.ownerId).toBe('')
+  })
+
+  it('auto-fills certName when certType changes to vehicle license', async () => {
+    wrapper = createWrapper()
+    wrapper.vm.form.certType = VehicleCertType.COMMERCIAL_INSURANCE
+    await nextTick()
+    wrapper.vm.form.certType = VehicleCertType.VEHICLE_LICENSE
+    await nextTick()
+    expect(wrapper.vm.form.certName).toBe('行驶证')
+  })
+
+  it('auto-fills certName when certType changes to road transport', async () => {
+    wrapper = createWrapper()
+    wrapper.vm.form.certType = VehicleCertType.ROAD_TRANSPORT
+    await nextTick()
+    expect(wrapper.vm.form.certName).toBe('道路运输证')
+  })
+
+  it('auto-fills certName when ownerType switches to driver', async () => {
+    wrapper = createWrapper()
+    wrapper.vm.form.ownerType = OwnerType.DRIVER
+    await nextTick()
+    expect(wrapper.vm.form.certName).toBe('驾驶证')
   })
 })

@@ -6,6 +6,7 @@ import {
   statusTagConfig,
   documentLabels,
   formatRoute,
+  formatDateTime,
   canEdit,
   canAssign,
   canComplete,
@@ -17,7 +18,7 @@ import {
 function makeOrder(overrides: Partial<Order> = {}): Order {
   return {
     id: 'o1',
-    orderNo: 'DD202605150001',
+    orderNo: 'T202605150001',
     status: OrderStatus.PENDING,
     customerName: null,
     customerPhone: null,
@@ -139,6 +140,50 @@ describe('formatRoute', () => {
       waypoints: ['苏州物流园', '无锡中转站'],
       destName: '昆山工厂',
     }))).toBe('上海港 → 苏州物流园 → 无锡中转站 → 昆山工厂')
+  })
+})
+
+describe('formatDateTime', () => {
+  it('formats ISO string with Z suffix to local time', () => {
+    const result = formatDateTime('2026-05-16T00:53:20Z')
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+  })
+
+  it('converts UTC to local timezone correctly', () => {
+    const result = formatDateTime('2026-05-16T00:53:20Z')
+    const date = new Date('2026-05-16T00:53:20Z')
+    const expectedYear = date.getFullYear()
+    const expectedMonth = String(date.getMonth() + 1).padStart(2, '0')
+    const expectedDay = String(date.getDate()).padStart(2, '0')
+    const expectedHour = String(date.getHours()).padStart(2, '0')
+    const expectedMin = String(date.getMinutes()).padStart(2, '0')
+    const expectedSec = String(date.getSeconds()).padStart(2, '0')
+    expect(result).toBe(`${expectedYear}-${expectedMonth}-${expectedDay} ${expectedHour}:${expectedMin}:${expectedSec}`)
+  })
+
+  it('treats ISO string without timezone as UTC and converts to local', () => {
+    const result = formatDateTime('2026-05-16T00:53:20')
+    const date = new Date('2026-05-16T00:53:20Z')
+    const expectedYear = date.getFullYear()
+    const expectedMonth = String(date.getMonth() + 1).padStart(2, '0')
+    const expectedDay = String(date.getDate()).padStart(2, '0')
+    const expectedHour = String(date.getHours()).padStart(2, '0')
+    const expectedMin = String(date.getMinutes()).padStart(2, '0')
+    const expectedSec = String(date.getSeconds()).padStart(2, '0')
+    expect(result).toBe(`${expectedYear}-${expectedMonth}-${expectedDay} ${expectedHour}:${expectedMin}:${expectedSec}`)
+  })
+
+  it('formats ISO string with timezone offset', () => {
+    const result = formatDateTime('2026-05-16T00:53:20+00:00')
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+  })
+
+  it('returns empty string for empty input', () => {
+    expect(formatDateTime('')).toBe('')
+  })
+
+  it('returns empty string for invalid date', () => {
+    expect(formatDateTime('invalid')).toBe('')
   })
 })
 

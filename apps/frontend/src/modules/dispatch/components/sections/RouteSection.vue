@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Delete } from '@element-plus/icons-vue'
 import type { OrderFormState } from '../../composables/useOrderForm'
 
 const props = defineProps<{
@@ -61,12 +62,12 @@ function onWaypointInput(index: number, value: string) {
             <el-input
               :model-value="form.waypoints[index]"
               placeholder="请输入途径点"
-              @input="onWaypointInput(index, ($event as any as string))"
+              @input="onWaypointInput(index, $event)"
             >
               <template #append>
                 <el-button
                   type="danger"
-                  :icon="'Delete'"
+                  :icon="Delete"
                   @click="emit('removeWaypoint', index)"
                 />
               </template>

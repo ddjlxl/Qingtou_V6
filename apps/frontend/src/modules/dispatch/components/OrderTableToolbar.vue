@@ -12,7 +12,7 @@ const keyword = defineModel<string>('keyword', { required: true })
   <div class="order-table-toolbar">
     <el-input
       v-model="keyword"
-      placeholder="搜索任务编号/箱号/客户名称"
+      placeholder="搜索任务编号/箱号/客户名称/车牌号"
       clearable
       style="width: 320px"
     >

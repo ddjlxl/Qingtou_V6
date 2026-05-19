@@ -4,6 +4,7 @@ import {
   statusTagConfig,
   documentLabels,
   formatRoute,
+  formatDateTime,
   canEdit,
   canAssign,
   canComplete,
@@ -33,6 +34,7 @@ const emit = defineEmits<{
       prop="orderNo"
       label="任务编号"
       width="160"
+      align="center"
     />
     <el-table-column
       label="客户名称"
@@ -44,7 +46,7 @@ const emit = defineEmits<{
     </el-table-column>
     <el-table-column
       label="路线"
-      min-width="200"
+      width="300"
     >
       <template #default="{ row }">
         <span class="order-table-body__route">{{ formatRoute(row) }}</span>
@@ -52,7 +54,8 @@ const emit = defineEmits<{
     </el-table-column>
     <el-table-column
       label="箱号"
-      width="120"
+      width="140"
+      align="center"
     >
       <template #default="{ row }">
         {{ row.containerNo || '-' }}
@@ -61,6 +64,7 @@ const emit = defineEmits<{
     <el-table-column
       label="箱型"
       width="80"
+      align="center"
     >
       <template #default="{ row }">
         {{ row.containerType || '-' }}
@@ -68,7 +72,8 @@ const emit = defineEmits<{
     </el-table-column>
     <el-table-column
       label="单证"
-      width="120"
+      width="160"
+      align="center"
     >
       <template #default="{ row }">
         <template v-if="row.documents && row.documents.length > 0">
@@ -86,18 +91,17 @@ const emit = defineEmits<{
     </el-table-column>
     <el-table-column
       label="司机/车牌"
-      width="140"
+      width="160"
+      align="center"
     >
       <template #default="{ row }">
-        <div>{{ row.driverName || '-' }}</div>
-        <div class="order-table-body__plate">
-          {{ row.vehiclePlateNo || '-' }}
-        </div>
+        {{ row.driverName || '-' }} / {{ row.vehiclePlateNo || '-' }}
       </template>
     </el-table-column>
     <el-table-column
       label="状态"
       width="90"
+      align="center"
     >
       <template #default="{ row }">
         <el-tag
@@ -111,14 +115,16 @@ const emit = defineEmits<{
     <el-table-column
       label="创建时间"
       width="160"
+      align="center"
     >
       <template #default="{ row }">
-        {{ row.createdAt }}
+        {{ formatDateTime(row.createdAt) }}
       </template>
     </el-table-column>
     <el-table-column
       label="操作"
       width="200"
+      align="center"
       fixed="right"
     >
       <template #default="{ row }">
@@ -182,10 +188,5 @@ const emit = defineEmits<{
 <style scoped>
 .order-table-body__route {
   color: #606266;
-}
-
-.order-table-body__plate {
-  font-size: 12px;
-  color: #909399;
 }
 </style>

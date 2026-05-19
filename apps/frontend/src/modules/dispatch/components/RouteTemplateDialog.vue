@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { dispatchService } from '../services/dispatchService'
 import type { RouteTemplate } from '../types/order'
@@ -128,7 +129,7 @@ function handleClose() {
                 />
                 <el-button
                   type="danger"
-                  :icon="'Delete'"
+                  :icon="Delete"
                   circle
                   size="small"
                   @click="removeWaypoint(tpl.businessType, idx)"

@@ -37,17 +37,20 @@ function watchBusinessType(
   watch(
     () => form.businessType,
     async (val) => {
-      if (!val || options.mode.value !== 'create') return
+      if (options.mode.value !== 'create') return
+      if (!val) {
+        form.originName = ''
+        form.waypoints = []
+        form.destName = ''
+        return
+      }
       try {
         const result = await dispatchService.getRouteTemplate(val)
-        if (result.originName && !form.originName) {
+        if (result.originName) {
           form.originName = result.originName
         }
-        const hasWaypoints = form.waypoints.filter((w) => w.trim()).length > 0
-        if (!hasWaypoints) {
-          form.waypoints = result.waypoints ? [...result.waypoints] : []
-        }
-        if (result.destName && !form.destName) {
+        form.waypoints = result.waypoints ? [...result.waypoints] : []
+        if (result.destName) {
           form.destName = result.destName
         }
       } catch {
@@ -56,6 +59,8 @@ function watchBusinessType(
     }
   )
 }
+
+let autoFillDepth = 0
 
 function watchVehicleId(
   form: OrderFormState,
@@ -66,18 +71,24 @@ function watchVehicleId(
   watch(
     () => form.vehicleId,
     (val) => {
-      if (val && options.mode.value === 'create') {
-        const vehicle = availableVehicles.find((v) => v.id === val)
-        if (vehicle?.boundDriverName) {
-          const driver = availableDrivers.find(
-            (d) => d.name === vehicle.boundDriverName
-          )
-          if (driver) {
-            form.driverId = driver.id
-          }
+      if (autoFillDepth > 0 || options.mode.value !== 'create') return
+      if (!val) {
+        form.driverId = ''
+        return
+      }
+      const vehicle = availableVehicles.find((v) => v.id === val)
+      if (vehicle?.boundDriverName) {
+        const driver = availableDrivers.find(
+          (d) => d.name === vehicle.boundDriverName
+        )
+        if (driver) {
+          autoFillDepth++
+          form.driverId = driver.id
+          autoFillDepth--
         }
       }
-    }
+    },
+    { flush: 'sync' },
   )
 }
 
@@ -90,18 +101,24 @@ function watchDriverId(
   watch(
     () => form.driverId,
     (val) => {
-      if (val && options.mode.value === 'create') {
-        const driver = availableDrivers.find((d) => d.id === val)
-        if (driver?.boundVehiclePlateNo) {
-          const vehicle = availableVehicles.find(
-            (v) => v.plateNo === driver.boundVehiclePlateNo
-          )
-          if (vehicle) {
-            form.vehicleId = vehicle.id
-          }
+      if (autoFillDepth > 0 || options.mode.value !== 'create') return
+      if (!val) {
+        form.vehicleId = ''
+        return
+      }
+      const driver = availableDrivers.find((d) => d.id === val)
+      if (driver?.boundVehiclePlateNo) {
+        const vehicle = availableVehicles.find(
+          (v) => v.plateNo === driver.boundVehiclePlateNo
+        )
+        if (vehicle) {
+          autoFillDepth++
+          form.vehicleId = vehicle.id
+          autoFillDepth--
         }
       }
-    }
+    },
+    { flush: 'sync' },
   )
 }
 

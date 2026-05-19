@@ -1,5 +1,6 @@
 import { OrderStatus, DocumentType } from '../types/order'
 import type { Order } from '../types/order'
+import { formatDate } from '@/shared/utils/format'
 
 export const tabs = [
   { value: 'all' as const, label: '全部' },
@@ -32,6 +33,12 @@ export function formatRoute(order: Order): string {
   }
   if (order.destName) parts.push(order.destName)
   return parts.length > 0 ? parts.join(' → ') : '-'
+}
+
+export function formatDateTime(value: string): string {
+  if (!value) return ''
+  const iso = /Z|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`
+  return formatDate(iso)
 }
 
 export function canEdit(order: Order): boolean {
