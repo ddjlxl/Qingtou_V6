@@ -319,7 +319,7 @@ AI最大的问题是什么？**没有记忆。**
 - [文档名称]：已读取（X个章节）
 
 项目认知：
-- 技术栈：Vue 3 + TypeScript + Element Plus + FastAPI + SQLite
+- 技术栈：Vue 3 + TypeScript + Element Plus + FastAPI + PostgreSQL
 - 核心功能：任务管理、车辆管理、仓库管理、运营看板
 - 开发约束：无any类型、无console.log、文件不超过300行
 \`\`\`
@@ -881,7 +881,7 @@ function getDevSetupContent() {
 - Prettier (esbenp.prettier-vscode)
 - Python (ms-python.python)
 - Pylance (ms-python.vscode-pylance)
-- SQLite (alexcvzz.vscode-sqlite)
+- PostgreSQL (ckolkman.vscode-postgres)
 
 ---
 

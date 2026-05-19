@@ -878,7 +878,7 @@ async def is_driver_available(db: AsyncSession, driver_id: uuid.UUID) -> bool:
 - **选项 A**：乐观锁（先查后改，冲突时重试）
 - **选项 B**：数据库事务（BEGIN → 检查 → 更新 Order → 更新 Vehicle → COMMIT）
 - **选择**：B
-- **理由**：SQLAlchemy + SQLite 原生支持事务。分配操作涉及两张表的写操作，放在一个事务内天然保证原子性。乐观锁在低并发场景下增加复杂度而无收益。
+- **理由**：SQLAlchemy + PostgreSQL 原生支持事务。分配操作涉及两张表的写操作，放在一个事务内天然保证原子性。乐观锁在低并发场景下增加复杂度而无收益。
 
 ### 决策 4：业务类型快捷填充的存储
 

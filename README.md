@@ -28,7 +28,7 @@
 - **状态管理**：Pinia
 - **路由**：Vue Router
 - **构建工具**：Vite
-- **样式**：Tailwind CSS
+- **样式**：scoped CSS
 - **语言**：TypeScript
 
 ### 后端技术
@@ -51,13 +51,18 @@
 Qingtou_V6/
 ├── docs/                    # 项目文档
 │   ├── V6需求文档.md        # 功能需求说明
-│   ├── V6数据库设计.md      # 数据库结构设计
 │   └── V6开发规则.md        # 开发规范
 ├── apps/                    # 应用代码
-│   ├── frontend/           # 前端应用（待创建）
-│   └── server/             # 后端API服务（待创建）
-├── .trae/                  # AI开发工具配置
-│   └── rules/              # 项目规则
+│   ├── frontend/           # 前端应用（Vue 3 + Element Plus）
+│   └── server/             # 后端 API 服务（FastAPI）
+│       ├── alembic/        # 数据库迁移
+│       ├── app/            # 应用代码
+│       └── tests/          # 后端测试
+├── specs/                  # 技术规范文档
+├── docker/                 # Docker 配置
+│   └── init-db.sql         # 数据库初始化脚本
+├── docker-compose.yml      # 本地 PostgreSQL 一键启动
+├── .trae/                  # AI 开发工具配置
 └── README.md               # 项目说明
 ```
 
@@ -68,43 +73,66 @@ Qingtou_V6/
 ### 环境要求
 - Node.js 18+
 - Python 3.10+
-- pnpm 8+
+- PostgreSQL 14+（或 Docker Desktop）
+- pnpm 9+
 
-### 开发准备
-1. **克隆项目**（待创建Git仓库后）
-2. **安装依赖**：
-   ```bash
-   # 前端依赖
-   cd apps/frontend
-   pnpm install
-   
-   # 后端依赖
-   cd apps/server
-   pip install -r requirements.txt
-   ```
+### 方式一：Docker 启动 PostgreSQL（推荐）
 
-3. **启动开发服务器**：
-   ```bash
-   # 启动前端
-   cd apps/frontend
-   pnpm dev
-   
-   # 启动后端
-   cd apps/server
-   python -m uvicorn src.main:app --reload
-   ```
+```bash
+# 1. 启动 PostgreSQL（自动创建 qingtou_v6 和 qingtou_v6_test 库）
+docker compose up -d
+
+# 2. 安装后端依赖 + 运行数据库迁移
+cd apps/server
+pip install -r requirements.txt
+alembic upgrade head
+
+# 3. 验证：运行测试
+pytest
+```
+
+### 方式二：手动安装 PostgreSQL
+
+```bash
+# 1. 手动创建数据库
+createdb -U postgres qingtou_v6
+createdb -U postgres qingtou_v6_test
+
+# 2. 配置连接信息（复制 .env.example 并修改）
+cd apps/server
+cp .env.example .env
+# 编辑 .env 中的数据库用户名和密码
+```
+
+### 启动开发服务器
+
+```bash
+# 前端（项目根目录）
+pnpm dev
+
+# 后端（推荐，项目根目录）
+pnpm dev:server
+
+# 或手动启动后端
+cd apps/server
+uvicorn app.main:app --host 0.0.0.0 --port 9528 --reload
+
+# 交互式启动脚本（双击根目录 start.bat，按菜单选择）
+```
+
+访问 http://localhost:9527 查看前端页面，http://localhost:9528/docs 查看 API 文档。
 
 ---
 
 ## 📖 开发文档
 
 ### 核心文档
-- [需求文档](docs/V6需求文档.md) - 功能需求和业务规则
-- [数据库设计](docs/V6数据库设计.md) - 数据库结构和字段定义
-- [开发规则](docs/V6开发规则.md) - 代码规范和最佳实践
+- [需求文档](specs/requirements-clarification.md) - 功能需求和业务规则
+- [数据库设计](specs/features/database-model/design.md) - 数据库结构和字段定义
+- [开发规则](specs/development-standards.md) - 代码规范和最佳实践
 
 ### API文档
-- 后端启动后访问：http://localhost:8000/docs
+- 后端启动后访问：http://localhost:9528/docs
 - OpenAPI规范，支持在线测试
 
 ---
@@ -155,11 +183,11 @@ pytest --cov        # 生成覆盖率报告
 创建 `.env` 文件：
 ```bash
 # 前端环境变量
-VITE_API_BASE_URL=http://localhost:8000/api
+VITE_API_BASE_URL=http://localhost:9528/api
 
 # 后端环境变量
-DATABASE_URL=postgresql+asyncpg://user:password@127.0.0.1:5432/qingtou_v6
-JWT_SECRET=your-secret-key
+DATABASE_URL=postgresql+asyncpg://qingtou_dev:qingtou_dev_password_2026@127.0.0.1:5432/qingtou_v6
+JWT_SECRET=your-secure-jwt-secret-here
 ```
 
 ### 数据库迁移

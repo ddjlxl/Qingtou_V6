@@ -1,10 +1,10 @@
 # 数据库模型技术方案
 
-> **版本**：v1.1
+> **版本**：v1.2
 > **创建日期**：2026-05-03
-> **最后更新**：2026-05-04
+> **最后更新**：2026-05-17
 > **需求文档**：[requirements.md](./requirements.md)
-> **设计目标**：基于 SQLite + SQLAlchemy 2.0 构建完整的数据模型，支持 Alembic 迁移，为后续所有业务功能提供数据基础
+> **设计目标**：基于 PostgreSQL + SQLAlchemy 2.0 构建完整的数据模型，支持 Alembic 迁移，为后续所有业务功能提供数据基础
 
 ---
 
@@ -444,13 +444,138 @@ alembic upgrade head
 
 ---
 
-## 九、SQLite 特定说明
+## 九、PostgreSQL 特定说明
 
 1. **UUID 生成**：使用 Python `uuid.uuid4()` 在应用层生成，不依赖数据库函数
-2. **索引类型**：SQLite 自动为索引选择合适类型
-3. **字符集**：UTF-8（SQLite 默认）
-4. **时区**：使用 `DateTime` 类型，应用层处理时区转换
-5. **并发**：SQLite 使用库级锁，适合小团队（3-5 调度员）并发场景
+2. **索引类型**：PostgreSQL 默认使用 B-tree 索引，适合大多数查询场景
+3. **字符集**：UTF-8（创建数据库时指定 `ENCODING 'UTF8'`）
+4. **时区**：使用 `DateTime(timezone=True)` 类型，PostgreSQL 原生支持 `TIMESTAMP WITH TIME ZONE`
+5. **并发**：PostgreSQL 使用 MVCC（多版本并发控制），行级锁，支持 2 名调度同时派单
+6. **备份**：`pg_dump` 热备，不影响业务运行
+7. **迁移完成**：`database.py` 已完全移除 SQLite 兼容代码（无 PRAGMA 处理），纯 PostgreSQL 连接池配置。开发环境必须使用 PostgreSQL，不再支持 SQLite。
+
+### 从 SQLite 迁移的变更记录（v1.2）
+
+- **连接串**：`sqlite+aiosqlite:///./qingtou.db` → `postgresql+asyncpg://user:password@127.0.0.1:5432/qingtou_v6`
+- **engine 配置**：SQLite PRAGMA 代码已完全移除，替换为 PostgreSQL 连接池参数（`pool_size=10`、`max_overflow=20`、`pool_pre_ping=True`、`pool_recycle=3600`）
+- **迁移脚本**：初始迁移和各版本迁移中 `DATETIME` → `TIMESTAMP WITH TIME ZONE`，`TEXT` → `UUID`
+- **依赖**：`requirements.txt` 移除 `aiosqlite`，新增 `asyncpg>=0.29.0`
+- **测试**：233 个测试全部在 PostgreSQL 上通过
+
+---
+
+## 十、PostgreSQL 运维指南
+
+### 10.1 数据库创建
+
+**方式一：Docker（推荐本地开发）**
+
+```bash
+# 项目根目录，一键启动 PostgreSQL 16 + 自动创建 qingtou_v6 和 qingtou_v6_test
+docker compose up -d
+```
+
+**方式二：手动创建**
+
+```bash
+# 创建开发数据库
+createdb -U postgres qingtou_v6
+
+# 创建测试数据库
+createdb -U postgres qingtou_v6_test
+```
+
+### 10.2 备份与恢复
+
+```bash
+# 备份（热备，不影响业务运行）
+pg_dump -U postgres -Fc qingtou_v6 > qingtou_v6_$(date +%Y%m%d).dump
+
+# 恢复
+pg_restore -U postgres -d qingtou_v6 qingtou_v6_YYYYMMDD.dump
+
+# 定时备份（crontab，每天凌晨 3 点）
+# 0 3 * * * pg_dump -U postgres -Fc qingtou_v6 > /backup/qingtou_v6_$(date +\%Y\%m\%d).dump
+```
+
+### 10.3 连接池监控
+
+`database.py` 当前配置：
+- `pool_size=10`：基本连接数，适合 3-5 名调度员日常使用
+- `max_overflow=20`：峰值时可额外创建 20 个连接（最大 30 并发）
+- `pool_pre_ping=True`：每次使用前检查连接有效性，防止使用已断开的连接
+- `pool_recycle=3600`：连接每小时回收一次，防止内存泄漏
+
+**已接入监控事件**（`database.py`）：
+- `checkout` 事件：连接池使用率超过 80% 时自动输出 WARNING 日志
+- `connect` 事件：新建连接时记录 DEBUG 日志（pooled/overflow 计数）
+- 健康检查接口 `GET /api/health` 返回实时连接池状态（`pool` 字段）
+
+```sql
+-- 查看当前活跃连接数
+SELECT count(*) FROM pg_stat_activity WHERE state = 'active';
+
+-- 查看连接来源
+SELECT application_name, client_addr, state, count(*)
+FROM pg_stat_activity GROUP BY application_name, client_addr, state;
+```
+
+### 10.4 慢查询排查
+
+```sql
+-- 开启慢查询日志（postgresql.conf）
+-- log_min_duration_statement = 1000  （记录超过 1 秒的查询）
+
+-- 查看当前正在执行的查询
+SELECT pid, now() - pg_stat_activity.query_start AS duration, query, state
+FROM pg_stat_activity WHERE state = 'active' ORDER BY duration DESC;
+```
+
+### 10.5 首次部署迁移验证
+
+```bash
+cd apps/server
+# 确保 PostgreSQL 运行且数据库已创建
+alembic upgrade head    # 从零执行所有迁移脚本
+pytest                  # 运行 233 个测试验证
+```
+
+### 10.6 部署检查清单
+
+部署到生产服务器（43.163.118.22 Ubuntu）前逐项确认：
+
+**数据库层**
+- [ ] 安装 PostgreSQL 16
+- [ ] `sudo systemctl enable postgresql`（开机自启）
+- [ ] 创建生产数据库 `qingtou_v6`
+- [ ] `alembic upgrade head`（执行迁移）
+- [ ] 修改数据库密码（禁止使用 `user:password` 默认值）
+
+**安全层**
+- [ ] 修改 `.env` 中 `JWT_SECRET` 为强密钥（禁止使用 `change-me-in-production`）
+- [ ] 修改 `DATABASE_URL` 中的数据库用户名和密码
+- [ ] 确保 `.env` 文件不被提交到版本控制（已在 `.gitignore`）
+
+**运维层**
+- [ ] 配置 Nginx 反向代理到 FastAPI（端口 8000）
+- [ ] 配置 `crontab` 定时备份（每天凌晨 3 点 pg_dump）
+- [ ] 执行一次备份-恢复演练
+- [ ] 配置日志轮转（防止日志文件撑爆磁盘）
+
+**监控层**
+- [ ] 访问 `GET /api/health` 确认数据库连通
+- [ ] 观察日志中是否有连接池告警（`连接池使用率过高`）
+
+---
+
+### 10.7 本次迁移优化记录（2026-05-17）
+
+| 优化项 | 文件 | 说明 |
+|--------|------|------|
+| Docker 一键启动 | `docker-compose.yml` | 本地开发无需手动安装 PostgreSQL |
+| 数据库自动创建 | `docker/init-db.sql` | 容器启动时自动创建 `qingtou_v6` 和 `qingtou_v6_test` |
+| 连接池监控 | `database.py` | 使用率超过 80% 自动告警 |
+| 健康检查增强 | `main.py` | `/api/health` 返回连接池实时指标 |
 
 ---
 

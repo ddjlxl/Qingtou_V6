@@ -256,7 +256,7 @@ class TransportRecord(BaseModel):
 
 **索引重命名注意事项**：
 - Alembic 的 `autogenerate` 可能不会自动检测索引重命名（取决于数据库方言）
-- 对于 SQLite，需在迁移脚本中手动添加 `op.drop_index()` + `op.create_index()`
+- 对于 PostgreSQL，Alembic 的 `autogenerate` 能自动检测索引变更
 - 生成迁移脚本后需人工检查索引变更是否正确
 
 **迁移命令**：
@@ -687,6 +687,8 @@ async def get_certificate_attachment(id: uuid.UUID, db: AsyncSession = Depends(g
 - 大小：≤ 10MB（`MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024`）
 
 **设计决策**：选择本地存储而非云存储，理由：内部管理系统、访问量低、零成本、备份简单（直接拷贝目录）。未来如需迁移到云存储，只需修改文件写入和读取逻辑，数据库字段不变。
+
+> **注意**：生产环境部署时，`uploads/` 目录需挂载持久卷（Docker volume 或独立磁盘），避免容器重建导致文件丢失。同时需配置定期备份策略。
 
 ---
 

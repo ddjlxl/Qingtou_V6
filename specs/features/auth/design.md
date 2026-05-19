@@ -92,7 +92,7 @@ def decode_token(token: str) -> dict:
 ```python
 class Settings(BaseSettings):
     # ... 已有配置 ...
-    JWT_SECRET: str = "change-me-in-production"
+    JWT_SECRET: str = "replace-with-your-secure-jwt-secret-here"
 ```
 
 ### 3.3 Pydantic Schema（`schemas/auth.py`）

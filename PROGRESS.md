@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-16（dispatch 编码实现中）
+> 最后更新：2026-05-17（SQLite → PostgreSQL 迁移完成）
 
 ---
 
@@ -33,7 +33,7 @@
 
 ### Phase 1.2：基础设施 — 数据库模型 ✅
 
-- [x] 技术选型确认：SQLite（开发+生产统一）
+- [x] 技术选型确认：PostgreSQL（从 SQLite 迁移，支持生产部署）
 - [x] 数据库模型设计文档：[specs/features/database-model/design.md](file:///e:/Qingtou_V6/specs/features/database-model/design.md)
 - [x] SQLAlchemy 模型实现（每个模型独立文件）：
   - [x] [users](file:///e:/Qingtou_V6/apps/server/app/models/user.py) — 用户表
@@ -51,7 +51,7 @@
 - [x] 应用配置管理：[app/core/config.py](file:///e:/Qingtou_V6/apps/server/app/core/config.py)
 - [x] Alembic 迁移配置：[alembic.ini](file:///e:/Qingtou_V6/apps/server/alembic.ini) + [alembic/env.py](file:///e:/Qingtou_V6/apps/server/alembic/env.py)
 - [x] 初始迁移脚本：[alembic/versions/20260503_init_database.py](file:///e:/Qingtou_V6/apps/server/alembic/versions/20260503_init_database.py)
-- [x] SQLite 数据库验证通过：11 张表全部创建成功
+- [x] PostgreSQL 数据库验证通过：11 张表全部创建成功（从 SQLite 迁移）
 
 ### Phase 1.2：基础设施 — shared 公共模块 ✅
 

@@ -139,12 +139,12 @@ if %errorlevel% equ 0 (
     echo [%date% %time%] Port %BACKEND_PORT% available >> %LOG_FILE%
 )
 
-if exist "apps\server\qingtou.db" (
-    echo OK: Database file exists
-    echo [%date% %time%] Database exists >> %LOG_FILE%
+if exist "apps\server\.env" (
+    echo OK: Backend .env config exists
+    echo [%date% %time%] Backend .env exists >> %LOG_FILE%
 ) else (
-    echo TIP: Database file not found, will be created on first run
-    echo [%date% %time%] Database not found >> %LOG_FILE%
+    echo WARNING: Backend .env not found, copy .env.example to .env first
+    echo [%date% %time%] WARNING: Backend .env not found >> %LOG_FILE%
 )
 
 echo.
@@ -184,7 +184,7 @@ echo Press Ctrl+C to stop
 echo.
 timeout /t 2 /nobreak >nul
 start "" %FRONTEND_URL%
-call pnpm dev --port %FRONTEND_PORT%
+call pnpm dev
 goto end_script
 
 :start_backend
@@ -200,7 +200,7 @@ echo.
 timeout /t 2 /nobreak >nul
 start "" %BACKEND_URL%/docs
 cd apps\server
-python -m uvicorn app.main:app --reload --port %BACKEND_PORT%
+python -m uvicorn app.main:app --host 0.0.0.0 --port %BACKEND_PORT% --reload
 goto end_script
 
 :start_both
@@ -209,13 +209,10 @@ echo [6/6] Starting Both Services...
 echo [%date% %time%] Starting both services >> %LOG_FILE%
 echo.
 echo Starting backend service...
-cd apps\server
-start "QingTou-V6-Backend (Port %BACKEND_PORT%)" cmd /k "python -m uvicorn app.main:app --reload --port %BACKEND_PORT%"
-cd ..\..
-timeout /t 3 /nobreak >nul
+start "QingTou-V6-Backend (Port %BACKEND_PORT%)" cmd /k "cd /d %~dp0apps\server && python -m uvicorn app.main:app --host 0.0.0.0 --port %BACKEND_PORT% --reload"
 
 echo Starting frontend service...
-start "QingTou-V6-Frontend (Port %FRONTEND_PORT%)" cmd /k "call pnpm dev --port %FRONTEND_PORT%"
+start "QingTou-V6-Frontend (Port %FRONTEND_PORT%)" cmd /k "cd /d %~dp0 && pnpm dev"
 
 echo.
 echo ========================================
@@ -324,10 +321,10 @@ if exist "apps\server\.installed" (
 ) else (
     echo   Backend Dependencies: Not Installed
 )
-if exist "apps\server\qingtou.db" (
-    echo   Database: Exists
+if exist "apps\server\.env" (
+    echo   Database Config: .env exists
 ) else (
-    echo   Database: Not Created
+    echo   Database Config: .env not found (copy from .env.example)
 )
 echo.
 echo ========================================
