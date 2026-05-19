@@ -107,6 +107,7 @@ async def bind_driver_to_vehicle(
 
 IMPORT_EXPECTED_COLUMNS = 7
 ALLOWED_IMPORT_EXTENSIONS = {".xlsx", ".txt"}
+VALID_CONTAINER_STATUSES = {"heavy", "empty"}
 
 
 def _validate_import_filename(filename: str) -> str:
@@ -132,20 +133,37 @@ async def import_transport_records_from_content(
     from app.models.vehicle import Vehicle
 
     lines = [line.strip() for line in content.strip().split("\n") if line.strip()]
-    total_rows = len(lines)
+
+    # 跳过模板表头行
+    start_index = 0
+    if lines and lines[0].startswith("任务编号\t"):
+        start_index = 1
+
+    total_rows = len(lines) - start_index
     success_count = 0
     duplicate_count = 0
     error_count = 0
     errors: list[dict] = []
 
-    for row_idx, line in enumerate(lines, start=1):
+    for row_idx, line in enumerate(lines[start_index:], start=start_index + 1):
         columns = line.split("\t")
-        if len(columns) != IMPORT_EXPECTED_COLUMNS:
+        if len(columns) not in (7, 8):
             error_count += 1
-            errors.append({"row": row_idx, "message": f"列数不正确，期望 {IMPORT_EXPECTED_COLUMNS} 列，实际 {len(columns)} 列"})
+            errors.append({"row": row_idx, "message": f"列数不正确，期望 7 或 8 列，实际 {len(columns)} 列"})
             continue
 
-        order_no, customer_info, origin, destination, container_no, plate_no, phone = columns
+        order_no, customer_info, origin, destination, container_no, plate_no, phone = columns[:7]
+        container_status_raw = columns[7].strip() if len(columns) == 8 else ""
+
+        # 校验 container_status
+        if container_status_raw:
+            if container_status_raw not in VALID_CONTAINER_STATUSES:
+                error_count += 1
+                errors.append({"row": row_idx, "message": f"空重箱状态值无效，应为 heavy 或 empty"})
+                continue
+            container_status = container_status_raw
+        else:
+            container_status = None
 
         existing = await db.execute(
             select(TransportRecord).where(TransportRecord.order_no == order_no)
@@ -176,6 +194,7 @@ async def import_transport_records_from_content(
             id=uuid.uuid4(),
             order_no=order_no,
             customer_info=customer_info,
+            container_status=container_status,
             origin=origin,
             destination=destination,
             container_no=container_no,

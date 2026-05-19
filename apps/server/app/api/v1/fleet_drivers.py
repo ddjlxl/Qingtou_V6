@@ -7,10 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.v1.auth import get_current_user
 from app.core.database import get_db
 from app.core.exceptions import AppException
+from app.core.security import hash_password
 from app.models.certificate import Certificate
 from app.models.driver import Driver
 from app.models.transport_record import TransportRecord
-from app.models.user import User
+from app.models.user import User, UserRole, UserStatus
 from app.models.vehicle import Vehicle
 from app.schemas.fleet import (
     DriverCreate,
@@ -21,6 +22,12 @@ from app.schemas.fleet import (
 from app.services.fleet_service import delete_certificate_attachment
 
 router = APIRouter(tags=["车队管理-司机"])
+
+
+def _require_non_driver(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role == UserRole.DRIVER.value:
+        raise AppException(code=403, message="仅管理员/调度员可访问")
+    return current_user
 
 
 def _driver_to_response(driver: Driver, bound_vehicle_id: str | None = None, bound_vehicle_plate_no: str | None = None) -> DriverResponse:
@@ -41,7 +48,7 @@ async def list_drivers(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     count_query = select(func.count(Driver.id))
     total_result = await db.execute(count_query)
@@ -81,7 +88,7 @@ async def list_drivers(
 async def get_driver(
     driver_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     result = await db.execute(select(Driver).where(Driver.id == driver_id))
     driver = result.scalar_one_or_none()
@@ -104,7 +111,7 @@ async def get_driver(
 async def create_driver(
     data: DriverCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     existing = await db.execute(
         select(Driver).where(Driver.phone == data.phone)
@@ -117,6 +124,28 @@ async def create_driver(
         phone=data.phone,
     )
     db.add(driver)
+    await db.flush()
+
+    # 同步创建 User 账号（如不存在且角色为 driver）
+    existing_user_result = await db.execute(
+        select(User).where(User.username == data.phone)
+    )
+    existing_user = existing_user_result.scalar_one_or_none()
+    if existing_user:
+        if existing_user.role != UserRole.DRIVER.value:
+            raise AppException(code=409, message="该手机号已被非驾驶员用户使用")
+    else:
+        user = User(
+            id=uuid.uuid4(),
+            username=data.phone,
+            password=hash_password(data.phone),
+            name=data.name,
+            phone=data.phone,
+            role=UserRole.DRIVER.value,
+            status=UserStatus.ACTIVE.value,
+        )
+        db.add(user)
+
     await db.commit()
     await db.refresh(driver)
 
@@ -128,7 +157,7 @@ async def update_driver(
     driver_id: uuid.UUID,
     data: DriverUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     result = await db.execute(select(Driver).where(Driver.id == driver_id))
     driver = result.scalar_one_or_none()
@@ -143,7 +172,24 @@ async def update_driver(
         )
         if existing.scalar_one_or_none():
             raise AppException(code=409, message="手机号已存在，请检查")
+        old_phone = driver.phone
         driver.phone = data.phone
+
+        # 同步更新 User 的 username 和 phone
+        user_result = await db.execute(
+            select(User).where(User.username == old_phone)
+        )
+        user = user_result.scalar_one_or_none()
+        if user:
+            # 检查新手机号是否已被其他 User 占用
+            if data.phone != old_phone:
+                dup_user = await db.execute(
+                    select(User).where(User.username == data.phone)
+                )
+                if dup_user.scalar_one_or_none():
+                    raise AppException(code=409, message="该手机号已被其他用户使用")
+            user.username = data.phone
+            user.phone = data.phone
 
     await db.commit()
     await db.refresh(driver)
@@ -164,7 +210,7 @@ async def update_driver(
 async def delete_driver(
     driver_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     result = await db.execute(select(Driver).where(Driver.id == driver_id))
     driver = result.scalar_one_or_none()
@@ -193,6 +239,14 @@ async def delete_driver(
         delete_certificate_attachment(cert)
         await db.delete(cert)
 
+    # 同步删除关联的 User 账号
+    user_result = await db.execute(
+        select(User).where(User.username == driver.phone)
+    )
+    user = user_result.scalar_one_or_none()
+    if user:
+        await db.delete(user)
+
     await db.delete(driver)
     await db.commit()
 
@@ -203,7 +257,7 @@ async def delete_driver(
 async def disable_driver(
     driver_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(_require_non_driver),
 ):
     result = await db.execute(select(Driver).where(Driver.id == driver_id))
     driver = result.scalar_one_or_none()
@@ -211,6 +265,15 @@ async def disable_driver(
         raise AppException(code=404, message="司机不存在")
 
     driver.is_disabled = True
+
+    # 同步设置 User 状态为 disabled
+    user_result = await db.execute(
+        select(User).where(User.username == driver.phone)
+    )
+    user = user_result.scalar_one_or_none()
+    if user:
+        user.status = UserStatus.DISABLED.value
+
     await db.commit()
 
     return {"code": 200, "message": "司机已停用"}
