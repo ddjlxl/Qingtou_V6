@@ -1,3 +1,6 @@
+"""
+种子数据脚本 — 仅用于本地开发环境，禁止在生产环境运行。
+"""
 import asyncio
 import uuid
 

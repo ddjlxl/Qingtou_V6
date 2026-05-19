@@ -18,7 +18,7 @@ logger = setup_logger("dispatch_service")
 
 async def generate_order_no(db: AsyncSession) -> str:
     today_str = datetime.now(timezone.utc).strftime("%Y%m%d")
-    prefix = f"DD{today_str}"
+    prefix = f"T{today_str}"
 
     result = await db.execute(
         select(Order.order_no)

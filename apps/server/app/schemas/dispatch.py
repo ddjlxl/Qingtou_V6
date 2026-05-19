@@ -156,22 +156,30 @@ class DispatchAddressListResponse(BaseModel):
 
 
 class RouteTemplateResponse(BaseModel):
-    origin_name: str
+    origin_name: str | None = None
     waypoints: list[str] | None = None
-    dest_name: str
+    dest_name: str | None = None
 
 
 class RouteTemplateUpdate(BaseModel):
-    origin_name: str = Field(..., min_length=1, max_length=200)
+    origin_name: str | None = Field(None, max_length=200)
     waypoints: list[str] | None = None
-    dest_name: str = Field(..., min_length=1, max_length=200)
+    dest_name: str | None = Field(None, max_length=200)
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_empty_strings_to_none(cls, data):
+        """将所有空字符串字段转换为 None"""
+        if isinstance(data, dict):
+            return {k: empty_str_to_none(v) for k, v in data.items()}
+        return data
 
 
 class RouteTemplateItem(BaseModel):
     business_type: str
-    origin_name: str
+    origin_name: str | None = None
     waypoints: list[str] | None = None
-    dest_name: str
+    dest_name: str | None = None
 
     model_config = {"from_attributes": True}
 

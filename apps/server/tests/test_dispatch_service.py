@@ -8,8 +8,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.dispatch_address import DispatchAddress
 from app.models.driver import Driver
 from app.models.order import BusinessType, Order, OrderStatus
+from app.models.user import User
 from app.models.vehicle import Vehicle, VehicleStatus
 from app.core.exceptions import AppException
+
+
+async def create_test_user(db_session, username: str, role: str = "dispatcher"):
+    user = User(
+        id=uuid.uuid4(),
+        username=username,
+        password="$2b$12$placeholder",
+        name=username,
+        role=role,
+        status="active",
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
 
 
 async def create_test_vehicle(db_session, plate_no: str, ownership: str = "own"):
@@ -36,6 +52,23 @@ async def create_test_driver(db_session, name: str, phone: str):
     return driver
 
 
+async def _ensure_dispatcher(db_session, dispatcher_id: uuid.UUID):
+    from sqlalchemy import select
+    from app.models.user import User
+    result = await db_session.execute(select(User).where(User.id == dispatcher_id))
+    if result.scalar_one_or_none() is None:
+        user = User(
+            id=dispatcher_id,
+            username=f"dispatcher_{dispatcher_id.hex[:8]}",
+            password="$2b$12$placeholder",
+            name=f"dispatcher_{dispatcher_id.hex[:8]}",
+            role="dispatcher",
+            status="active",
+        )
+        db_session.add(user)
+        await db_session.commit()
+
+
 async def create_test_order(
     db_session,
     dispatcher_id: uuid.UUID,
@@ -46,6 +79,7 @@ async def create_test_order(
 ):
     from app.services.dispatch_service import generate_order_no
 
+    await _ensure_dispatcher(db_session, dispatcher_id)
     order_no = await generate_order_no(db_session)
     order = Order(
         id=uuid.uuid4(),
@@ -69,7 +103,7 @@ class TestGenerateOrderNo:
 
         order_no = await generate_order_no(db_session)
         today_str = datetime.now(timezone.utc).strftime("%Y%m%d")
-        assert order_no == f"DD{today_str}0001"
+        assert order_no == f"T{today_str}0001"
 
     @pytest.mark.asyncio
     async def test_sequential_order_no(self, db_session: AsyncSession):
@@ -81,7 +115,7 @@ class TestGenerateOrderNo:
 
         order_no = await generate_order_no(db_session)
         today_str = datetime.now(timezone.utc).strftime("%Y%m%d")
-        assert order_no == f"DD{today_str}0003"
+        assert order_no == f"T{today_str}0003"
 
 
 class TestValidateContainerNoUnique:
@@ -198,7 +232,8 @@ class TestCreateOrder:
     async def test_create_skeleton_order(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_order
 
-        dispatcher_id = uuid.uuid4()
+        dispatcher = await create_test_user(db_session, "skeleton_dispatcher")
+        dispatcher_id = dispatcher.id
         order = await create_order(db_session, {}, dispatcher_id)
 
         assert order.id is not None
@@ -213,7 +248,8 @@ class TestCreateOrder:
     async def test_create_order_with_all_fields(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_order
 
-        dispatcher_id = uuid.uuid4()
+        dispatcher = await create_test_user(db_session, "allfields_dispatcher")
+        dispatcher_id = dispatcher.id
         data = {
             "customer_name": "测试客户",
             "customer_phone": "13800138000",
@@ -277,7 +313,8 @@ class TestCreateOrder:
     async def test_create_order_with_driver_and_vehicle(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_order
 
-        dispatcher_id = uuid.uuid4()
+        dispatcher = await create_test_user(db_session, "driver_vehicle_dispatcher")
+        dispatcher_id = dispatcher.id
         driver = await create_test_driver(db_session, "张三", "13800138000")
         vehicle = await create_test_vehicle(db_session, "粤A12345")
 
@@ -323,7 +360,8 @@ class TestCreateOrder:
     async def test_create_order_vehicle_not_available(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_order
 
-        dispatcher_id = uuid.uuid4()
+        dispatcher = await create_test_user(db_session, "vehicle_nav_dispatcher")
+        dispatcher_id = dispatcher.id
         driver = await create_test_driver(db_session, "张三", "13800138000")
         vehicle = await create_test_vehicle(db_session, "粤A12345")
         vehicle.status = VehicleStatus.TRANSITING.value
@@ -344,7 +382,8 @@ class TestCreateOrder:
     async def test_create_order_container_no_uppercase(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_order
 
-        dispatcher_id = uuid.uuid4()
+        dispatcher = await create_test_user(db_session, "container_upper_dispatcher")
+        dispatcher_id = dispatcher.id
         order = await create_order(db_session, {"container_no": "abcd1234567"}, dispatcher_id)
 
         assert order.container_no == "ABCD1234567"
@@ -353,7 +392,8 @@ class TestCreateOrder:
     async def test_create_order_seal_no_uppercase(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_order
 
-        dispatcher_id = uuid.uuid4()
+        dispatcher = await create_test_user(db_session, "seal_upper_dispatcher")
+        dispatcher_id = dispatcher.id
         order = await create_order(db_session, {"seal_no": "seal001"}, dispatcher_id)
 
         assert order.seal_no == "SEAL001"
@@ -728,7 +768,8 @@ class TestDispatchAddresses:
     async def test_create_address(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_dispatch_address
 
-        user_id = uuid.uuid4()
+        user = await create_test_user(db_session, "addr_user1")
+        user_id = user.id
         address = await create_dispatch_address(db_session, user_id, "上海港")
 
         assert address.name == "上海港"
@@ -738,7 +779,8 @@ class TestDispatchAddresses:
     async def test_create_duplicate_address_raises(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_dispatch_address
 
-        user_id = uuid.uuid4()
+        user = await create_test_user(db_session, "addr_dup_user")
+        user_id = user.id
         await create_dispatch_address(db_session, user_id, "上海港")
 
         with pytest.raises(AppException) as exc_info:
@@ -750,7 +792,8 @@ class TestDispatchAddresses:
     async def test_list_addresses(self, db_session: AsyncSession):
         from app.services.dispatch_service import get_dispatch_addresses, create_dispatch_address
 
-        user_id = uuid.uuid4()
+        user = await create_test_user(db_session, "addr_list_user")
+        user_id = user.id
         await create_dispatch_address(db_session, user_id, "上海港")
         await create_dispatch_address(db_session, user_id, "宁波港")
 
@@ -762,11 +805,11 @@ class TestDispatchAddresses:
     async def test_list_addresses_user_isolation(self, db_session: AsyncSession):
         from app.services.dispatch_service import get_dispatch_addresses, create_dispatch_address
 
-        user_a = uuid.uuid4()
-        user_b = uuid.uuid4()
-        await create_dispatch_address(db_session, user_a, "上海港")
+        user_a = await create_test_user(db_session, "addr_iso_user_a")
+        user_b = await create_test_user(db_session, "addr_iso_user_b")
+        await create_dispatch_address(db_session, user_a.id, "上海港")
 
-        addresses = await get_dispatch_addresses(db_session, user_b)
+        addresses = await get_dispatch_addresses(db_session, user_b.id)
 
         assert len(addresses) == 0
 
@@ -774,7 +817,8 @@ class TestDispatchAddresses:
     async def test_delete_address(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_dispatch_address, delete_dispatch_address
 
-        user_id = uuid.uuid4()
+        user = await create_test_user(db_session, "addr_del_user")
+        user_id = user.id
         address = await create_dispatch_address(db_session, user_id, "上海港")
 
         await delete_dispatch_address(db_session, address.id, user_id)
@@ -786,8 +830,9 @@ class TestDispatchAddresses:
     async def test_delete_address_not_found(self, db_session: AsyncSession):
         from app.services.dispatch_service import delete_dispatch_address
 
+        user = await create_test_user(db_session, "addr_notfound_user")
         with pytest.raises(AppException) as exc_info:
-            await delete_dispatch_address(db_session, uuid.uuid4(), uuid.uuid4())
+            await delete_dispatch_address(db_session, uuid.uuid4(), user.id)
 
         assert exc_info.value.code == 404
 
@@ -795,12 +840,12 @@ class TestDispatchAddresses:
     async def test_delete_address_wrong_user(self, db_session: AsyncSession):
         from app.services.dispatch_service import create_dispatch_address, delete_dispatch_address
 
-        user_a = uuid.uuid4()
-        user_b = uuid.uuid4()
-        address = await create_dispatch_address(db_session, user_a, "上海港")
+        user_a = await create_test_user(db_session, "addr_wrong_user_a")
+        user_b = await create_test_user(db_session, "addr_wrong_user_b")
+        address = await create_dispatch_address(db_session, user_a.id, "上海港")
 
         with pytest.raises(AppException) as exc_info:
-            await delete_dispatch_address(db_session, address.id, user_b)
+            await delete_dispatch_address(db_session, address.id, user_b.id)
 
         assert exc_info.value.code == 404
 

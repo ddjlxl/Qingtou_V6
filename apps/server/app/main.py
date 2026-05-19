@@ -8,7 +8,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.dispatch import router as dispatch_router
 from app.api.v1.fleet import router as fleet_router
 from app.core.config import settings
-from app.core.database import engine
+from app.core.database import engine, get_pool_status
 from app.core.exception_handlers import register_exception_handlers
 from app.core.logger import setup_logger
 from app.scheduler import init_scheduler, shutdown_scheduler
@@ -59,4 +59,9 @@ async def health_check():
         db_status = "ok"
     except Exception:
         db_status = "unavailable"
-    return {"status": "ok", "database": db_status}
+    pool = get_pool_status()
+    return {
+        "status": "ok",
+        "database": db_status,
+        "pool": pool,
+    }

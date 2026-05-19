@@ -21,10 +21,10 @@ class BusinessTypeRoute(BaseModel):
     business_type: Mapped[str] = mapped_column(
         String(50), nullable=False
     )
-    origin_name: Mapped[str] = mapped_column(
-        String(200), nullable=False
+    origin_name: Mapped[str | None] = mapped_column(
+        String(200), nullable=True
     )
     waypoints: Mapped[str | None] = mapped_column(Text, nullable=True)
-    dest_name: Mapped[str] = mapped_column(
-        String(200), nullable=False
+    dest_name: Mapped[str | None] = mapped_column(
+        String(200), nullable=True
     )

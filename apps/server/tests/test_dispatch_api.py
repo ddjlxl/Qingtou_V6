@@ -33,9 +33,27 @@ async def create_test_driver(db_session, name: str, phone: str):
     return driver
 
 
+async def _ensure_dispatcher(db_session, dispatcher_id: uuid.UUID):
+    from sqlalchemy import select
+    from app.models.user import User
+    result = await db_session.execute(select(User).where(User.id == dispatcher_id))
+    if result.scalar_one_or_none() is None:
+        user = User(
+            id=dispatcher_id,
+            username=f"dispatcher_{dispatcher_id.hex[:8]}",
+            password="$2b$12$placeholder",
+            name=f"dispatcher_{dispatcher_id.hex[:8]}",
+            role="dispatcher",
+            status="active",
+        )
+        db_session.add(user)
+        await db_session.commit()
+
+
 async def create_test_order(db_session, dispatcher_id: uuid.UUID, **kwargs):
     from app.services.dispatch_service import generate_order_no
 
+    await _ensure_dispatcher(db_session, dispatcher_id)
     order_no = await generate_order_no(db_session)
     order_data = {
         "id": uuid.uuid4(),
@@ -63,7 +81,7 @@ class TestCreateOrderAPI:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "pending"
-        assert data["order_no"].startswith("DD")
+        assert data["order_no"].startswith("T")
         assert data["customer_name"] is None
         assert data["origin_name"] is None
 
@@ -662,6 +680,74 @@ class TestRouteTemplatesAPI:
         assert data["origin_name"] == "新启运地"
         assert data["waypoints"] == ["新途径点"]
         assert data["dest_name"] == "新目的地"
+
+    @pytest.mark.asyncio
+    async def test_update_route_template_with_empty_origin(self, client: AsyncClient, db_session, auth_headers):
+        """
+        Bug: 路线模板更新时，不允许空的起运地，与 AC-007 不一致
+        AC-007: 如无历史记录则留空
+        """
+        from app.models.business_type_route import BusinessTypeRoute
+
+        route = BusinessTypeRoute(
+            id=uuid.uuid4(),
+            business_type="heavy_transport",
+            origin_name="旧启运地",
+            waypoints=None,
+            dest_name="旧目的地",
+        )
+        db_session.add(route)
+        await db_session.commit()
+
+        response = await client.put(
+            "/api/v1/dispatch/route-templates/heavy_transport",
+            json={
+                "origin_name": "",
+                "waypoints": None,
+                "dest_name": "新目的地",
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["origin_name"] is None
+        assert data["waypoints"] is None
+        assert data["dest_name"] == "新目的地"
+
+    @pytest.mark.asyncio
+    async def test_update_route_template_with_empty_dest(self, client: AsyncClient, db_session, auth_headers):
+        """
+        Bug: 路线模板更新时，不允许空的目的地，与 AC-007 不一致
+        AC-007: 如无历史记录则留空
+        """
+        from app.models.business_type_route import BusinessTypeRoute
+
+        route = BusinessTypeRoute(
+            id=uuid.uuid4(),
+            business_type="heavy_transport",
+            origin_name="旧启运地",
+            waypoints=None,
+            dest_name="旧目的地",
+        )
+        db_session.add(route)
+        await db_session.commit()
+
+        response = await client.put(
+            "/api/v1/dispatch/route-templates/heavy_transport",
+            json={
+                "origin_name": "新启运地",
+                "waypoints": None,
+                "dest_name": "",
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["origin_name"] == "新启运地"
+        assert data["waypoints"] is None
+        assert data["dest_name"] is None
 
     @pytest.mark.asyncio
     async def test_route_templates_unauthorized(self, client: AsyncClient):
