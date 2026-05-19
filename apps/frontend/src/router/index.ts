@@ -3,6 +3,7 @@ import { LoginForm, useAuthStore } from '@/modules/auth'
 import { AppLayout } from '@/shared/components'
 import { FleetPage } from '@/modules/fleet'
 import { DispatchPage } from '@/modules/dispatch'
+import { DriverWorkbench } from '@/modules/driver'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,18 +15,28 @@ const router = createRouter({
       children: [
         {
           path: '',
-          redirect: '/fleet',
+          redirect: () => {
+            const authStore = useAuthStore()
+            return authStore.userRole === 'driver' ? '/driver' : '/fleet'
+          },
         },
         {
           path: 'fleet',
           name: 'Fleet',
           component: FleetPage,
+          meta: { requiresAuth: true, roles: ['admin', 'dispatcher'] },
         },
         {
           path: 'dispatch',
           name: 'Dispatch',
           component: DispatchPage,
           meta: { requiresAuth: true, roles: ['admin', 'dispatcher'] },
+        },
+        {
+          path: 'driver',
+          name: 'Driver',
+          component: DriverWorkbench,
+          meta: { requiresAuth: true, roles: ['driver'] },
         },
       ],
     },
