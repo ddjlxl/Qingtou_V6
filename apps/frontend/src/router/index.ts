@@ -3,7 +3,7 @@ import { LoginForm, useAuthStore } from '@/modules/auth'
 import { AppLayout } from '@/shared/components'
 import { FleetPage } from '@/modules/fleet'
 import { DispatchPage } from '@/modules/dispatch'
-import { DriverWorkbench } from '@/modules/driver'
+import { DriverWorkbench, DriverHistory, DriverProfile } from '@/modules/driver'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -36,6 +36,18 @@ const router = createRouter({
           path: 'driver',
           name: 'Driver',
           component: DriverWorkbench,
+          meta: { requiresAuth: true, roles: ['driver'] },
+        },
+        {
+          path: 'driver/history',
+          name: 'DriverHistory',
+          component: DriverHistory,
+          meta: { requiresAuth: true, roles: ['driver'] },
+        },
+        {
+          path: 'driver/profile',
+          name: 'DriverProfile',
+          component: DriverProfile,
           meta: { requiresAuth: true, roles: ['driver'] },
         },
       ],

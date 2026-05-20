@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
+import MobileTabBar from './MobileTabBar.vue'
 import {
   Menu as IconMenu,
   Van,
@@ -23,6 +24,23 @@ const displayName = computed(() => authStore.user?.name || authStore.user?.usern
 
 const isDriver = computed(() => authStore.userRole === 'driver')
 
+const isMobile = ref(false)
+let mediaQuery: MediaQueryList
+
+function checkMobile() {
+  isMobile.value = mediaQuery.matches && authStore.userRole === 'driver'
+}
+
+onMounted(() => {
+  mediaQuery = window.matchMedia('(max-width: 767px)')
+  mediaQuery.addEventListener('change', checkMobile)
+  checkMobile()
+})
+
+onUnmounted(() => {
+  mediaQuery.removeEventListener('change', checkMobile)
+})
+
 function handleLogout() {
   authStore.logout()
   router.push('/login')
@@ -30,7 +48,11 @@ function handleLogout() {
 </script>
 
 <template>
-  <el-container class="app-layout">
+  <!-- 桌面端：现有侧边栏布局 -->
+  <el-container
+    v-if="!isMobile"
+    class="app-layout"
+  >
     <el-aside
       :width="isCollapsed ? '64px' : '220px'"
       class="app-aside"
@@ -121,6 +143,20 @@ function handleLogout() {
       </el-main>
     </el-container>
   </el-container>
+
+  <!-- 移动端：顶部标题栏 + 内容 + 底部 Tab 栏 -->
+  <div
+    v-else
+    class="app-layout-mobile"
+  >
+    <div class="mobile-topbar">
+      我的任务
+    </div>
+    <div class="mobile-content">
+      <router-view />
+    </div>
+    <MobileTabBar />
+  </div>
 </template>
 
 <style scoped>
@@ -207,5 +243,31 @@ function handleLogout() {
 .app-main {
   background: #f0f2f5;
   overflow-y: auto;
+}
+
+.app-layout-mobile {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.mobile-topbar {
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.mobile-content {
+  flex: 1;
+  overflow: hidden;
 }
 </style>

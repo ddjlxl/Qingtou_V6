@@ -41,6 +41,7 @@ export default tseslint.config(
       'src/modules/dispatch/components/OrderFormDialog.vue',
       'src/modules/dispatch/components/OrderTable.vue',
       'src/modules/dispatch/stores/useDispatchStore.ts',
+      'src/modules/driver/stores/useDriverStore.ts',
       'src/modules/fleet/components/TransportRecordManagement.vue',
       'src/modules/fleet/stores/useFleetStore.ts',
     ],

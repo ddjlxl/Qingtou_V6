@@ -9,8 +9,10 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = [
         "http://localhost:9527",
         "http://localhost:9528",
+        "http://localhost:9529",
         "http://127.0.0.1:9527",
         "http://127.0.0.1:9528",
+        "http://127.0.0.1:9529",
     ]
 
     class Config:

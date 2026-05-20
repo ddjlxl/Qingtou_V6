@@ -4,9 +4,12 @@ import { driverService } from '../services/driverService'
 import type { DriverOrder, DriverOrderListParams } from '../types'
 import type { OrderStatus, OrderStatusCounts } from '@/modules/dispatch/types/order'
 
+let requestId = 0
+
 export const useDriverStore = defineStore('driver', () => {
   const orders = ref<DriverOrder[]>([])
   const loading = ref(false)
+  const loadingMore = ref(false)
   const error = ref<string | null>(null)
   const page = ref(1)
   const pageSize = ref(20)
@@ -20,6 +23,8 @@ export const useDriverStore = defineStore('driver', () => {
     overdue: 0,
   })
 
+  const hasMore = computed(() => orders.value.length < total.value)
+
   const tabCounts = computed(() => ({
     all: total.value,
     pending: statusCounts.value.pending,
@@ -32,6 +37,7 @@ export const useDriverStore = defineStore('driver', () => {
   async function fetchOrders() {
     loading.value = true
     error.value = null
+    const currentRequestId = ++requestId
     try {
       const params: DriverOrderListParams = {
         page: page.value,
@@ -41,13 +47,44 @@ export const useDriverStore = defineStore('driver', () => {
         params.status = activeTab.value
       }
       const result = await driverService.getOrders(params)
+      if (currentRequestId !== requestId) return
       orders.value = result.items
       total.value = result.total
       statusCounts.value = result.statusCounts
     } catch (e) {
+      if (currentRequestId !== requestId) return
       error.value = e instanceof Error ? e.message : '获取任务列表失败'
     } finally {
-      loading.value = false
+      if (currentRequestId === requestId) {
+        loading.value = false
+      }
+    }
+  }
+
+  async function loadMore() {
+    if (loadingMore.value || !hasMore.value) return
+    loadingMore.value = true
+    const currentRequestId = ++requestId
+    try {
+      page.value++
+      const params: DriverOrderListParams = {
+        page: page.value,
+        pageSize: pageSize.value,
+      }
+      if (activeTab.value !== 'all') {
+        params.status = activeTab.value
+      }
+      const result = await driverService.getOrders(params)
+      if (currentRequestId !== requestId) return
+      orders.value.push(...result.items)
+    } catch (e) {
+      if (currentRequestId !== requestId) return
+      page.value--
+      error.value = e instanceof Error ? e.message : '加载失败'
+    } finally {
+      if (currentRequestId === requestId) {
+        loadingMore.value = false
+      }
     }
   }
 
@@ -91,10 +128,11 @@ export const useDriverStore = defineStore('driver', () => {
   }
 
   return {
-    orders, loading, error,
+    orders, loading, loadingMore, error,
     page, pageSize, total,
     activeTab, statusCounts, tabCounts,
-    fetchOrders, startOrder, completeOrder,
+    hasMore,
+    fetchOrders, loadMore, startOrder, completeOrder,
     setTab, setPage,
   }
 })

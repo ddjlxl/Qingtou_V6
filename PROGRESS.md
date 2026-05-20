@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-17（SQLite → PostgreSQL 迁移完成）
+> 最后更新：2026-05-20（dispatch-fleet-linkage 联动全部完成，M1 MVP 核心功能已实现）
 
 ---
 
@@ -13,7 +13,9 @@
 | M1: MVP | Phase 1.2 基础设施 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — auth 认证 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — fleet 车队管理 | ✅ 已完成 |
-| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | 🔄 编码实现中 |
+| M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | ✅ 已完成 |
+| M1: MVP | Phase 1.3 核心业务 — driver 司机端 | ✅ 已完成 |
+| M1: MVP | Phase 1.3 核心业务 — dispatch-fleet-linkage 联动 | ✅ 已完成 |
 | M2: 完整版 | - | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -159,33 +161,22 @@
 - [x] 技能总数：17 → 21
 - [x] 相关文档已同步更新
 
-离苦集，也会提高人的风俗哇SXDCFROP【]\---
+### Phase 1.3：核心业务 — driver 司机端 ✅
 
-## 下一步
+- [x] 需求文档：[specs/features/driver-mobile/requirements.md](file:///e:/Qingtou_V6/specs/features/driver-mobile/requirements.md)
+- [x] 设计文档：[specs/features/driver-mobile/design.md](file:///e:/Qingtou_V6/specs/features/driver-mobile/design.md)
+- [x] 任务规划：[specs/features/driver-mobile/tasks.md](file:///e:/Qingtou_V6/specs/features/driver-mobile/tasks.md)
+- [x] 后端 API：[api/v1/driver.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/driver.py) — 司机端专用接口（任务列表/开始运输/标记完成）
+- [x] 前端页面：DriverWorkbench.vue + DriverHistory.vue + DriverProfile.vue
+- [x] 前端 Store：useDriverStore.ts
+- [x] 前端 Service：driverService.ts
+- [x] 前端组件：DriverOrderCard.vue
+- [x] 前端类型：types/index.ts
+- [x] 前端测试：__tests__/useDriverStore.test.ts
+- [x] 路由配置：`/driver`、`/driver/history`、`/driver/profile`（roles=['driver']）
+- [x] 登录跳转：按角色动态跳转（driver → /driver，其他 → /fleet）
 
-### Phase 1.3：核心业务 — fleet 车队管理 🚀
-
-**auth 用户认证** ✅ 已完成（6/6 任务全部通过）
-
-**fleet 车队管理**（阶段 0 ✅，阶段 1 ✅，阶段 2 ✅，阶段 3 ✅，阶段 4 ✅，阶段 5 ✅）
-- [x] 需求澄清：[specs/features/fleet/requirements.md](file:///e:/Qingtou_V6/specs/features/fleet/requirements.md)
-- [x] 技术设计：[specs/features/fleet/design.md](file:///e:/Qingtou_V6/specs/features/fleet/design.md)
-- [x] 任务规划：[specs/features/fleet/tasks.md](file:///e:/Qingtou_V6/specs/features/fleet/tasks.md)
-- [x] 编码实现：41/41 任务已完成 🎉
-
-| 阶段 | 任务范围 | 任务数 | 状态 | 检查点 Commit |
-|------|---------|--------|------|--------------|
-| 阶段 0: 基础设施 | T-001 ~ T-010 | 10 | ✅ | 未提交（等待手动确认） |
-| 阶段 1: 车辆管理 | T-101 ~ T-109 | 9 | ✅ | 未提交（等待手动确认） |
-| 阶段 2: 司机管理 | T-201 ~ T-208 | 8 | ✅ | 未提交（等待手动确认） |
-| 阶段 3: 证照管理 | T-301 ~ T-308 | 8 | ✅ | 未提交（等待手动确认） |
-| 阶段 4: 运输流水 | T-401 ~ T-405 | 5 | ✅ | 未提交（等待手动确认） |
-| 阶段 5: 车队统计 | T-501 ~ T-507 | 7 | ✅ | 未提交（等待手动确认） |
-
-**当前任务**：fleet 模块全部完成 ✅
-**检查点约定**：每完成一个阶段后 git commit，记录 commit hash 到上表
-
-### Phase 1.3：核心业务 — dispatch 调度中心 🔄
+### Phase 1.3：核心业务 — dispatch 调度中心 ✅
 
 - [x] 需求文档：[specs/features/dispatch/requirements.md](file:///e:/Qingtou_V6/specs/features/dispatch/requirements.md)（42 条 AC）
 - [x] 技术设计文档：[specs/features/dispatch/design.md](file:///e:/Qingtou_V6/specs/features/dispatch/design.md)
@@ -205,19 +196,43 @@
 - [x] 前端 Components：OrderFormDialog、OrderTable、AssignDialog、AddressDialog、RouteTemplateDialog + 5 个 section 组件
 - [x] 前端 Composables：[composables/useOrderForm.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/composables/useOrderForm.ts)
 - [x] 前端测试：[__tests__/OrderFormDialog.test.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/__tests__/OrderFormDialog.test.ts)（9 tests）
-- [ ] 任务规划文档（待创建 tasks.md）
-- [ ] 后端测试补充
+
+---
+
+## 下一步
+
+### Phase 2.1：业务补齐 — warehouse 仓库管理 ⬜
+
+后续模块：warehouse 仓库管理
+
+---
+
+## 已完成
+
+### Phase 1.3：核心业务 — dispatch-fleet-linkage 联动 ✅
+
+- [x] 需求文档：[specs/features/dispatch-fleet-linkage/requirements.md](file:///e:/Qingtou_V6/specs/features/dispatch-fleet-linkage/requirements.md)（24 条 AC）
+- [x] 技术设计：[specs/features/dispatch-fleet-linkage/design.md](file:///e:/Qingtou_V6/specs/features/dispatch-fleet-linkage/design.md)（四轮审查通过）
+- [x] 任务规划：[specs/features/dispatch-fleet-linkage/tasks.md](file:///e:/Qingtou_V6/specs/features/dispatch-fleet-linkage/tasks.md)（9 个任务，6 个阶段）
+
+| 阶段 | 任务范围 | 任务数 | 状态 | 说明 |
+|------|---------|--------|------|------|
+| 阶段 0: 数据库迁移 | Task-01 | 1 | ✅ | Order + TransportRecord 加 container_status 字段 |
+| 阶段 1: 调度端空重箱 | Task-02 ~ Task-03 | 2 | ✅ | 后端 Schema + 前端 dispatch 侧（ContainerSection.vue）+ fleet 侧（transport-record.ts + TransportRecordManagement.vue 空重箱列） |
+| 阶段 2: 完成→流水联动 | Task-04 | 1 | ✅ | complete_order 自动创建运输流水 |
+| 阶段 3: 删除→流水同步删除 | Task-05 | 1 | ✅ | delete_order 同步删除关联流水 |
+| 阶段 4: 司机账号联动 | Task-06 | 1 | ✅ | 创建/修改/删除司机同步处理 User |
+| 阶段 5: 导入格式升级 | Task-07 | 1 | ✅ | 7/8 列兼容 + container_status 校验 |
+| 阶段 6: 司机工作台 | Task-08 ~ Task-09 | 2 | ✅ | 司机端 API + 前端工作台页面 |
+
+---
+
+### dispatch 模块技术债（待修复）
+
 - [ ] 文件超行拆分（OrderFormDialog 561 行、OrderTable 358 行、dispatch_service.py 419 行）
 - [ ] ESLint error 修复（11 个 vue/no-mutating-props）
-
-**新窗口启动指令**：
-```
-继续 dispatch 调度中心模块，从任务规划开始。
-技术设计文档：specs/features/dispatch/design.md（已完成，两轮审查通过）
-关键设计决策：Order 模型迁移、DispatchAddress 独立表、分配补偿事务、APScheduler 超时检测
-```
-
-后续模块：dispatch 调度中心 → driver 司机端
+- [ ] 后端测试补充
+- [ ] 任务规划文档 tasks.md 待创建
 
 ---
 

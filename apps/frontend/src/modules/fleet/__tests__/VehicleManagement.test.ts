@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { nextTick } from 'vue'
 import { VehicleStatus, Ownership } from '../types/vehicle'
+import type { Vehicle } from '../types/vehicle'
 
 const {
   mockFetchVehicles,
@@ -20,7 +21,7 @@ const {
   mockElMessageError: vi.fn(),
 }))
 
-let mockVehicles: any[] = []
+let mockVehicles: Vehicle[] = []
 let mockVehicleLoading = false
 
 vi.mock('element-plus', async () => {
@@ -70,6 +71,13 @@ function makeVehicle(overrides: Record<string, unknown> = {}) {
     updatedAt: '2026-01-01T00:00:00Z',
     ...overrides,
   }
+}
+
+interface VehicleManagementVM {
+  handleEdit: (vehicle: Vehicle) => void
+  handleDisable: (vehicle: Vehicle) => Promise<void>
+  handleDelete: (vehicle: Vehicle) => Promise<void>
+  handleDialogSuccess: () => void
 }
 
 function createWrapper() {
@@ -164,7 +172,7 @@ describe('VehicleManagement', () => {
   describe('edit vehicle', () => {
     it('opens dialog when handleEdit is called', async () => {
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       vm.handleEdit(makeVehicle({ plateNo: '粤A12345' }))
       await nextTick()
       const dialog = wrapper.find('.form-dialog')
@@ -176,7 +184,7 @@ describe('VehicleManagement', () => {
     it('calls disableVehicle on confirm', async () => {
       mockDisableVehicle.mockResolvedValue(undefined)
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       await vm.handleDisable(makeVehicle({ id: 'v1', plateNo: '粤A12345' }))
       expect(mockElMessageBoxConfirm).toHaveBeenCalled()
       expect(mockDisableVehicle).toHaveBeenCalledWith('v1')
@@ -185,7 +193,7 @@ describe('VehicleManagement', () => {
     it('does not call disableVehicle on cancel', async () => {
       mockElMessageBoxConfirm.mockRejectedValue('cancel')
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       await vm.handleDisable(makeVehicle({ id: 'v1', plateNo: '粤A12345' }))
       expect(mockDisableVehicle).not.toHaveBeenCalled()
     })
@@ -194,7 +202,7 @@ describe('VehicleManagement', () => {
       mockElMessageBoxConfirm.mockResolvedValue('confirm')
       mockDisableVehicle.mockRejectedValue(new Error('停用失败'))
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       await vm.handleDisable(makeVehicle({ id: 'v1', plateNo: '粤A12345' }))
       expect(mockDisableVehicle).toHaveBeenCalledWith('v1')
       expect(mockElMessageError).toHaveBeenCalled()
@@ -207,7 +215,7 @@ describe('VehicleManagement', () => {
       mockElMessageBoxConfirm.mockResolvedValue('confirm')
       mockFetchVehicles.mockClear()
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       await vm.handleDelete(makeVehicle({ id: 'v1', plateNo: '粤A12345' }))
       expect(mockDeleteVehicle).toHaveBeenCalledWith('v1')
       expect(mockFetchVehicles).toHaveBeenCalledTimes(2)
@@ -216,7 +224,7 @@ describe('VehicleManagement', () => {
     it('does not call deleteVehicle on cancel', async () => {
       mockElMessageBoxConfirm.mockRejectedValue('cancel')
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       await vm.handleDelete(makeVehicle({ id: 'v1', plateNo: '粤A12345' }))
       expect(mockDeleteVehicle).not.toHaveBeenCalled()
     })
@@ -225,7 +233,7 @@ describe('VehicleManagement', () => {
       mockElMessageBoxConfirm.mockResolvedValue('confirm')
       mockDeleteVehicle.mockRejectedValue(new Error('删除失败'))
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       await vm.handleDelete(makeVehicle({ id: 'v1', plateNo: '粤A12345' }))
       expect(mockDeleteVehicle).toHaveBeenCalledWith('v1')
       expect(mockElMessageError).toHaveBeenCalled()
@@ -236,7 +244,7 @@ describe('VehicleManagement', () => {
     it('reloads vehicles when dialog emits success', async () => {
       mockFetchVehicles.mockClear()
       const wrapper = createWrapper()
-      const vm = wrapper.vm as any
+      const vm = wrapper.vm as unknown as VehicleManagementVM
       vm.handleDialogSuccess()
       expect(mockFetchVehicles).toHaveBeenCalled()
     })

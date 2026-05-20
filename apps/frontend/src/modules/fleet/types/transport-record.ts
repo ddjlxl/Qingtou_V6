@@ -10,6 +10,7 @@ export interface TransportRecord {
   driverId: string
   driverName?: string
   importedAt: string
+  containerStatus?: 'heavy' | 'empty' | null
 }
 
 export interface TransportRecordListParams {

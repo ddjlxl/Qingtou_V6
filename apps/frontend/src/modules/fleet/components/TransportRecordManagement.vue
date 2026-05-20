@@ -187,6 +187,15 @@ onMounted(() => {
         min-width="120"
       />
       <el-table-column
+        prop="containerStatus"
+        label="空重箱"
+        min-width="80"
+      >
+        <template #default="{ row }">
+          {{ row.containerStatus === 'heavy' ? '重箱' : row.containerStatus === 'empty' ? '空箱' : '-' }}
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="vehiclePlateNo"
         label="执行车辆"
         min-width="120"

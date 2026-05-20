@@ -22,7 +22,9 @@ const {
   mockElMessageError: vi.fn(),
 }))
 
-let mockVehicles: any[] = []
+import type { Vehicle } from '../types/vehicle'
+
+let mockVehicles: Vehicle[] = []
 
 vi.mock('element-plus', async () => {
   const actual = await vi.importActual('element-plus')

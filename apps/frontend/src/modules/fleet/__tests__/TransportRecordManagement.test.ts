@@ -210,4 +210,117 @@ describe('TransportRecordManagement', () => {
     const wrapper = createWrapper()
     expect(wrapper.findAll('.statistics-empty').length).toBe(2)
   })
+
+  it('renders container status column in table', () => {
+    const wrapper = createWrapper()
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    const containerStatusColumn = columns.find(
+      (col) => col.props('prop') === 'containerStatus'
+    )
+    expect(containerStatusColumn).toBeDefined()
+    expect(containerStatusColumn?.props('label')).toBe('空重箱')
+  })
+
+  it('container status column template renders heavy value', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+        containerStatus: 'heavy',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    const containerStatusColumn = columns.find(
+      (col) => col.props('prop') === 'containerStatus'
+    )
+    expect(containerStatusColumn).toBeDefined()
+  })
+
+  it('container status column template renders empty value', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+        containerStatus: 'empty',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    const containerStatusColumn = columns.find(
+      (col) => col.props('prop') === 'containerStatus'
+    )
+    expect(containerStatusColumn).toBeDefined()
+  })
+
+  it('container status column template handles null value', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+        containerStatus: null,
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    const containerStatusColumn = columns.find(
+      (col) => col.props('prop') === 'containerStatus'
+    )
+    expect(containerStatusColumn).toBeDefined()
+  })
+
+  it('container status column template handles undefined value', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    const containerStatusColumn = columns.find(
+      (col) => col.props('prop') === 'containerStatus'
+    )
+    expect(containerStatusColumn).toBeDefined()
+  })
 })

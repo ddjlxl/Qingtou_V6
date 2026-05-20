@@ -28,6 +28,7 @@ import {
   Search,
   FolderOpened,
   CircleCloseFilled,
+  Clock,
 } from '@element-plus/icons-vue'
 
 interface Props {
@@ -48,6 +49,7 @@ const iconMap: Record<string, Component> = {
   Search,
   FolderOpened,
   CircleCloseFilled,
+  Clock,
 }
 
 const iconComponent = computed(() => iconMap[props.icon] ?? PictureFilled)

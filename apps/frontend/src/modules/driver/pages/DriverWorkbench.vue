@@ -1,16 +1,33 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useDriverStore } from '../stores/useDriverStore'
-import { EmptyState } from '@/shared/components'
-import { OrderStatus, ContainerStatus } from '@/modules/dispatch/types/order'
-import type { DriverOrder } from '../types'
+import { EmptyState, LoadingSpinner } from '@/shared/components'
+import { OrderStatus } from '@/modules/dispatch/types/order'
+import DriverOrderCard from '../components/DriverOrderCard.vue'
 
 const store = useDriverStore()
 
+const isMobile = ref(false)
+let mediaQuery: MediaQueryList
+
+function onMediaChange(e: MediaQueryListEvent) {
+  isMobile.value = e.matches
+}
+
 onMounted(() => {
+  mediaQuery = window.matchMedia('(max-width: 767px)')
+  isMobile.value = mediaQuery.matches
+  mediaQuery.addEventListener('change', onMediaChange)
   store.fetchOrders()
 })
+
+onUnmounted(() => {
+  mediaQuery.removeEventListener('change', onMediaChange)
+})
+
+function loadMoreData() {
+  store.loadMore()
+}
 
 const STATUS_TABS: { label: string; value: OrderStatus | 'all' }[] = [
   { label: '全部', value: 'all' },
@@ -18,64 +35,6 @@ const STATUS_TABS: { label: string; value: OrderStatus | 'all' }[] = [
   { label: '运输中', value: OrderStatus.TRANSITING },
   { label: '已完成', value: OrderStatus.COMPLETED },
 ]
-
-const statusTagType: Record<string, 'info' | 'warning' | 'primary' | 'success' | 'danger'> = {
-  [OrderStatus.PENDING]: 'info',
-  [OrderStatus.ASSIGNED]: 'warning',
-  [OrderStatus.TRANSITING]: 'primary',
-  [OrderStatus.COMPLETED]: 'success',
-  [OrderStatus.OVERDUE]: 'danger',
-}
-
-const statusLabel: Record<string, string> = {
-  [OrderStatus.PENDING]: '待分配',
-  [OrderStatus.ASSIGNED]: '待发车',
-  [OrderStatus.TRANSITING]: '运输中',
-  [OrderStatus.COMPLETED]: '已完成',
-  [OrderStatus.OVERDUE]: '超时',
-}
-
-function canStart(order: DriverOrder): boolean {
-  return order.status === OrderStatus.ASSIGNED
-}
-
-function canComplete(order: DriverOrder): boolean {
-  return order.status === OrderStatus.TRANSITING
-}
-
-async function handleStart(order: DriverOrder) {
-  try {
-    await ElMessageBox.confirm(
-      `确认开始运输任务 ${order.orderNo}？`,
-      '开始运输',
-      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
-    )
-    await store.startOrder(order.id)
-    ElMessage.success('已开始运输')
-  } catch {
-    // 用户取消
-  }
-}
-
-async function handleComplete(order: DriverOrder) {
-  try {
-    await ElMessageBox.confirm(
-      `确认完成任务 ${order.orderNo}？`,
-      '完成任务',
-      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
-    )
-    await store.completeOrder(order.id)
-    ElMessage.success('任务已完成')
-  } catch {
-    // 用户取消
-  }
-}
-
-function containerStatusLabel(status: string | null): string {
-  if (status === ContainerStatus.HEAVY) return '重箱'
-  if (status === ContainerStatus.EMPTY) return '空箱'
-  return '-'
-}
 </script>
 
 <template>
@@ -113,80 +72,52 @@ function containerStatusLabel(status: string | null): string {
         description="当前没有分配给您的任务"
       />
 
-      <div
-        v-for="order in store.orders"
-        :key="order.id"
-        class="driver-workbench__card"
-      >
-        <div class="driver-workbench__card-header">
-          <span class="driver-workbench__order-no">{{ order.orderNo }}</span>
-          <el-tag
-            :type="statusTagType[order.status] ?? 'info'"
-            size="small"
-          >
-            {{ statusLabel[order.status] ?? order.status }}
-          </el-tag>
-        </div>
-
-        <div class="driver-workbench__card-body">
-          <div class="driver-workbench__info-row">
-            <span class="driver-workbench__label">客户</span>
-            <span class="driver-workbench__value">{{ order.customerName || '-' }}</span>
-          </div>
-          <div class="driver-workbench__info-row">
-            <span class="driver-workbench__label">路线</span>
-            <span class="driver-workbench__value">
-              {{ order.originName || '-' }} → {{ order.destName || '-' }}
-            </span>
-          </div>
-          <div class="driver-workbench__info-row">
-            <span class="driver-workbench__label">箱号</span>
-            <span class="driver-workbench__value">{{ order.containerNo || '-' }}</span>
-          </div>
-          <div class="driver-workbench__info-row">
-            <span class="driver-workbench__label">空重箱</span>
-            <span class="driver-workbench__value">{{ containerStatusLabel(order.containerStatus) }}</span>
-          </div>
-          <div class="driver-workbench__info-row">
-            <span class="driver-workbench__label">车牌</span>
-            <span class="driver-workbench__value">{{ order.vehiclePlateNo || '-' }}</span>
-          </div>
-        </div>
+      <!-- 桌面端：卡片 + 分页 -->
+      <template v-if="!isMobile">
+        <DriverOrderCard
+          v-for="order in store.orders"
+          :key="order.id"
+          :order="order"
+        />
 
         <div
-          v-if="canStart(order) || canComplete(order)"
-          class="driver-workbench__card-actions"
+          v-if="store.total > store.pageSize"
+          class="driver-workbench__pagination"
         >
-          <el-button
-            v-if="canStart(order)"
-            type="primary"
-            size="small"
-            @click="handleStart(order)"
-          >
-            开始运输
-          </el-button>
-          <el-button
-            v-if="canComplete(order)"
-            type="success"
-            size="small"
-            @click="handleComplete(order)"
-          >
-            完成任务
-          </el-button>
+          <el-pagination
+            :current-page="store.page"
+            :page-size="store.pageSize"
+            :total="store.total"
+            layout="prev, pager, next"
+            @current-change="store.setPage"
+          />
         </div>
-      </div>
+      </template>
 
+      <!-- 移动端：无限滚动 -->
       <div
-        v-if="store.total > store.pageSize"
-        class="driver-workbench__pagination"
+        v-else
+        v-infinite-scroll="loadMoreData"
+        :infinite-scroll-disabled="store.loadingMore || !store.hasMore"
+        :infinite-scroll-distance="50"
+        class="driver-workbench__scroll-container"
       >
-        <el-pagination
-          :current-page="store.page"
-          :page-size="store.pageSize"
-          :total="store.total"
-          layout="prev, pager, next"
-          @current-change="store.setPage"
+        <DriverOrderCard
+          v-for="order in store.orders"
+          :key="order.id"
+          :order="order"
         />
+
+        <LoadingSpinner
+          v-if="store.loadingMore"
+          text="加载中..."
+        />
+        <p
+          v-if="!store.hasMore && store.orders.length > 0"
+          class="driver-workbench__no-more"
+        >
+          没有更多了
+        </p>
       </div>
     </div>
   </div>
@@ -217,61 +148,36 @@ function containerStatusLabel(status: string | null): string {
   min-height: 200px;
 }
 
-.driver-workbench__card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-
-.driver-workbench__card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.driver-workbench__order-no {
-  font-weight: 600;
-  font-size: 15px;
-  color: #303133;
-}
-
-.driver-workbench__card-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 24px;
-}
-
-.driver-workbench__info-row {
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-}
-
-.driver-workbench__label {
-  color: #909399;
-  width: 56px;
-  flex-shrink: 0;
-}
-
-.driver-workbench__value {
-  color: #606266;
-}
-
-.driver-workbench__card-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-}
-
 .driver-workbench__pagination {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+.driver-workbench__scroll-container {
+  min-height: 200px;
+}
+
+.driver-workbench__no-more {
+  text-align: center;
+  color: #c0c4cc;
+  font-size: 13px;
+  padding: 16px 0;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .driver-workbench {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+  }
+
+  .driver-workbench__tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 </style>

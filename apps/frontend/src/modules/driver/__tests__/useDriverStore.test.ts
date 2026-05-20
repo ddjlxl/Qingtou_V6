@@ -150,4 +150,164 @@ describe('useDriverStore', () => {
       })
     })
   })
+
+  describe('hasMore', () => {
+    it('returns true when orders length < total', () => {
+      const store = useDriverStore()
+      store.orders = [...mockOrderListResponse.items] as never[]
+      store.total = 45
+
+      expect(store.hasMore).toBe(true)
+    })
+
+    it('returns false when orders length >= total', () => {
+      const store = useDriverStore()
+      store.orders = [...mockOrderListResponse.items] as never[]
+      store.total = 1
+
+      expect(store.hasMore).toBe(false)
+    })
+  })
+
+  describe('loadMore', () => {
+    const page2Response: DriverOrderListResponse = {
+      items: [
+        {
+          id: '2',
+          orderNo: 'QT20260101002',
+          status: OrderStatus.TRANSITING,
+          customerName: '客户B',
+          customerPhone: null,
+          originName: '北京',
+          destName: '天津',
+          waypoints: null,
+          containerNo: 'EFGH5678',
+          containerType: null,
+          sealNo: null,
+          businessType: null,
+          containerStatus: ContainerStatus.EMPTY,
+          documents: null,
+          driverId: 'd1',
+          driverName: '张司机',
+          vehicleId: 'v1',
+          vehiclePlateNo: '粤A88888',
+          dispatcherId: 'dp1',
+          dispatcherName: '调度员',
+          remark: null,
+          assignedAt: '2026-01-01T08:00:00',
+          startedAt: '2026-01-01T09:00:00',
+          completedAt: null,
+          createdAt: '2026-01-01T07:00:00',
+          updatedAt: '2026-01-01T09:00:00',
+        },
+      ],
+      total: 45,
+      page: 2,
+      pageSize: 20,
+      statusCounts: {
+        pending: 0,
+        assigned: 0,
+        transiting: 1,
+        completed: 0,
+        overdue: 0,
+      },
+    }
+
+    it('appends new data to existing orders', async () => {
+      vi.spyOn(driverService.driverService, 'getOrders').mockResolvedValue(page2Response)
+      const store = useDriverStore()
+      store.orders = [...mockOrderListResponse.items] as never[]
+      store.total = 45
+      store.page = 1
+
+      await store.loadMore()
+
+      expect(store.page).toBe(2)
+      expect(store.orders).toHaveLength(2)
+      expect(store.orders[0].orderNo).toBe('QT20260101001')
+      expect(store.orders[1].orderNo).toBe('QT20260101002')
+      expect(store.loadingMore).toBe(false)
+    })
+
+    it('does not request when loadingMore is true', async () => {
+      const spy = vi.spyOn(driverService.driverService, 'getOrders').mockResolvedValue(page2Response)
+      const store = useDriverStore()
+      store.orders = [...mockOrderListResponse.items] as never[]
+      store.total = 45
+      store.page = 1
+      store.loadingMore = true
+
+      await store.loadMore()
+
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('does not request when hasMore is false', async () => {
+      const spy = vi.spyOn(driverService.driverService, 'getOrders').mockResolvedValue(page2Response)
+      const store = useDriverStore()
+      store.orders = [...mockOrderListResponse.items] as never[]
+      store.total = 1
+      store.page = 1
+
+      await store.loadMore()
+
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('rolls back page and preserves orders on failure', async () => {
+      vi.spyOn(driverService.driverService, 'getOrders').mockRejectedValue(new Error('加载失败'))
+      const store = useDriverStore()
+      store.orders = [...mockOrderListResponse.items] as never[]
+      store.total = 45
+      store.page = 1
+
+      await store.loadMore()
+
+      expect(store.page).toBe(1)
+      expect(store.orders).toHaveLength(1)
+      expect(store.error).toBe('加载失败')
+      expect(store.loadingMore).toBe(false)
+    })
+  })
+
+  describe('fetchOrders race condition', () => {
+    it('discards stale response when tab switches quickly', async () => {
+      let resolveFirst: (value: unknown) => void
+      let resolveSecond: (value: unknown) => void
+      const firstPromise = new Promise((resolve) => { resolveFirst = resolve })
+      const secondPromise = new Promise((resolve) => { resolveSecond = resolve })
+
+      const spy = vi.spyOn(driverService.driverService, 'getOrders')
+      spy.mockReturnValueOnce(firstPromise)
+      spy.mockReturnValueOnce(secondPromise)
+
+      const store = useDriverStore()
+
+      const firstCall = store.fetchOrders()
+      const secondCall = store.fetchOrders()
+
+      const firstResponse: DriverOrderListResponse = {
+        items: [{ ...mockOrderListResponse.items[0], id: 'stale' }] as never[],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+        statusCounts: mockOrderListResponse.statusCounts,
+      }
+      const secondResponse: DriverOrderListResponse = {
+        items: [{ ...mockOrderListResponse.items[0], id: 'fresh' }] as never[],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+        statusCounts: mockOrderListResponse.statusCounts,
+      }
+
+      resolveSecond!(secondResponse)
+      resolveFirst!(firstResponse)
+
+      await Promise.all([firstCall, secondCall])
+
+      expect(store.orders[0].id).toBe('fresh')
+      expect(store.loading).toBe(false)
+    })
+  })
 })

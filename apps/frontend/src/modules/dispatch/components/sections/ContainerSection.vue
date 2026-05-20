@@ -33,7 +33,10 @@ const containerStatus = computed({
   </el-divider>
   <el-row :gutter="16">
     <el-col :span="6">
-      <el-form-item label="空重箱" prop="containerStatus">
+      <el-form-item
+        label="空重箱"
+        prop="containerStatus"
+      >
         <el-select
           v-model="containerStatus"
           placeholder="请选择"
