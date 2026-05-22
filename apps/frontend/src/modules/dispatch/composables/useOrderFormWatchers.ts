@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import type { OrderFormState } from './useOrderForm'
 import type { Order } from '../types/order'
 import { dispatchService } from '../services/dispatchService'
-import type { AvailableDriver, AvailableVehicle } from '../types/order'
+import type { AvailableDriver, AvailableVehicle, DocumentType, ContainerStatus } from '../types/order'
 import { fillFormFromOrder, resetForm } from './useOrderFormHelpers'
 
 function watchVisible(
@@ -42,6 +42,8 @@ function watchBusinessType(
         form.originName = ''
         form.waypoints = []
         form.destName = ''
+        form.documents = []
+        form.containerStatus = ''
         return
       }
       try {
@@ -52,6 +54,12 @@ function watchBusinessType(
         form.waypoints = result.waypoints ? [...result.waypoints] : []
         if (result.destName) {
           form.destName = result.destName
+        }
+        if (result.documents && result.documents.length > 0) {
+          form.documents = [...result.documents] as DocumentType[]
+        }
+        if (result.containerStatus) {
+          form.containerStatus = result.containerStatus as ContainerStatus
         }
       } catch {
         // 无模板数据，忽略

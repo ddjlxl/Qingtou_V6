@@ -17,6 +17,7 @@ function createForm(): OrderFormState {
     containerType: '',
     sealNo: '',
     businessType: '',
+    containerStatus: '',
     documents: [],
     driverId: '',
     vehicleId: '',

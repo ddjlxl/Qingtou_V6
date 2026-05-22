@@ -28,3 +28,7 @@ class BusinessTypeRoute(BaseModel):
     dest_name: Mapped[str | None] = mapped_column(
         String(200), nullable=True
     )
+    documents: Mapped[str | None] = mapped_column(Text, nullable=True)
+    container_status: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )

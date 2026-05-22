@@ -17,6 +17,54 @@ from app.models.vehicle import Vehicle, VehicleStatus
 logger = setup_logger("dispatch_service")
 
 
+def order_to_response(order: Order) -> dict:
+    """将 Order ORM 对象转换为 API 响应字典"""
+    waypoints = None
+    if order.waypoints:
+        try:
+            waypoints = json.loads(order.waypoints)
+        except (json.JSONDecodeError, TypeError):
+            logger.warning("Failed to parse waypoints JSON for order %s", order.id)
+            waypoints = None
+
+    documents = None
+    if order.documents:
+        try:
+            documents = json.loads(order.documents)
+        except (json.JSONDecodeError, TypeError):
+            logger.warning("Failed to parse documents JSON for order %s", order.id)
+            documents = None
+
+    return {
+        "id": str(order.id),
+        "order_no": order.order_no,
+        "status": order.status,
+        "customer_name": order.customer_name,
+        "customer_phone": order.customer_phone,
+        "origin_name": order.origin_name,
+        "dest_name": order.dest_name,
+        "waypoints": waypoints,
+        "container_no": order.container_no,
+        "container_type": order.container_type,
+        "seal_no": order.seal_no,
+        "business_type": order.business_type,
+        "container_status": order.container_status,
+        "documents": documents,
+        "driver_id": str(order.driver_id) if order.driver_id else None,
+        "driver_name": order.driver.name if order.driver else None,
+        "vehicle_id": str(order.vehicle_id) if order.vehicle_id else None,
+        "vehicle_plate_no": order.vehicle.plate_no if order.vehicle else None,
+        "dispatcher_id": str(order.dispatcher_id),
+        "dispatcher_name": order.dispatcher.name if order.dispatcher else None,
+        "remark": order.remark,
+        "assigned_at": order.assigned_at,
+        "started_at": order.started_at,
+        "completed_at": order.completed_at,
+        "created_at": order.created_at,
+        "updated_at": order.updated_at,
+    }
+
+
 async def generate_order_no(db: AsyncSession) -> str:
     today_str = datetime.now(timezone.utc).strftime("%Y%m%d")
     prefix = f"T{today_str}"
@@ -94,10 +142,18 @@ async def get_route_template(
             waypoints = json.loads(route.waypoints)
         except (json.JSONDecodeError, TypeError):
             waypoints = None
+    documents = None
+    if route.documents:
+        try:
+            documents = json.loads(route.documents)
+        except (json.JSONDecodeError, TypeError):
+            documents = None
     return {
         "origin_name": route.origin_name,
         "waypoints": waypoints,
         "dest_name": route.dest_name,
+        "documents": documents,
+        "container_status": route.container_status,
     }
 
 
@@ -112,6 +168,7 @@ async def update_route_template(
     db: AsyncSession, business_type: str, data: dict
 ) -> BusinessTypeRoute:
     waypoints_json = json.dumps(data["waypoints"], ensure_ascii=False) if data.get("waypoints") else None
+    documents_json = json.dumps(data["documents"], ensure_ascii=False) if data.get("documents") else None
     await db.execute(
         update(BusinessTypeRoute)
         .where(BusinessTypeRoute.business_type == business_type)
@@ -119,6 +176,8 @@ async def update_route_template(
             origin_name=data["origin_name"],
             waypoints=waypoints_json,
             dest_name=data["dest_name"],
+            documents=documents_json,
+            container_status=data.get("container_status"),
         )
     )
     await db.commit()
@@ -185,7 +244,7 @@ async def create_order(
             raise AppException(code=409, message="该司机已有进行中的任务")
 
         vehicle_result = await db.execute(
-            select(Vehicle).where(Vehicle.id == vehicle_id)
+            select(Vehicle).where(Vehicle.id == vehicle_id).with_for_update()
         )
         vehicle = vehicle_result.scalar_one_or_none()
         if not vehicle or vehicle.is_disabled:
@@ -276,7 +335,7 @@ async def assign_order(
         raise AppException(code=409, message="该司机已有进行中的任务")
 
     vehicle_result = await db.execute(
-        select(Vehicle).where(Vehicle.id == vehicle_id)
+        select(Vehicle).where(Vehicle.id == vehicle_id).with_for_update()
     )
     vehicle = vehicle_result.scalar_one_or_none()
     if not vehicle or vehicle.is_disabled:

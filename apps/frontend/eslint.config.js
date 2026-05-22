@@ -47,7 +47,7 @@ export default tseslint.config(
     ],
     rules: {
       'max-lines': 'warn',
-      'max-lines-per-function': 'warn',
+      'max-lines-per-function': 'off',
     },
   },
 )

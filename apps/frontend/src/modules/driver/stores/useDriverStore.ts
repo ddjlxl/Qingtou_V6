@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { driverService } from '../services/driverService'
 import type { DriverOrder, DriverOrderListParams } from '../types'
-import type { OrderStatus, OrderStatusCounts } from '@/modules/dispatch/types/order'
+import type { OrderStatus, OrderStatusCounts } from '@/modules/dispatch'
 
 let requestId = 0
 

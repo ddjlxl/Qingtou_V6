@@ -143,10 +143,7 @@ async function assignOrderAction(s: DispatchStoreState, id: string, data: Assign
   s.error.value = null
   try {
     const order = await dispatchService.assignOrder(id, data)
-    const index = s.orders.value.findIndex((o) => o.id === id)
-    if (index !== -1) {
-      s.orders.value[index] = order
-    }
+    await fetchOrdersAction(s)
     return order
   } catch (e) {
     s.error.value = e instanceof Error ? e.message : '分配任务失败'

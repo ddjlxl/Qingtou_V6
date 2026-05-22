@@ -1,19 +1,5 @@
-export enum TaskStatus {
-  PENDING = 'pending',
-  ASSIGNED = 'assigned',
-  IN_TRANSIT = 'in_transit',
-  COMPLETED = 'completed',
-  TIMEOUT = 'timeout',
-}
-
-export enum VehicleStatus {
-  IDLE = 'idle',
-  IN_TRANSIT = 'in_transit',
-  TIMEOUT = 'timeout',
-}
-
-export enum UserRole {
-  DISPATCHER = 'dispatcher',
-  DRIVER = 'driver',
-  ADMIN = 'admin',
-}
+// 枚举定义已迁移到各模块内部：
+// - OrderStatus → apps/frontend/src/modules/dispatch/types/order.ts
+// - VehicleStatus → apps/server/app/models/vehicle.py
+// - UserRole → apps/server/app/models/user.py
+// 本文件保留为空，避免破坏引用链

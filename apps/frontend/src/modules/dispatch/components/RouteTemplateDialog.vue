@@ -4,6 +4,7 @@ import { Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { dispatchService } from '../services/dispatchService'
 import type { RouteTemplate } from '../types/order'
+import { documentOptions, containerStatusOptions } from '../composables/useOrderFormOptions'
 
 const props = defineProps<{
   visible: boolean
@@ -15,7 +16,7 @@ const emit = defineEmits<{
 
 const loading = ref(false)
 const templates = ref<RouteTemplate[]>([])
-const editingMap = ref<Record<string, { originName: string; waypoints: string[]; destName: string }>>({})
+const editingMap = ref<Record<string, { originName: string; waypoints: string[]; destName: string; documents: string[]; containerStatus: string }>>({})
 
 const businessTypeLabels: Record<string, string> = {
   heavy_transport: '重箱运输',
@@ -44,6 +45,8 @@ async function fetchTemplates() {
           originName: t.originName,
           waypoints: t.waypoints ? [...t.waypoints] : [],
           destName: t.destName,
+          documents: t.documents ? [...t.documents] : [],
+          containerStatus: t.containerStatus ?? '',
         }
       }
     }
@@ -78,6 +81,8 @@ async function handleSave(businessType: string) {
       originName: edit.originName,
       waypoints: waypoints.length > 0 ? waypoints : null,
       destName: edit.destName,
+      documents: edit.documents.length > 0 ? edit.documents : null,
+      containerStatus: edit.containerStatus || null,
     })
     ElMessage.success('路线模板已更新')
   } catch {
@@ -94,7 +99,7 @@ function handleClose() {
   <el-dialog
     :model-value="visible"
     title="路线模板管理"
-    width="650px"
+    width="700px"
     :close-on-click-modal="false"
     @update:model-value="handleClose"
   >
@@ -150,6 +155,34 @@ function handleClose() {
               v-model="editingMap[tpl.businessType].destName"
               placeholder="目的地"
             />
+          </div>
+          <div class="route-template-item__row">
+            <label>单证</label>
+            <el-checkbox-group v-model="editingMap[tpl.businessType].documents">
+              <el-checkbox
+                v-for="opt in documentOptions"
+                :key="opt.value"
+                :value="opt.value"
+                :label="opt.label"
+              />
+            </el-checkbox-group>
+          </div>
+          <div class="route-template-item__row">
+            <label>空重箱</label>
+            <el-select
+              v-model="editingMap[tpl.businessType].containerStatus"
+              placeholder="请选择默认值"
+              clearable
+              teleported
+              style="width: 200px"
+            >
+              <el-option
+                v-for="opt in containerStatusOptions"
+                :key="opt.value"
+                :label="opt.label"
+                :value="opt.value"
+              />
+            </el-select>
           </div>
           <div class="route-template-item__actions">
             <el-button

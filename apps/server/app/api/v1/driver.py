@@ -1,5 +1,4 @@
 """司机端 API — 司机工作台接口"""
-import json
 import uuid
 from datetime import datetime, timezone
 
@@ -15,7 +14,7 @@ from app.models.driver import Driver
 from app.models.order import Order, OrderStatus
 from app.models.user import User, UserRole
 from app.schemas.dispatch import OrderListResponse, OrderResponse, OrderStatusCounts
-from app.services.dispatch_service import complete_order
+from app.services.dispatch_service import complete_order, order_to_response
 
 router = APIRouter(tags=["司机端"])
 
@@ -38,48 +37,7 @@ async def get_current_driver(
 
 
 def _order_to_response(order: Order) -> OrderResponse:
-    waypoints = None
-    if order.waypoints:
-        try:
-            waypoints = json.loads(order.waypoints)
-        except (json.JSONDecodeError, TypeError):
-            waypoints = None
-
-    documents = None
-    if order.documents:
-        try:
-            documents = json.loads(order.documents)
-        except (json.JSONDecodeError, TypeError):
-            documents = None
-
-    return OrderResponse(
-        id=str(order.id),
-        order_no=order.order_no,
-        status=order.status,
-        customer_name=order.customer_name,
-        customer_phone=order.customer_phone,
-        origin_name=order.origin_name,
-        dest_name=order.dest_name,
-        waypoints=waypoints,
-        container_no=order.container_no,
-        container_type=order.container_type,
-        seal_no=order.seal_no,
-        business_type=order.business_type,
-        container_status=order.container_status,
-        documents=documents,
-        driver_id=str(order.driver_id) if order.driver_id else None,
-        driver_name=order.driver.name if order.driver else None,
-        vehicle_id=str(order.vehicle_id) if order.vehicle_id else None,
-        vehicle_plate_no=order.vehicle.plate_no if order.vehicle else None,
-        dispatcher_id=str(order.dispatcher_id),
-        dispatcher_name=order.dispatcher.name if order.dispatcher else None,
-        remark=order.remark,
-        assigned_at=order.assigned_at,
-        started_at=order.started_at,
-        completed_at=order.completed_at,
-        created_at=order.created_at,
-        updated_at=order.updated_at,
-    )
+    return OrderResponse(**order_to_response(order))
 
 
 @router.get("/driver/orders", response_model=OrderListResponse)

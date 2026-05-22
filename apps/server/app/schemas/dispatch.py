@@ -24,8 +24,8 @@ class OrderCreate(BaseModel):
     business_type: Optional[str] = Field(
         None, pattern="^(heavy_transport|empty_transport|short_haul)$"
     )
-    container_status: str = Field(
-        ..., pattern="^(heavy|empty)$"
+    container_status: Optional[str] = Field(
+        None, pattern="^(heavy|empty)$"
     )
     documents: Optional[list[str]] = None
     driver_id: Optional[uuid.UUID] = None
@@ -164,12 +164,16 @@ class RouteTemplateResponse(BaseModel):
     origin_name: str | None = None
     waypoints: list[str] | None = None
     dest_name: str | None = None
+    documents: list[str] | None = None
+    container_status: str | None = None
 
 
 class RouteTemplateUpdate(BaseModel):
     origin_name: str | None = Field(None, max_length=200)
     waypoints: list[str] | None = None
     dest_name: str | None = Field(None, max_length=200)
+    documents: list[str] | None = None
+    container_status: str | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -185,6 +189,8 @@ class RouteTemplateItem(BaseModel):
     origin_name: str | None = None
     waypoints: list[str] | None = None
     dest_name: str | None = None
+    documents: list[str] | None = None
+    container_status: str | None = None
 
     model_config = {"from_attributes": True}
 

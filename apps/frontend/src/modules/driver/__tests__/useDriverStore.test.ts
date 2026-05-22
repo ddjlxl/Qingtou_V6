@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useDriverStore } from '../stores/useDriverStore'
 import * as driverService from '../services/driverService'
-import { OrderStatus, ContainerStatus } from '@/modules/dispatch/types/order'
+import { OrderStatus, ContainerStatus } from '@/modules/dispatch'
 import type { DriverOrderListResponse } from '../types'
 
 vi.mock('../services/driverService')

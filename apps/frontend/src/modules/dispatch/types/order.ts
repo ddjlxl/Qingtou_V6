@@ -141,6 +141,8 @@ export interface RouteTemplate {
   originName: string
   waypoints: string[] | null
   destName: string
+  documents: string[] | null
+  containerStatus: string | null
 }
 
 export interface OrderListParams {

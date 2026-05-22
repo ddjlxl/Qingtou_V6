@@ -32,10 +32,21 @@ const containerStatus = computed({
     集装箱信息
   </el-divider>
   <el-row :gutter="16">
-    <el-col :span="6">
+    <el-col :span="12">
+      <el-form-item label="箱号" style="max-width: 300px">
+        <el-input
+          :model-value="form.containerNo"
+          placeholder="4位字母+7位数字"
+          clearable
+          @input="emit('containerNoInput', $event)"
+        />
+      </el-form-item>
+    </el-col>
+    <el-col :span="12">
       <el-form-item
         label="空重箱"
         prop="containerStatus"
+        style="max-width: 300px"
       >
         <el-select
           v-model="containerStatus"
@@ -53,18 +64,10 @@ const containerStatus = computed({
         </el-select>
       </el-form-item>
     </el-col>
-    <el-col :span="6">
-      <el-form-item label="箱号">
-        <el-input
-          :model-value="form.containerNo"
-          placeholder="4位字母+7位数字"
-          clearable
-          @input="emit('containerNoInput', $event)"
-        />
-      </el-form-item>
-    </el-col>
-    <el-col :span="6">
-      <el-form-item label="箱型">
+  </el-row>
+  <el-row :gutter="16">
+    <el-col :span="12">
+      <el-form-item label="箱型" style="max-width: 300px">
         <el-select
           v-model="containerType"
           placeholder="请选择箱型"
@@ -81,8 +84,8 @@ const containerStatus = computed({
         </el-select>
       </el-form-item>
     </el-col>
-    <el-col :span="6">
-      <el-form-item label="封号">
+    <el-col :span="12">
+      <el-form-item label="封号" style="max-width: 300px">
         <el-input
           :model-value="form.sealNo"
           placeholder="请输入封号"

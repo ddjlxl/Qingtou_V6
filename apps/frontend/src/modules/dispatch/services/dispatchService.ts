@@ -52,7 +52,7 @@ export const dispatchService = {
     return http.get<{ items: RouteTemplate[] }>('/v1/dispatch/route-templates')
   },
 
-  updateRouteTemplate(businessType: string, data: { originName: string; waypoints: string[] | null; destName: string }) {
+  updateRouteTemplate(businessType: string, data: { originName: string; waypoints: string[] | null; destName: string; documents: string[] | null; containerStatus: string | null }) {
     return http.put<RouteTemplate>(`/v1/dispatch/route-templates/${businessType}`, data)
   },
 

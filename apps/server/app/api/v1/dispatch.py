@@ -1,15 +1,13 @@
-import json
 import uuid
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.v1.auth import get_current_user
 from app.core.database import get_db
 from app.core.exceptions import AppException
-from app.core.logger import setup_logger
-from app.models.driver import Driver
 from app.models.order import Order
 from app.models.user import User
 from app.models.vehicle import Vehicle
@@ -43,59 +41,15 @@ from app.services.dispatch_service import (
     list_route_templates,
     update_route_template,
     get_order_status_counts,
+    order_to_response,
     update_order,
 )
 
 router = APIRouter(prefix="/dispatch", tags=["调度中心"])
 
-logger = setup_logger("dispatch")
-
 
 def _order_to_response(order: Order) -> OrderResponse:
-    waypoints = None
-    if order.waypoints:
-        try:
-            waypoints = json.loads(order.waypoints)
-        except (json.JSONDecodeError, TypeError):
-            logger.warning("Failed to parse waypoints JSON for order %s", order.id)
-            waypoints = None
-
-    documents = None
-    if order.documents:
-        try:
-            documents = json.loads(order.documents)
-        except (json.JSONDecodeError, TypeError):
-            logger.warning("Failed to parse documents JSON for order %s", order.id)
-            documents = None
-
-    return OrderResponse(
-        id=str(order.id),
-        order_no=order.order_no,
-        status=order.status,
-        customer_name=order.customer_name,
-        customer_phone=order.customer_phone,
-        origin_name=order.origin_name,
-        dest_name=order.dest_name,
-        waypoints=waypoints,
-        container_no=order.container_no,
-        container_type=order.container_type,
-        seal_no=order.seal_no,
-        business_type=order.business_type,
-        container_status=order.container_status,
-        documents=documents,
-        driver_id=str(order.driver_id) if order.driver_id else None,
-        driver_name=order.driver.name if order.driver else None,
-        vehicle_id=str(order.vehicle_id) if order.vehicle_id else None,
-        vehicle_plate_no=order.vehicle.plate_no if order.vehicle else None,
-        dispatcher_id=str(order.dispatcher_id),
-        dispatcher_name=order.dispatcher.name if order.dispatcher else None,
-        remark=order.remark,
-        assigned_at=order.assigned_at,
-        started_at=order.started_at,
-        completed_at=order.completed_at,
-        created_at=order.created_at,
-        updated_at=order.updated_at,
-    )
+    return OrderResponse(**order_to_response(order))
 
 
 @router.get("/orders/available-resources", response_model=AvailableResourcesResponse)
@@ -119,7 +73,9 @@ async def list_orders(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    base_query = select(Order)
+    base_query = select(Order).options(
+        selectinload(Order.driver), selectinload(Order.vehicle), selectinload(Order.dispatcher)
+    )
     count_query = select(func.count(Order.id))
 
     if status:
@@ -234,6 +190,8 @@ async def list_route_templates_api(
                 "origin_name": t.origin_name,
                 "waypoints": json.loads(t.waypoints) if t.waypoints else None,
                 "dest_name": t.dest_name,
+                "documents": json.loads(t.documents) if t.documents else None,
+                "container_status": t.container_status,
             }
             for t in templates
         ]
@@ -259,10 +217,13 @@ async def update_route_template_api(
 ):
     updated = await update_route_template(db, business_type, data.model_dump())
     waypoints = json.loads(updated.waypoints) if updated.waypoints else None
+    documents = json.loads(updated.documents) if updated.documents else None
     return RouteTemplateResponse(
         origin_name=updated.origin_name,
         waypoints=waypoints,
         dest_name=updated.dest_name,
+        documents=documents,
+        container_status=updated.container_status,
     )
 
 

@@ -44,6 +44,7 @@ function makeOrder(overrides: Record<string, unknown> = {}) {
     containerType: null,
     sealNo: null,
     businessType: null,
+    containerStatus: null,
     documents: null,
     driverId: null,
     driverName: null,
@@ -299,10 +300,8 @@ describe('useDispatchStore', () => {
   })
 
   describe('assignOrder', () => {
-    it('assigns order and updates local state', async () => {
+    it('assigns order and refreshes list', async () => {
       const store = useDispatchStore()
-      const existing = makeOrder({ id: 'o1' })
-      store.orders = [existing]
       const assigned = makeOrder({
         id: 'o1',
         status: OrderStatus.ASSIGNED,
@@ -312,12 +311,12 @@ describe('useDispatchStore', () => {
         vehiclePlateNo: '粤A12345',
       })
       mockAssignOrder.mockResolvedValue(assigned)
+      mockGetOrders.mockResolvedValue(makeOrderListResponse({ items: [assigned], total: 1 }))
 
       const result = await store.assignOrder('o1', { driverId: 'd1', vehicleId: 'v1' })
 
       expect(result).toEqual(assigned)
-      expect(store.orders[0].status).toBe(OrderStatus.ASSIGNED)
-      expect(store.orders[0].driverName).toBe('张三')
+      expect(mockGetOrders).toHaveBeenCalled()
     })
 
     it('sets error on failure', async () => {

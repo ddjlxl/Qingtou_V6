@@ -1,4 +1,4 @@
-import type { Order, OrderStatus, OrderStatusCounts } from '@/modules/dispatch/types/order'
+import type { Order, OrderStatus, OrderStatusCounts } from '@/modules/dispatch'
 
 export type DriverOrder = Order
 

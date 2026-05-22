@@ -29,6 +29,7 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
     containerType: null,
     sealNo: null,
     businessType: null,
+    containerStatus: null,
     documents: null,
     driverId: null,
     driverName: null,

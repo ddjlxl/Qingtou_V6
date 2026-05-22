@@ -1,6 +1,6 @@
 import http from '@/shared/api/client'
 import type { DriverOrderListResponse, DriverOrderListParams } from '../types'
-import type { Order } from '@/modules/dispatch/types/order'
+import type { Order } from '@/modules/dispatch'
 
 export const driverService = {
   getOrders(params?: DriverOrderListParams) {

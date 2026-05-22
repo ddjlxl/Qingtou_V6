@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 import sqlalchemy as sa
-from sqlalchemy import DateTime, ForeignKey, String, Uuid
+from sqlalchemy import DateTime, ForeignKey, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
@@ -46,5 +46,5 @@ class TransportRecord(BaseModel):
         Uuid, ForeignKey("drivers.id"), nullable=False
     )
     imported_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=datetime.now
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
     )

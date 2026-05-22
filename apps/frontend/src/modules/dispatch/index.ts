@@ -1,9 +1,9 @@
 export { default as DispatchPage } from './pages/DispatchPage.vue'
 export { useDispatchStore } from './stores/useDispatchStore'
 export { dispatchService } from './services/dispatchService'
+export { OrderStatus, ContainerStatus } from './types/order'
 export type {
   Order,
-  OrderStatus,
   BusinessType,
   DocumentType,
   ContainerType,
