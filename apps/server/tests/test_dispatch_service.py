@@ -766,7 +766,7 @@ class TestGetAvailableResources:
 class TestDispatchAddresses:
     @pytest.mark.asyncio
     async def test_create_address(self, db_session: AsyncSession):
-        from app.services.dispatch_service import create_dispatch_address
+        from app.services.dispatch_address_service import create_dispatch_address
 
         user = await create_test_user(db_session, "addr_user1")
         user_id = user.id
@@ -777,7 +777,7 @@ class TestDispatchAddresses:
 
     @pytest.mark.asyncio
     async def test_create_duplicate_address_raises(self, db_session: AsyncSession):
-        from app.services.dispatch_service import create_dispatch_address
+        from app.services.dispatch_address_service import create_dispatch_address
 
         user = await create_test_user(db_session, "addr_dup_user")
         user_id = user.id
@@ -790,7 +790,7 @@ class TestDispatchAddresses:
 
     @pytest.mark.asyncio
     async def test_list_addresses(self, db_session: AsyncSession):
-        from app.services.dispatch_service import get_dispatch_addresses, create_dispatch_address
+        from app.services.dispatch_address_service import get_dispatch_addresses, create_dispatch_address
 
         user = await create_test_user(db_session, "addr_list_user")
         user_id = user.id
@@ -803,7 +803,7 @@ class TestDispatchAddresses:
 
     @pytest.mark.asyncio
     async def test_list_addresses_user_isolation(self, db_session: AsyncSession):
-        from app.services.dispatch_service import get_dispatch_addresses, create_dispatch_address
+        from app.services.dispatch_address_service import get_dispatch_addresses, create_dispatch_address
 
         user_a = await create_test_user(db_session, "addr_iso_user_a")
         user_b = await create_test_user(db_session, "addr_iso_user_b")
@@ -815,7 +815,7 @@ class TestDispatchAddresses:
 
     @pytest.mark.asyncio
     async def test_delete_address(self, db_session: AsyncSession):
-        from app.services.dispatch_service import create_dispatch_address, delete_dispatch_address
+        from app.services.dispatch_address_service import create_dispatch_address, delete_dispatch_address
 
         user = await create_test_user(db_session, "addr_del_user")
         user_id = user.id
@@ -828,7 +828,7 @@ class TestDispatchAddresses:
 
     @pytest.mark.asyncio
     async def test_delete_address_not_found(self, db_session: AsyncSession):
-        from app.services.dispatch_service import delete_dispatch_address
+        from app.services.dispatch_address_service import delete_dispatch_address
 
         user = await create_test_user(db_session, "addr_notfound_user")
         with pytest.raises(AppException) as exc_info:
@@ -838,7 +838,7 @@ class TestDispatchAddresses:
 
     @pytest.mark.asyncio
     async def test_delete_address_wrong_user(self, db_session: AsyncSession):
-        from app.services.dispatch_service import create_dispatch_address, delete_dispatch_address
+        from app.services.dispatch_address_service import create_dispatch_address, delete_dispatch_address
 
         user_a = await create_test_user(db_session, "addr_wrong_user_a")
         user_b = await create_test_user(db_session, "addr_wrong_user_b")

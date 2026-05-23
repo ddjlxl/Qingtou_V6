@@ -24,7 +24,7 @@ async def create_route_template(db_session, business_type: str, origin_name: str
 class TestGetRouteTemplateService:
     @pytest.mark.asyncio
     async def test_get_heavy_transport_route(self, db_session):
-        from app.services.dispatch_service import get_route_template
+        from app.services.route_template_service import get_route_template
 
         await create_route_template(
             db_session,
@@ -42,7 +42,7 @@ class TestGetRouteTemplateService:
 
     @pytest.mark.asyncio
     async def test_get_empty_transport_route_no_waypoints(self, db_session):
-        from app.services.dispatch_service import get_route_template
+        from app.services.route_template_service import get_route_template
 
         await create_route_template(
             db_session,
@@ -60,7 +60,7 @@ class TestGetRouteTemplateService:
 
     @pytest.mark.asyncio
     async def test_get_short_haul_route(self, db_session):
-        from app.services.dispatch_service import get_route_template
+        from app.services.route_template_service import get_route_template
 
         await create_route_template(
             db_session,
@@ -78,7 +78,7 @@ class TestGetRouteTemplateService:
 
     @pytest.mark.asyncio
     async def test_get_route_not_found_raises_exception(self, db_session):
-        from app.services.dispatch_service import get_route_template
+        from app.services.route_template_service import get_route_template
         from app.core.exceptions import AppException
 
         with pytest.raises(AppException) as exc_info:

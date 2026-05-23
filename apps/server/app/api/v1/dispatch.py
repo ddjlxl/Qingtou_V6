@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from fastapi import APIRouter, Depends, Query
@@ -28,21 +29,25 @@ from app.schemas.dispatch import (
     OrderStatusCounts,
     OrderUpdate,
 )
+from app.services.dispatch_address_service import (
+    create_dispatch_address,
+    delete_dispatch_address,
+    get_dispatch_addresses,
+)
 from app.services.dispatch_service import (
     assign_order,
     complete_order,
-    create_dispatch_address,
     create_order,
-    delete_dispatch_address,
     delete_order,
     get_available_resources,
-    get_dispatch_addresses,
-    get_route_template,
-    list_route_templates,
-    update_route_template,
     get_order_status_counts,
     order_to_response,
     update_order,
+)
+from app.services.route_template_service import (
+    get_route_template,
+    list_route_templates,
+    update_route_template,
 )
 
 router = APIRouter(prefix="/dispatch", tags=["调度中心"])

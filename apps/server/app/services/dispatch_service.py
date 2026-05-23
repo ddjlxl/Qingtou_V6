@@ -1,14 +1,12 @@
 import json
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AppException
 from app.core.logger import setup_logger
-from app.models.business_type_route import BusinessTypeRoute
-from app.models.dispatch_address import DispatchAddress
 from app.models.driver import Driver
 from app.models.order import BusinessType, Order, OrderStatus
 from app.models.transport_record import TransportRecord
@@ -123,74 +121,6 @@ async def is_driver_available(db: AsyncSession, driver_id: uuid.UUID) -> bool:
         )
     )
     return result.scalar_one_or_none() is None
-
-
-async def get_route_template(
-    db: AsyncSession, business_type: str
-) -> dict:
-    result = await db.execute(
-        select(BusinessTypeRoute)
-        .where(BusinessTypeRoute.business_type == business_type)
-        .limit(1)
-    )
-    route = result.scalar_one_or_none()
-    if not route:
-        raise AppException(code=404, message="该业务类型暂无路线模板")
-    waypoints = None
-    if route.waypoints:
-        try:
-            waypoints = json.loads(route.waypoints)
-        except (json.JSONDecodeError, TypeError):
-            waypoints = None
-    documents = None
-    if route.documents:
-        try:
-            documents = json.loads(route.documents)
-        except (json.JSONDecodeError, TypeError):
-            documents = None
-    return {
-        "origin_name": route.origin_name,
-        "waypoints": waypoints,
-        "dest_name": route.dest_name,
-        "documents": documents,
-        "container_status": route.container_status,
-    }
-
-
-async def list_route_templates(db: AsyncSession) -> list[BusinessTypeRoute]:
-    result = await db.execute(
-        select(BusinessTypeRoute).order_by(BusinessTypeRoute.business_type)
-    )
-    return list(result.scalars().all())
-
-
-async def update_route_template(
-    db: AsyncSession, business_type: str, data: dict
-) -> BusinessTypeRoute:
-    waypoints_json = json.dumps(data["waypoints"], ensure_ascii=False) if data.get("waypoints") else None
-    documents_json = json.dumps(data["documents"], ensure_ascii=False) if data.get("documents") else None
-    await db.execute(
-        update(BusinessTypeRoute)
-        .where(BusinessTypeRoute.business_type == business_type)
-        .values(
-            origin_name=data["origin_name"],
-            waypoints=waypoints_json,
-            dest_name=data["dest_name"],
-            documents=documents_json,
-            container_status=data.get("container_status"),
-        )
-    )
-    await db.commit()
-
-    result = await db.execute(
-        select(BusinessTypeRoute)
-        .where(BusinessTypeRoute.business_type == business_type)
-        .limit(1)
-    )
-    route = result.scalar_one_or_none()
-    if not route:
-        raise AppException(code=404, message="该业务类型暂无路线模板")
-    return route
 
 
 async def create_order(
@@ -323,7 +253,9 @@ async def assign_order(
     driver_id: uuid.UUID,
     vehicle_id: uuid.UUID,
 ) -> Order:
-    result = await db.execute(select(Order).where(Order.id == order_id))
+    result = await db.execute(
+        select(Order).where(Order.id == order_id).with_for_update()
+    )
     order = result.scalar_one_or_none()
     if not order:
         raise AppException(code=404, message="任务不存在")
@@ -358,7 +290,9 @@ async def complete_order(
     db: AsyncSession,
     order_id: uuid.UUID,
 ) -> Order:
-    result = await db.execute(select(Order).where(Order.id == order_id))
+    result = await db.execute(
+        select(Order).where(Order.id == order_id).with_for_update()
+    )
     order = result.scalar_one_or_none()
     if not order:
         raise AppException(code=404, message="任务不存在")
@@ -377,13 +311,21 @@ async def complete_order(
 
     if order.vehicle_id:
         vehicle_result = await db.execute(
-            select(Vehicle).where(Vehicle.id == order.vehicle_id)
+            select(Vehicle).where(Vehicle.id == order.vehicle_id).with_for_update()
         )
         vehicle = vehicle_result.scalar_one_or_none()
         if vehicle:
             vehicle.status = VehicleStatus.IDLE.value
 
     if order.driver_id and order.vehicle_id:
+        waypoints_json = None
+        if order.waypoints:
+            try:
+                waypoints_list = json.loads(order.waypoints)
+                waypoints_json = json.dumps(waypoints_list, ensure_ascii=False)
+            except (json.JSONDecodeError, TypeError):
+                waypoints_json = order.waypoints
+        
         record = TransportRecord(
             id=uuid.uuid4(),
             order_no=order.order_no,
@@ -391,9 +333,11 @@ async def complete_order(
             container_status=order.container_status,
             origin=order.origin_name or "",
             destination=order.dest_name or "",
+            waypoints=waypoints_json,
             container_no=order.container_no or "",
             vehicle_id=order.vehicle_id,
             driver_id=order.driver_id,
+            business_date=date.today(),
             imported_at=datetime.now(timezone.utc),
         )
         db.add(record)
@@ -493,57 +437,6 @@ async def get_available_resources(db: AsyncSession) -> dict:
     }
 
 
-async def get_dispatch_addresses(
-    db: AsyncSession, user_id: uuid.UUID
-) -> list[DispatchAddress]:
-    result = await db.execute(
-        select(DispatchAddress)
-        .where(DispatchAddress.user_id == user_id)
-        .order_by(DispatchAddress.created_at.desc())
-    )
-    return list(result.scalars().all())
-
-
-async def create_dispatch_address(
-    db: AsyncSession, user_id: uuid.UUID, name: str
-) -> DispatchAddress:
-    existing = await db.execute(
-        select(DispatchAddress).where(
-            DispatchAddress.user_id == user_id,
-            DispatchAddress.name == name,
-        )
-    )
-    if existing.scalar_one_or_none():
-        raise AppException(code=409, message="该地址已存在")
-
-    address = DispatchAddress(
-        id=uuid.uuid4(),
-        user_id=user_id,
-        name=name,
-    )
-    db.add(address)
-    await db.commit()
-    await db.refresh(address)
-    return address
-
-
-async def delete_dispatch_address(
-    db: AsyncSession, address_id: uuid.UUID, user_id: uuid.UUID
-) -> None:
-    result = await db.execute(
-        select(DispatchAddress).where(
-            DispatchAddress.id == address_id,
-            DispatchAddress.user_id == user_id,
-        )
-    )
-    address = result.scalar_one_or_none()
-    if not address:
-        raise AppException(code=404, message="地址不存在")
-
-    await db.delete(address)
-    await db.commit()
-
-
 async def check_order_overdue(db: AsyncSession | None = None) -> None:
     if db is not None:
         await _do_check_order_overdue(db)
@@ -562,7 +455,7 @@ async def _do_check_order_overdue(db: AsyncSession) -> None:
         select(Order).where(
             Order.status == OrderStatus.ASSIGNED.value,
             Order.assigned_at < four_hours_ago,
-        )
+        ).with_for_update()
     )
     overdue_orders = result.scalars().all()
 
@@ -570,7 +463,7 @@ async def _do_check_order_overdue(db: AsyncSession) -> None:
         order.status = OrderStatus.OVERDUE.value
         if order.vehicle_id:
             vehicle_result = await db.execute(
-                select(Vehicle).where(Vehicle.id == order.vehicle_id)
+                select(Vehicle).where(Vehicle.id == order.vehicle_id).with_for_update()
             )
             vehicle = vehicle_result.scalar_one_or_none()
             if vehicle:
