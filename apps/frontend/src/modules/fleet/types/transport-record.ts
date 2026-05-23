@@ -4,11 +4,13 @@ export interface TransportRecord {
   customerInfo: string
   origin: string
   destination: string
+  waypoints?: string[] | null
   containerNo: string
   vehicleId: string
   vehiclePlateNo?: string
   driverId: string
   driverName?: string
+  businessDate?: string
   importedAt: string
   containerStatus?: 'heavy' | 'empty' | null
 }
