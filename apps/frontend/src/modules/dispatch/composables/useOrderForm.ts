@@ -55,8 +55,8 @@ export function useOrderForm(options: {
   useOrderFormWatchers(
     form,
     options,
-    store.availableDrivers,
-    store.availableVehicles,
+    () => store.availableDrivers,
+    () => store.availableVehicles,
     () => store.fetchAvailableResources(),
   )
 

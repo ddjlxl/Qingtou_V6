@@ -73,8 +73,8 @@ let autoFillDepth = 0
 function watchVehicleId(
   form: OrderFormState,
   options: { mode: Ref<'create' | 'edit'> },
-  availableVehicles: AvailableVehicle[],
-  availableDrivers: AvailableDriver[],
+  getAvailableVehicles: () => AvailableVehicle[],
+  getAvailableDrivers: () => AvailableDriver[],
 ) {
   watch(
     () => form.vehicleId,
@@ -84,9 +84,9 @@ function watchVehicleId(
         form.driverId = ''
         return
       }
-      const vehicle = availableVehicles.find((v) => v.id === val)
+      const vehicle = getAvailableVehicles().find((v) => v.id === val)
       if (vehicle?.boundDriverName) {
-        const driver = availableDrivers.find(
+        const driver = getAvailableDrivers().find(
           (d) => d.name === vehicle.boundDriverName
         )
         if (driver) {
@@ -103,8 +103,8 @@ function watchVehicleId(
 function watchDriverId(
   form: OrderFormState,
   options: { mode: Ref<'create' | 'edit'> },
-  availableDrivers: AvailableDriver[],
-  availableVehicles: AvailableVehicle[],
+  getAvailableDrivers: () => AvailableDriver[],
+  getAvailableVehicles: () => AvailableVehicle[],
 ) {
   watch(
     () => form.driverId,
@@ -114,9 +114,9 @@ function watchDriverId(
         form.vehicleId = ''
         return
       }
-      const driver = availableDrivers.find((d) => d.id === val)
+      const driver = getAvailableDrivers().find((d) => d.id === val)
       if (driver?.boundVehiclePlateNo) {
-        const vehicle = availableVehicles.find(
+        const vehicle = getAvailableVehicles().find(
           (v) => v.plateNo === driver.boundVehiclePlateNo
         )
         if (vehicle) {
@@ -137,12 +137,12 @@ export function useOrderFormWatchers(
     order: Ref<Order | null | undefined>
     visible: Ref<boolean>
   },
-  availableDrivers: AvailableDriver[],
-  availableVehicles: AvailableVehicle[],
+  getAvailableDrivers: () => AvailableDriver[],
+  getAvailableVehicles: () => AvailableVehicle[],
   fetchAvailableResources: () => Promise<void>,
 ) {
   watchVisible(form, options, fetchAvailableResources)
   watchBusinessType(form, options)
-  watchVehicleId(form, options, availableVehicles, availableDrivers)
-  watchDriverId(form, options, availableDrivers, availableVehicles)
+  watchVehicleId(form, options, getAvailableVehicles, getAvailableDrivers)
+  watchDriverId(form, options, getAvailableDrivers, getAvailableVehicles)
 }
