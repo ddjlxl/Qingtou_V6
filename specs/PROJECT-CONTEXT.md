@@ -65,8 +65,8 @@ scripts/                     # 检查脚本（architecture-check/code-quality-ch
 |------|---------|
 | 禁止 `any` 类型 | ESLint `error` |
 | 禁止 `console.log` | ESLint `error` |
-| 文件 ≤ 300 行 | ESLint `error` + code-quality-check |
-| 函数 ≤ 50 行 | ESLint `error` + code-quality-check |
+| 文件 ≤ 300 行 warn / ≤ 500 行 error | ESLint `warn` + code-quality-check `error` |
+| 函数 ≤ 50 行 warn / ≤ 80 行 error | ESLint `warn` + code-quality-check `error` |
 | 样式必须 `scoped` | ESLint |
 | 不写未被请求的功能 | 1.6 外科手术原则 |
 | 不顺手重构无关代码 | 1.7 外科手术原则 |

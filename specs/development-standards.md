@@ -30,17 +30,27 @@ import { logger } from '@/shared/utils/logger'
 logger.debug('调试', data)
 ```
 
-### 3. 文件不超过 300 行
+### 3. 文件行数分级限制
 
-超过就拆。一个文件只做一件事。
+| 阈值 | 级别 | 说明 |
+|------|------|------|
+| > 300 行 | warn | 建议拆分，code review 时关注职责是否单一 |
+| > 500 行 | error | 必须拆分，硬底线 |
 
-**自动检查**：ESLint `max-lines` 规则会在 IDE 中红线提示，`pnpm lint` 会报错。
+**例外**：测试文件（`__tests__/`）豁免行数限制。测试文件天然偏长（AAA 模式每个 it 约 7 行），拆分反而降低凝聚力。
 
-### 4. 函数不超过 50 行
+**自动检查**：ESLint `max-lines` 规则 warn 级别提示，`code-quality-check.js` 在 500 行时报 error。
 
-超过就提取子函数。
+### 4. 函数行数分级限制
 
-**自动检查**：ESLint `max-lines-per-function` 规则会在 IDE 中红线提示，`pnpm lint` 会报错。
+| 阈值 | 级别 | 说明 |
+|------|------|------|
+| > 50 行 | warn | 建议提取子函数 |
+| > 80 行 | error | 必须提取子函数，硬底线 |
+
+**例外**：测试文件豁免函数长度限制。
+
+**自动检查**：ESLint `max-lines-per-function` 规则 warn 级别提示，`code-quality-check.js` 在 80 行时报 error。
 
 ### 5. 组件必须处理三种状态
 
@@ -254,8 +264,8 @@ AI 每次生成代码前，必须确认：
 - [ ] 没有 `any` 类型
 - [ ] 没有 `console.log`
 - [ ] 声明"完成"前已运行 `verification-before-completion` 验证门禁
-- [ ] 文件 ≤ 300 行
-- [ ] 函数 ≤ 50 行
+- [ ] 文件 ≤ 300 行（warn），≤ 500 行（error）
+- [ ] 函数 ≤ 50 行（warn），≤ 80 行（error）
 - [ ] 组件处理了 loading / empty / error
 - [ ] 异步操作有 try-catch
 - [ ] 样式用了 scoped
