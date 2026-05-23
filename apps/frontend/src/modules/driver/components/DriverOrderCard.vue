@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDriverStore } from '../stores/useDriverStore'
-import { OrderStatus, ContainerStatus } from '@/modules/dispatch/types/order'
+import { OrderStatus, ContainerStatus } from '@/modules/dispatch'
 import type { DriverOrder } from '../types'
 
 defineProps<{

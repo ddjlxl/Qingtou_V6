@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useDriverStore } from '../stores/useDriverStore'
 import { EmptyState, LoadingSpinner } from '@/shared/components'
-import { OrderStatus } from '@/modules/dispatch/types/order'
+import { OrderStatus } from '@/modules/dispatch'
 import DriverOrderCard from '../components/DriverOrderCard.vue'
 
 const store = useDriverStore()
