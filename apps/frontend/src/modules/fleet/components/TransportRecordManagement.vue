@@ -214,6 +214,15 @@ onMounted(() => {
         </template>
       </el-table-column>
       <el-table-column
+        prop="businessDate"
+        label="业务日期"
+        min-width="120"
+      >
+        <template #default="{ row }">
+          {{ row.businessDate || '-' }}
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="importedAt"
         label="导入时间"
         min-width="160"

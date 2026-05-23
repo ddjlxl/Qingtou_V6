@@ -1,3 +1,7 @@
+"""运输流水导入测试
+
+覆盖 AC：AC-008, AC-009, AC-010, AC-024, AC-025, AC-026, AC-039（导入文件支持途径地）
+"""
 import io
 import uuid
 from datetime import date
@@ -189,6 +193,72 @@ class TestTransportRecordList:
 
 
 class TestTransportRecordImport:
+    @pytest.mark.asyncio
+    async def test_import_9_columns_with_waypoints(
+        self, client: AsyncClient, auth_headers, db_session
+    ):
+        """导入 9 列格式（包含途径地）应成功"""
+        vehicle = await create_test_vehicle(db_session, "粤A12345")
+        driver = await create_test_driver(db_session, "张三", "13800138001")
+
+        content = (
+            "任务编号\t客户信息\t起运地\t途径地\t目的地\t箱号\t执行车辆(车牌号)\t执行司机(手机号)\t空重箱状态\n"
+            "ORD001\t测试客户\t广州\t苏州,无锡\t深圳\tCONT001\t粤A12345\t13800138001\theavy\n"
+            "ORD002\t测试客户2\t佛山\t\t东莞\tCONT002\t粤A12345\t13800138001\tempty\n"
+        )
+        file_content = content.encode("utf-8")
+        files = {"file": ("test.txt", io.BytesIO(file_content), "text/plain")}
+
+        response = await client.post(
+            "/api/v1/fleet/transport-records/import",
+            headers=auth_headers,
+            files=files,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_rows"] == 2
+        assert data["success_count"] == 2
+        assert data["error_count"] == 0
+
+        # 验证途径地已保存
+        from sqlalchemy import select
+        from app.models.transport_record import TransportRecord
+
+        result = await db_session.execute(
+            select(TransportRecord).where(TransportRecord.order_no == "ORD001")
+        )
+        record = result.scalar_one_or_none()
+        assert record is not None
+        assert record.waypoints == '["苏州", "无锡"]'
+
+        result2 = await db_session.execute(
+            select(TransportRecord).where(TransportRecord.order_no == "ORD002")
+        )
+        record2 = result2.scalar_one_or_none()
+        assert record2 is not None
+        assert record2.waypoints is None
+
+    @pytest.mark.asyncio
+    async def test_import_8_columns_rejected(
+        self, client: AsyncClient, auth_headers, db_session
+    ):
+        """强制升级：导入 8 列旧格式应被拒绝"""
+        vehicle = await create_test_vehicle(db_session, "粤A12345")
+        driver = await create_test_driver(db_session, "张三", "13800138001")
+
+        content = (
+            "ORD001\t测试客户\t广州\t深圳\tCONT001\t粤A12345\t13800138001\theavy\n"
+        )
+        file_content = content.encode("utf-8")
+        files = {"file": ("test.txt", io.BytesIO(file_content), "text/plain")}
+
+        response = await client.post(
+            "/api/v1/fleet/transport-records/import",
+            headers=auth_headers,
+            files=files,
+        )
+        assert response.status_code == 422
+
     @pytest.mark.asyncio
     async def test_import_excel_success(
         self, client: AsyncClient, auth_headers, db_session

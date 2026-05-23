@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from fastapi.responses import StreamingResponse
@@ -51,6 +51,7 @@ def _record_to_response(
         vehicle_plate_no=vehicle_plate_no,
         driver_id=str(record.driver_id),
         driver_name=driver_name,
+        business_date=record.business_date,
         imported_at=record.imported_at,
     )
 
@@ -71,17 +72,17 @@ async def list_transport_records(
 
     if start_date:
         try:
-            start_dt = datetime.fromisoformat(start_date)
-            base_query = base_query.where(TransportRecord.imported_at >= start_dt)
-            count_query = count_query.where(TransportRecord.imported_at >= start_dt)
+            start_d = date.fromisoformat(start_date)
+            base_query = base_query.where(TransportRecord.business_date >= start_d)
+            count_query = count_query.where(TransportRecord.business_date >= start_d)
         except ValueError:
             raise AppException(code=422, message="开始日期格式不正确")
 
     if end_date:
         try:
-            end_dt = datetime.fromisoformat(end_date).replace(hour=23, minute=59, second=59)
-            base_query = base_query.where(TransportRecord.imported_at <= end_dt)
-            count_query = count_query.where(TransportRecord.imported_at <= end_dt)
+            end_d = date.fromisoformat(end_date)
+            base_query = base_query.where(TransportRecord.business_date <= end_d)
+            count_query = count_query.where(TransportRecord.business_date <= end_d)
         except ValueError:
             raise AppException(code=422, message="结束日期格式不正确")
 
@@ -105,7 +106,7 @@ async def list_transport_records(
     total = total_result.scalar() or 0
 
     offset = (page - 1) * page_size
-    base_query = base_query.offset(offset).limit(page_size).order_by(TransportRecord.imported_at.desc())
+    base_query = base_query.offset(offset).limit(page_size).order_by(TransportRecord.business_date.desc())
     result = await db.execute(base_query)
     records = result.scalars().all()
 
@@ -175,7 +176,7 @@ async def get_statistics(
 async def download_template(
     current_user: User = Depends(_require_non_driver),
 ):
-    template_content = "任务编号\t客户信息\t起运地\t目的地\t箱号\t执行车辆(车牌号)\t执行司机(手机号)\t空重箱状态\n"
+    template_content = "任务编号\t客户信息\t起运地\t途径地\t目的地\t箱号\t执行车辆(车牌号)\t执行司机(手机号)\t空重箱状态\n"
     template_bytes = template_content.encode("utf-8")
 
     return StreamingResponse(

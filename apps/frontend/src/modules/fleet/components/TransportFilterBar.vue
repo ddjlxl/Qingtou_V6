@@ -26,10 +26,10 @@ const emit = defineEmits<{
         :model-value="dateRange"
         type="daterange"
         range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
+        start-placeholder="业务开始日期"
+        end-placeholder="业务结束日期"
         value-format="YYYY-MM-DD"
-        style="width: 260px"
+        style="width: 280px"
         @update:model-value="emit('update:dateRange', $event as [string, string] | null)"
       />
       <el-select

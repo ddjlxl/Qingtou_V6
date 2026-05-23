@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 from datetime import date, timedelta
@@ -147,13 +148,21 @@ async def import_transport_records_from_content(
 
     for row_idx, line in enumerate(lines[start_index:], start=start_index + 1):
         columns = line.split("\t")
-        if len(columns) not in (7, 8):
+        if len(columns) != 9:
             error_count += 1
-            errors.append({"row": row_idx, "message": f"列数不正确，期望 7 或 8 列，实际 {len(columns)} 列"})
+            errors.append({"row": row_idx, "message": f"列数不正确，期望 9 列，实际 {len(columns)} 列。请下载最新模板。"})
             continue
 
-        order_no, customer_info, origin, destination, container_no, plate_no, phone = columns[:7]
-        container_status_raw = columns[7].strip() if len(columns) == 8 else ""
+        order_no, customer_info, origin, waypoints_raw, destination, container_no, plate_no, phone, container_status_raw = columns
+        waypoints_raw = waypoints_raw.strip()
+        container_status_raw = container_status_raw.strip()
+
+        # 处理途径地：逗号分隔 → JSON 数组
+        waypoints_json = None
+        if waypoints_raw:
+            waypoints_list = [w.strip() for w in waypoints_raw.split(",") if w.strip()]
+            if waypoints_list:
+                waypoints_json = json.dumps(waypoints_list, ensure_ascii=False)
 
         # 校验 container_status
         if container_status_raw:
@@ -197,9 +206,11 @@ async def import_transport_records_from_content(
             container_status=container_status,
             origin=origin,
             destination=destination,
+            waypoints=waypoints_json,
             container_no=container_no,
             vehicle_id=vehicle.id,
             driver_id=driver.id,
+            business_date=date.today(),
         )
         db.add(record)
         success_count += 1
@@ -267,7 +278,7 @@ async def get_fleet_statistics(db: AsyncSession) -> dict:
     month_start = today.replace(day=1)
     result = await db.execute(
         select(func.count(TransportRecord.id)).where(
-            TransportRecord.imported_at >= month_start
+            TransportRecord.business_date >= month_start
         )
     )
     month_task_count = result.scalar() or 0

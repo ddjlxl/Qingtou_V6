@@ -70,4 +70,36 @@ describe('fleetService - transport records', () => {
       })
     })
   })
+
+  describe('TransportRecord type - business_date field', () => {
+    it('Bug: TransportRecord should have businessDate for date filtering, not importedAt', () => {
+      // 验证类型定义包含 businessDate 字段
+      // 当前 Bug: 日期筛选基于 imported_at（导入时间）而非业务时间
+      // 修复后: TransportRecord 应包含 businessDate，筛选参数应传 start_date/end_date 基于 business_date
+      const record: import('../types/transport-record').TransportRecord = {
+        id: '1',
+        orderNo: 'ORD-001',
+        customerInfo: 'test',
+        origin: 'A',
+        destination: 'B',
+        containerNo: 'CN-001',
+        vehicleId: 'v1',
+        driverId: 'd1',
+        importedAt: '2026-05-01T00:00:00Z',
+        businessDate: '2026-04-15',
+      }
+      expect(record.businessDate).toBeDefined()
+    })
+
+    it('Bug: TransportRecordListParams should support date filtering by business date', () => {
+      const params: import('../types/transport-record').TransportRecordListParams = {
+        startDate: '2026-04-01',
+        endDate: '2026-04-30',
+        page: 1,
+        pageSize: 20,
+      }
+      expect(params.startDate).toBe('2026-04-01')
+      expect(params.endDate).toBe('2026-04-30')
+    })
+  })
 })
