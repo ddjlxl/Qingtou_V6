@@ -131,7 +131,7 @@ class PreDevelopmentChecklist {
       },
       {
         question: "文件大小和函数长度的限制是多少？",
-        expected: "单个文件不超过300行，单个函数不超过50行"
+        expected: "单个文件不超过300行(warn)/500行(error)，单个函数不超过50行(warn)/80行(error)"
       },
       {
         question: "Store中禁止混入什么？如何解决？",

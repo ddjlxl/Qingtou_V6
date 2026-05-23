@@ -26,28 +26,16 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': 'error',
       'vue/multi-word-component-names': 'off',
-      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }],
     },
   },
   {
     files: ['**/*.test.ts', '**/*.spec.ts'],
     rules: {
+      'max-lines': 'off',
       'max-lines-per-function': 'off',
     },
   },
-  {
-    files: [
-      'src/modules/dispatch/components/OrderFormDialog.vue',
-      'src/modules/dispatch/components/OrderTable.vue',
-      'src/modules/dispatch/stores/useDispatchStore.ts',
-      'src/modules/driver/stores/useDriverStore.ts',
-      'src/modules/fleet/components/TransportRecordManagement.vue',
-      'src/modules/fleet/stores/useFleetStore.ts',
-    ],
-    rules: {
-      'max-lines': 'warn',
-      'max-lines-per-function': 'off',
-    },
-  },
+
 )

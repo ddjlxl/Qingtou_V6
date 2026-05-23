@@ -71,8 +71,8 @@ Types → Config → Repo → Service → Runtime → UI
 |------|-------------|
 | 禁止 `any` 类型 | ESLint `no-explicit-any: error` |
 | 禁止 `console.log` | ESLint `no-console: error` |
-| 文件 ≤ 300 行 | `code-quality-check.js` |
-| 函数 ≤ 50 行 | `code-quality-check.js` |
+| 文件 ≤ 300 行 warn / ≤ 500 行 error | `code-quality-check.js` |
+| 函数 ≤ 50 行 warn / ≤ 80 行 error | `code-quality-check.js` |
 | 样式必须 `scoped` | ESLint |
 | 异步必须有 try-catch | code-review |
 | 组件处理 loading/empty/error | code-review |

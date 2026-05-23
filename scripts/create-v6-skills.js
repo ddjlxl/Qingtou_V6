@@ -1243,8 +1243,8 @@ function getComponentDevelopmentContent() {
 - ❌ 修改需求文档
 - ❌ 使用any类型
 - ❌ 遗留console.log
-- ❌ 文件超过300行
-- ❌ 函数超过50行
+- ❌ 文件超过500行
+- ❌ 函数超过80行
 
 ---
 

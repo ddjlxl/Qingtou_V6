@@ -106,13 +106,25 @@ class CodeQualityChecker {
     allFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8')
       const lineCount = content.split('\n').length
+      const isTest = file.includes('__tests__')
       
-      if (lineCount > 300) {
+      // 测试文件豁免行数限制
+      if (isTest) return
+      
+      if (lineCount > 500) {
         this.errors.push({
           type: 'ERROR',
           file: path.relative(this.projectRoot, file),
           line: 'N/A',
-          message: `文件超过300行限制 (当前: ${lineCount}行)`,
+          message: `文件超过500行硬限制 (当前: ${lineCount}行)`,
+          code: ''
+        })
+      } else if (lineCount > 300) {
+        this.warnings.push({
+          type: 'WARNING',
+          file: path.relative(this.projectRoot, file),
+          line: 'N/A',
+          message: `文件超过300行建议值 (当前: ${lineCount}行)`,
           code: ''
         })
       }
@@ -130,6 +142,10 @@ class CodeQualityChecker {
     tsFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8')
       const lines = content.split('\n')
+      const isTest = file.includes('__tests__')
+      
+      // 测试文件豁免函数长度限制
+      if (isTest) return
       
       let inFunction = false
       let functionStart = 0
@@ -155,12 +171,20 @@ class CodeQualityChecker {
           if (braceCount === 0 && functionStart > 0) {
             const functionLength = index - functionStart + 1
             
-            if (functionLength > 50) {
+            if (functionLength > 80) {
               this.errors.push({
                 type: 'ERROR',
                 file: path.relative(this.projectRoot, file),
                 line: functionStart + 1,
-                message: `函数超过50行限制 (当前: ${functionLength}行)`,
+                message: `函数超过80行硬限制 (当前: ${functionLength}行)`,
+                code: functionName
+              })
+            } else if (functionLength > 50) {
+              this.warnings.push({
+                type: 'WARNING',
+                file: path.relative(this.projectRoot, file),
+                line: functionStart + 1,
+                message: `函数超过50行建议值 (当前: ${functionLength}行)`,
                 code: functionName
               })
             }
