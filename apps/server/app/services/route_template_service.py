@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,7 +13,7 @@ logger = setup_logger("route_template_service")
 
 async def get_route_template(
     db: AsyncSession, business_type: str
-) -> dict:
+) -> dict[str, Any]:
     result = await db.execute(
         select(BusinessTypeRoute)
         .where(BusinessTypeRoute.business_type == business_type)

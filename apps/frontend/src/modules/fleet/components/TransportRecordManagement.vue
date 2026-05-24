@@ -177,6 +177,14 @@ onMounted(() => {
         min-width="100"
       />
       <el-table-column
+        label="途径地"
+        min-width="140"
+      >
+        <template #default="{ row }">
+          {{ row.waypoints && row.waypoints.length > 0 ? row.waypoints.join(' → ') : '-' }}
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="destination"
         label="目的地"
         min-width="100"

@@ -348,7 +348,7 @@ class TestUpdateOrderAPI:
         assert response.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_update_order_not_pending(self, client: AsyncClient, db_session, auth_headers):
+    async def test_update_order_container_no_on_assigned(self, client: AsyncClient, db_session, auth_headers):
         from tests.conftest import create_test_user
         from app.models.user import UserRole
 
@@ -357,7 +357,24 @@ class TestUpdateOrderAPI:
 
         response = await client.put(
             f"/api/v1/dispatch/orders/{order.id}",
-            json={"customer_name": "新客户名"},
+            json={"container_no": "ABCU1234567"},
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200
+        assert response.json()["container_no"] == "ABCU1234567"
+
+    @pytest.mark.asyncio
+    async def test_update_completed_order_raises(self, client: AsyncClient, db_session, auth_headers):
+        from tests.conftest import create_test_user
+        from app.models.user import UserRole
+
+        user = await create_test_user(db_session, "dispatcher_update2", "test123", UserRole.DISPATCHER.value)
+        order = await create_test_order(db_session, user.id, status=OrderStatus.COMPLETED.value)
+
+        response = await client.put(
+            f"/api/v1/dispatch/orders/{order.id}",
+            json={"container_no": "ABCU1234567"},
             headers=auth_headers,
         )
 

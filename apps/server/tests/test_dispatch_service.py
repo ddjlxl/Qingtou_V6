@@ -425,20 +425,19 @@ class TestUpdateOrder:
         assert exc_info.value.code == 404
 
     @pytest.mark.asyncio
-    async def test_update_order_not_pending(self, db_session: AsyncSession):
+    async def test_update_order_completed_raises(self, db_session: AsyncSession):
         from app.services.dispatch_service import update_order
 
         dispatcher_id = uuid.uuid4()
         order = await create_test_order(
             db_session, dispatcher_id,
-            status=OrderStatus.ASSIGNED.value,
+            status=OrderStatus.COMPLETED.value,
         )
 
         with pytest.raises(AppException) as exc_info:
             await update_order(db_session, order.id, {"customer_name": "新客户"})
 
         assert exc_info.value.code == 422
-        assert "待分配" in exc_info.value.message
 
     @pytest.mark.asyncio
     async def test_update_order_same_origin_dest(self, db_session: AsyncSession):
@@ -480,6 +479,146 @@ class TestUpdateOrder:
         })
 
         assert json.loads(updated.documents) == ["pickup_order"]
+
+    @pytest.mark.asyncio
+    async def test_update_container_no_on_assigned(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.ASSIGNED.value,
+        )
+
+        updated = await update_order(db_session, order.id, {
+            "container_no": "ABCU1234567",
+        })
+
+        assert updated.container_no == "ABCU1234567"
+
+    @pytest.mark.asyncio
+    async def test_update_seal_no_on_transiting(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.TRANSITING.value,
+        )
+
+        updated = await update_order(db_session, order.id, {
+            "seal_no": "seal001",
+        })
+
+        assert updated.seal_no == "SEAL001"
+
+    @pytest.mark.asyncio
+    async def test_update_container_no_on_overdue(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.OVERDUE.value,
+        )
+
+        updated = await update_order(db_session, order.id, {
+            "container_no": "ABCU1234567",
+        })
+
+        assert updated.container_no == "ABCU1234567"
+
+    @pytest.mark.asyncio
+    async def test_update_other_fields_ignored_on_assigned(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.ASSIGNED.value,
+            customer_name="原始客户",
+            origin_name="原始启运地",
+        )
+
+        updated = await update_order(db_session, order.id, {
+            "customer_name": "新客户",
+            "origin_name": "新启运地",
+        })
+
+        assert updated.customer_name == "原始客户"
+        assert updated.origin_name == "原始启运地"
+
+    @pytest.mark.asyncio
+    async def test_update_completed_order_raises(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.COMPLETED.value,
+        )
+
+        with pytest.raises(AppException) as exc_info:
+            await update_order(db_session, order.id, {"container_no": "ABCU1234567"})
+
+        assert exc_info.value.code == 422
+        assert "不可编辑" in exc_info.value.message
+
+    @pytest.mark.asyncio
+    async def test_update_container_no_duplicate_on_assigned(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        await create_test_order(
+            db_session, dispatcher_id,
+            container_no="BCDU1234567",
+            status=OrderStatus.PENDING.value,
+        )
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.ASSIGNED.value,
+        )
+
+        with pytest.raises(AppException) as exc_info:
+            await update_order(db_session, order.id, {
+                "container_no": "BCDU1234567",
+            })
+
+        assert exc_info.value.code == 409
+        assert "箱号" in exc_info.value.message
+
+    @pytest.mark.asyncio
+    async def test_update_container_no_auto_uppercase_on_assigned(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.ASSIGNED.value,
+        )
+
+        updated = await update_order(db_session, order.id, {
+            "container_no": "abcd1234567",
+        })
+
+        assert updated.container_no == "ABCD1234567"
+
+    @pytest.mark.asyncio
+    async def test_update_container_no_empty_to_null_on_assigned(self, db_session: AsyncSession):
+        from app.services.dispatch_service import update_order
+
+        dispatcher_id = uuid.uuid4()
+        order = await create_test_order(
+            db_session, dispatcher_id,
+            status=OrderStatus.ASSIGNED.value,
+            container_no="OLD1234567",
+        )
+
+        updated = await update_order(db_session, order.id, {
+            "container_no": "",
+        })
+
+        assert updated.container_no is None
 
 
 class TestAssignOrder:

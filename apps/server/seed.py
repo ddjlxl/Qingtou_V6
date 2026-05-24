@@ -31,8 +31,9 @@ async def seed():
             {
                 "username": "driver",
                 "password": "driver123",
-                "name": "司机老张",
+                "name": "段江",
                 "role": UserRole.DRIVER.value,
+                "phone": "15388256973",
             },
         ]
 
@@ -44,6 +45,7 @@ async def seed():
                 name=u["name"],
                 role=u["role"],
                 status=UserStatus.ACTIVE.value,
+                phone=u.get("phone"),
             )
             db.add(user)
             print(f"  创建用户: {u['username']} / {u['password']} ({u['name']}, {u['role']})")

@@ -1,6 +1,7 @@
 import json
 import uuid
 from datetime import date, datetime, timedelta, timezone
+from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +16,7 @@ from app.models.vehicle import Vehicle, VehicleStatus
 logger = setup_logger("dispatch_service")
 
 
-def order_to_response(order: Order) -> dict:
+def order_to_response(order: Order) -> dict[str, Any]:
     """将 Order ORM 对象转换为 API 响应字典"""
     waypoints = None
     if order.waypoints:
@@ -194,6 +195,14 @@ async def create_order(
     return order
 
 
+EDITABLE_STATUSES = {
+    OrderStatus.PENDING.value,
+    OrderStatus.ASSIGNED.value,
+    OrderStatus.TRANSITING.value,
+    OrderStatus.OVERDUE.value,
+}
+
+
 async def update_order(
     db: AsyncSession,
     order_id: uuid.UUID,
@@ -204,8 +213,8 @@ async def update_order(
     if not order:
         raise AppException(code=404, message="任务不存在")
 
-    if order.status != OrderStatus.PENDING.value:
-        raise AppException(code=422, message="仅待分配状态的任务可编辑")
+    if order.status not in EDITABLE_STATUSES:
+        raise AppException(code=422, message="该状态的任务不可编辑")
 
     container_no = data.get("container_no")
     if container_no is not None:
@@ -217,29 +226,30 @@ async def update_order(
     if seal_no is not None:
         seal_no = seal_no.upper() if seal_no else None
 
-    origin_name = data.get("origin_name")
-    dest_name = data.get("dest_name")
-    if origin_name is not None and dest_name is not None and origin_name == dest_name:
-        raise AppException(code=422, message="起运地和目的地不能相同")
+    if order.status == OrderStatus.PENDING.value:
+        origin_name = data.get("origin_name")
+        dest_name = data.get("dest_name")
+        if origin_name is not None and dest_name is not None and origin_name == dest_name:
+            raise AppException(code=422, message="起运地和目的地不能相同")
 
-    updatable_fields = [
-        "customer_name", "customer_phone", "origin_name",
-        "dest_name", "container_type", "business_type",
-        "container_status", "remark",
-    ]
-    for field in updatable_fields:
-        if field in data and data[field] is not None:
-            setattr(order, field, data[field])
+        updatable_fields = [
+            "customer_name", "customer_phone", "origin_name",
+            "dest_name", "container_type", "business_type",
+            "container_status", "remark",
+        ]
+        for field in updatable_fields:
+            if field in data and data[field] is not None:
+                setattr(order, field, data[field])
 
-    if "waypoints" in data:
-        order.waypoints = json.dumps(data["waypoints"], ensure_ascii=False) if data["waypoints"] else None
+        if "waypoints" in data:
+            order.waypoints = json.dumps(data["waypoints"], ensure_ascii=False) if data["waypoints"] else None
 
-    if "documents" in data:
-        order.documents = json.dumps(data["documents"], ensure_ascii=False) if data["documents"] else None
+        if "documents" in data:
+            order.documents = json.dumps(data["documents"], ensure_ascii=False) if data["documents"] else None
 
-    if container_no is not None:
+    if "container_no" in data:
         order.container_no = container_no
-    if seal_no is not None:
+    if "seal_no" in data:
         order.seal_no = seal_no
 
     await db.commit()
@@ -376,7 +386,7 @@ async def delete_order(
     await db.commit()
 
 
-async def get_available_resources(db: AsyncSession) -> dict:
+async def get_available_resources(db: AsyncSession) -> dict[str, Any]:
     driver_result = await db.execute(
         select(Driver).where(Driver.is_disabled == False)
     )
@@ -475,7 +485,7 @@ async def _do_check_order_overdue(db: AsyncSession) -> None:
     await db.commit()
 
 
-async def get_order_status_counts(db: AsyncSession) -> dict:
+async def get_order_status_counts(db: AsyncSession) -> dict[str, Any]:
     result = await db.execute(
         select(Order.status, func.count(Order.id)).group_by(Order.status)
     )

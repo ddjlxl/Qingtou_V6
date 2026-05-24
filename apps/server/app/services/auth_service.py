@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +9,7 @@ from app.core.security import create_token, verify_password
 from app.models.user import User
 
 
-async def login(db: AsyncSession, username: str, password: str) -> dict:
+async def login(db: AsyncSession, username: str, password: str) -> dict[str, Any]:
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
 

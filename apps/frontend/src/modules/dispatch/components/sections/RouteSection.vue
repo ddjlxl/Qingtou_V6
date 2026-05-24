@@ -5,6 +5,7 @@ import type { OrderFormState } from '../../composables/useOrderForm'
 
 const props = defineProps<{
   form: OrderFormState
+  disabled: boolean
   routeSummary: string
 }>()
 
@@ -41,11 +42,12 @@ function onWaypointInput(index: number, value: string) {
       <el-form-item label="起运地">
         <el-input
           v-model="originName"
+          :disabled="disabled"
           placeholder="请输入起运地"
           clearable
         >
           <template #append>
-            <el-button @click="emit('openAddressDialog')">
+            <el-button :disabled="disabled" @click="emit('openAddressDialog')">
               常用
             </el-button>
           </template>
@@ -61,6 +63,7 @@ function onWaypointInput(index: number, value: string) {
           <el-form-item :label="`途径点${index + 1}`">
             <el-input
               :model-value="form.waypoints[index]"
+              :disabled="disabled"
               placeholder="请输入途径点"
               @input="onWaypointInput(index, $event)"
             >
@@ -68,6 +71,7 @@ function onWaypointInput(index: number, value: string) {
                 <el-button
                   type="danger"
                   :icon="Delete"
+                  :disabled="disabled"
                   @click="emit('removeWaypoint', index)"
                 />
               </template>
@@ -75,6 +79,7 @@ function onWaypointInput(index: number, value: string) {
           </el-form-item>
         </div>
         <el-button
+          v-if="!disabled"
           type="primary"
           link
           @click="emit('addWaypoint')"
@@ -86,11 +91,12 @@ function onWaypointInput(index: number, value: string) {
       <el-form-item label="目的地">
         <el-input
           v-model="destName"
+          :disabled="disabled"
           placeholder="请输入目的地"
           clearable
         >
           <template #append>
-            <el-button @click="emit('openAddressDialog')">
+            <el-button :disabled="disabled" @click="emit('openAddressDialog')">
               常用
             </el-button>
           </template>

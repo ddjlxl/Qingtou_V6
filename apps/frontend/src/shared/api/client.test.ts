@@ -49,6 +49,20 @@ describe('http client', () => {
 
       expect(result).toEqual({ id: 1 })
     })
+
+    it('Bug: Blob 响应不应被 camelcaseKeys 转换，应直接返回', () => {
+      const blobContent = '任务编号\t客户信息\t起运地\t途径地\t目的地\t箱号\t执行车辆(车牌号)\t执行司机(手机号)\t空重箱状态\n'
+      const blob = new Blob([blobContent], { type: 'text/plain' })
+      const response = {
+        data: blob,
+        config: { responseType: 'blob' },
+      } as unknown as AxiosResponse
+
+      const result = handleResponseSuccess(response)
+
+      expect(result).toBeInstanceOf(Blob)
+      expect(result.type).toBe('text/plain')
+    })
   })
 
   describe('AC-001: handleResponseError', () => {

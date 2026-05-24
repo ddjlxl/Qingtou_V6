@@ -5,6 +5,7 @@ import { BusinessType, DocumentType } from '../../types/order'
 
 const props = defineProps<{
   form: OrderFormState
+  disabled: boolean
   businessTypeOptions: { value: string; label: string }[]
   documentOptions: { value: string; label: string }[]
 }>()
@@ -34,6 +35,7 @@ const documents = computed({
       <el-form-item label="业务类型">
         <el-select
           v-model="businessType"
+          :disabled="disabled"
           placeholder="请选择业务类型"
           clearable
           teleported
@@ -50,7 +52,7 @@ const documents = computed({
     </el-col>
     <el-col :span="12">
       <el-form-item label="单证">
-        <el-checkbox-group v-model="documents">
+        <el-checkbox-group v-model="documents" :disabled="disabled">
           <el-checkbox
             v-for="opt in documentOptions"
             :key="opt.value"

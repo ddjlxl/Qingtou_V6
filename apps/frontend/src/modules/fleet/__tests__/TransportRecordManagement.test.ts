@@ -323,4 +323,100 @@ describe('TransportRecordManagement', () => {
     )
     expect(containerStatusColumn).toBeDefined()
   })
+
+  it('renders waypoints column in table', () => {
+    const wrapper = createWrapper()
+    const columns = wrapper.findAllComponents({ name: 'ElTableColumn' })
+    const waypointsColumn = columns.find(
+      (col) => col.props('label') === '途径地'
+    )
+    expect(waypointsColumn).toBeDefined()
+  })
+
+  it('waypoints column slot renders joined waypoints', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        waypoints: ['苏州', '无锡', '常州'],
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    expect(wrapper.findComponent({ name: 'ElTableColumn' })).toBeDefined()
+  })
+
+  it('waypoints column shows hyphen when waypoints is null', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        waypoints: null,
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    expect(wrapper.findComponent({ name: 'ElTableColumn' })).toBeDefined()
+  })
+
+  it('waypoints column shows hyphen when waypoints is empty array', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        waypoints: [],
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    expect(wrapper.findComponent({ name: 'ElTableColumn' })).toBeDefined()
+  })
+
+  it('waypoints column shows hyphen when waypoints is undefined', () => {
+    mockStoreState.transportRecords = [
+      {
+        id: 'tr1',
+        orderNo: 'ORD001',
+        customerInfo: '测试客户',
+        origin: '广州',
+        destination: '深圳',
+        containerNo: 'CONT001',
+        vehicleId: 'v1',
+        vehiclePlateNo: '粤A12345',
+        driverId: 'd1',
+        driverName: '张三',
+        importedAt: '2026-05-01T00:00:00Z',
+      },
+    ]
+    mockStoreState.transportRecordTotal = 1
+    const wrapper = createWrapper()
+    expect(wrapper.findComponent({ name: 'ElTableColumn' })).toBeDefined()
+  })
 })

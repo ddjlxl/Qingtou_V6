@@ -43,6 +43,8 @@ async def create_test_transport_record(
     order_no: str,
     vehicle_id: uuid.UUID,
     driver_id: uuid.UUID,
+    waypoints_str: str | None = None,
+    container_status: str | None = None,
 ):
     from app.models.transport_record import TransportRecord
 
@@ -55,6 +57,8 @@ async def create_test_transport_record(
         container_no="CONT001",
         vehicle_id=vehicle_id,
         driver_id=driver_id,
+        waypoints=waypoints_str,
+        container_status=container_status,
     )
     db_session.add(record)
     await db_session.commit()
@@ -190,6 +194,49 @@ class TestTransportRecordList:
     async def test_list_requires_auth(self, client: AsyncClient):
         response = await client.get("/api/v1/fleet/transport-records")
         assert response.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_list_with_waypoints(
+        self, client: AsyncClient, auth_headers, db_session
+    ):
+        """验证列表 API 返回的 waypoints 被正确解析为 list[str]"""
+        import json as json_lib
+
+        vehicle = await create_test_vehicle(db_session, "粤A12345")
+        driver = await create_test_driver(db_session, "张三", "13800138001")
+        await create_test_transport_record(
+            db_session, "ORD001", vehicle.id, driver.id,
+            waypoints_str=json_lib.dumps(["苏州", "无锡"], ensure_ascii=False),
+        )
+
+        response = await client.get(
+            "/api/v1/fleet/transport-records", headers=auth_headers
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["items"]) == 1
+        item = data["items"][0]
+        assert item["waypoints"] == ["苏州", "无锡"]
+
+    @pytest.mark.asyncio
+    async def test_list_waypoints_null(
+        self, client: AsyncClient, auth_headers, db_session
+    ):
+        """验证 waypoints 为 null 时返回 None"""
+        vehicle = await create_test_vehicle(db_session, "粤A12345")
+        driver = await create_test_driver(db_session, "张三", "13800138001")
+        await create_test_transport_record(
+            db_session, "ORD002", vehicle.id, driver.id,
+            waypoints_str=None,
+        )
+
+        response = await client.get(
+            "/api/v1/fleet/transport-records", headers=auth_headers
+        )
+        assert response.status_code == 200
+        data = response.json()
+        item = data["items"][0]
+        assert item["waypoints"] is None
 
 
 class TestTransportRecordImport:

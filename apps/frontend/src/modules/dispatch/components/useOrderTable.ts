@@ -42,7 +42,7 @@ export function formatDateTime(value: string): string {
 }
 
 export function canEdit(order: Order): boolean {
-  return order.status === OrderStatus.PENDING
+  return order.status !== OrderStatus.COMPLETED
 }
 
 export function canAssign(order: Order): boolean {

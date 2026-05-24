@@ -4,6 +4,7 @@ import type { OrderFormState } from '../../composables/useOrderForm'
 
 const props = defineProps<{
   form: OrderFormState
+  disabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -31,6 +32,7 @@ const customerPhone = computed({
       <el-form-item label="客户名称">
         <el-input
           v-model="customerName"
+          :disabled="disabled"
           placeholder="请输入客户名称"
           clearable
         />
@@ -40,6 +42,7 @@ const customerPhone = computed({
       <el-form-item label="联系电话">
         <el-input
           v-model="customerPhone"
+          :disabled="disabled"
           placeholder="请输入联系电话"
           clearable
         />

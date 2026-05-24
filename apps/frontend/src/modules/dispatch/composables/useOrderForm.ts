@@ -6,6 +6,7 @@ import {
   DocumentType,
   ContainerType,
   ContainerStatus,
+  OrderStatus,
 } from '../types/order'
 import type { Order } from '../types/order'
 import { containerTypeOptions, containerStatusOptions, businessTypeOptions, documentOptions } from './useOrderFormOptions'
@@ -48,7 +49,16 @@ export function useOrderForm(options: {
 
   const canCreateAndAssign = computed(() => form.driverId !== '' && form.vehicleId !== '')
   const isEditMode = computed(() => options.mode.value === 'edit')
-  const dialogTitle = computed(() => isEditMode.value ? '编辑任务' : '新建任务')
+  const isLimitedEdit = computed(() => {
+    return isEditMode.value
+      && options.order.value !== null
+      && options.order.value !== undefined
+      && options.order.value.status !== OrderStatus.PENDING
+  })
+  const dialogTitle = computed(() => {
+    if (isLimitedEdit.value) return '补充箱号封号'
+    return isEditMode.value ? '编辑任务' : '新建任务'
+  })
   const routeSummary = computed(() => computeRouteSummary(form))
   const formRules = useOrderFormRules(form)
 
@@ -69,6 +79,7 @@ export function useOrderForm(options: {
     documentOptions,
     canCreateAndAssign,
     isEditMode,
+    isLimitedEdit,
     dialogTitle,
     routeSummary,
     addWaypoint: () => addWaypoint(form),

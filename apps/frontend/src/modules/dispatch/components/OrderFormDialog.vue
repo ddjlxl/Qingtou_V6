@@ -32,6 +32,7 @@ const {
   businessTypeOptions,
   documentOptions,
   canCreateAndAssign,
+  isLimitedEdit,
   dialogTitle,
   routeSummary,
   addWaypoint,
@@ -140,6 +141,7 @@ function handleClose() {
     >
       <BusinessSection
         :form="form"
+        :disabled="isLimitedEdit"
         :business-type-options="businessTypeOptions"
         :document-options="documentOptions"
         @update:business-type="form.businessType = $event"
@@ -148,6 +150,7 @@ function handleClose() {
 
       <RouteSection
         :form="form"
+        :disabled="isLimitedEdit"
         :route-summary="routeSummary"
         @add-waypoint="addWaypoint"
         @remove-waypoint="removeWaypoint"
@@ -159,6 +162,7 @@ function handleClose() {
 
       <ContainerSection
         :form="form"
+        :disabled="isLimitedEdit"
         :container-type-options="containerTypeOptions"
         :container-status-options="containerStatusOptions"
         @container-no-input="onContainerNoInput"
@@ -169,6 +173,7 @@ function handleClose() {
 
       <CustomerSection
         :form="form"
+        :disabled="isLimitedEdit"
         @update:customer-name="form.customerName = $event"
         @update:customer-phone="form.customerPhone = $event"
       />
@@ -191,6 +196,7 @@ function handleClose() {
           v-model="form.remark"
           type="textarea"
           :rows="3"
+          :disabled="isLimitedEdit"
           placeholder="请输入备注信息"
           clearable
         />

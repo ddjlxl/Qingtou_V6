@@ -5,6 +5,7 @@ import { ContainerType, ContainerStatus } from '../../types/order'
 
 const props = defineProps<{
   form: OrderFormState
+  disabled: boolean
   containerTypeOptions: { value: string; label: string }[]
   containerStatusOptions: { value: string; label: string }[]
 }>()
@@ -50,6 +51,7 @@ const containerStatus = computed({
       >
         <el-select
           v-model="containerStatus"
+          :disabled="disabled"
           placeholder="请选择"
           clearable
           teleported
@@ -70,6 +72,7 @@ const containerStatus = computed({
       <el-form-item label="箱型" style="max-width: 300px">
         <el-select
           v-model="containerType"
+          :disabled="disabled"
           placeholder="请选择箱型"
           clearable
           teleported

@@ -1,3 +1,4 @@
+import json
 import uuid
 from datetime import date
 
@@ -39,6 +40,13 @@ def _record_to_response(
     vehicle_plate_no: str | None = None,
     driver_name: str | None = None,
 ) -> TransportRecordResponse:
+    waypoints_parsed: list[str] | None = None
+    if record.waypoints:
+        try:
+            waypoints_parsed = json.loads(record.waypoints)
+        except (json.JSONDecodeError, TypeError):
+            waypoints_parsed = None
+
     return TransportRecordResponse(
         id=str(record.id),
         order_no=record.order_no,
@@ -46,6 +54,7 @@ def _record_to_response(
         container_status=record.container_status,
         origin=record.origin,
         destination=record.destination,
+        waypoints=waypoints_parsed,
         container_no=record.container_no,
         vehicle_id=str(record.vehicle_id),
         vehicle_plate_no=vehicle_plate_no,

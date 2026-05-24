@@ -1,9 +1,8 @@
 # 项目目录结构
 
-> **版本**：v1.1  
-> **创建日期**：2026-05-03  
-> **更新日期**：2026-05-16  
-> **来源**：基于技术栈选型和产品板块的结构设计，v1.1 同步实际代码目录  
+> **版本**：v1.2
+> **创建日期**：2026-05-03
+> **更新日期**：2026-05-24
 
 ---
 
@@ -56,6 +55,15 @@ Qingtou_V6/
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── __tests__/       # 20 个测试文件
 │   │   │   │   │
+│   │   │   │   ├── driver/              # 司机端 ✅ 已完成
+│   │   │   │   │   ├── components/      # DriverOrderCard.vue
+│   │   │   │   │   ├── pages/           # DriverWorkbench.vue, DriverHistory.vue, DriverProfile.vue
+│   │   │   │   │   ├── stores/          # useDriverStore.ts
+│   │   │   │   │   ├── services/        # driverService.ts
+│   │   │   │   │   ├── types/           # index.ts
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   └── __tests__/       # useDriverStore.test.ts
+│   │   │   │   │
 │   │   │   │   ├── warehouse/           # 仓库管理 ⬜ 未开发
 │   │   │   │   │   └── ...              # M2 Phase 2.1 开发
 │   │   │   │   │
@@ -68,6 +76,7 @@ Qingtou_V6/
 │   │   │   ├── shared/                  # 共享基础设施
 │   │   │   │   ├── components/          # 通用 UI 组件
 │   │   │   │   │   ├── AppLayout.vue    # 主布局组件（Header + Sidebar）
+│   │   │   │   │   ├── MobileTabBar.vue # 移动端底部 Tab 栏
 │   │   │   │   │   ├── EmptyState.vue
 │   │   │   │   │   └── LoadingSpinner.vue
 │   │   │   │   ├── utils/               # 工具函数
@@ -103,8 +112,8 @@ Qingtou_V6/
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
-│   ├── driver/                           # 司机端 ⬜ 未开发
-│   │   └── ...                           # M1 最后阶段开发（依赖 dispatch 完成后）
+│   ├── driver/                           # 司机端 ✅ 已完成（集成在 frontend/modules/driver/）
+│   │   └── ...                           # 移动端适配已完成
 │   │
 │   └── server/                           # 后端（FastAPI + Python）
 │       ├── app/
@@ -113,6 +122,7 @@ Qingtou_V6/
 │       │   │   │   ├── __init__.py
 │       │   │   │   ├── auth.py           # 认证接口 ✅
 │       │   │   │   ├── dispatch.py       # 调度接口 ✅
+│       │   │   │   ├── driver.py         # 司机端接口 ✅
 │       │   │   │   ├── fleet.py          # 车队接口 ✅
 │       │   │   │   ├── fleet_certificates.py   # 证照接口 ✅
 │       │   │   │   ├── fleet_drivers.py        # 司机接口 ✅
@@ -150,6 +160,8 @@ Qingtou_V6/
 │       │   │   ├── __init__.py
 │       │   │   ├── auth_service.py
 │       │   │   ├── dispatch_service.py
+│       │   │   ├── dispatch_address_service.py  # 调度常用地址
+│       │   │   ├── route_template_service.py    # 业务类型路线模板
 │       │   │   └── fleet_service.py
 │       │   ├── core/                     # 核心配置
 │       │   │   ├── __init__.py
@@ -220,6 +232,18 @@ Qingtou_V6/
 │       ├── dispatch/
 │       │   ├── design.md
 │       │   └── requirements.md
+│       ├── dispatch-container-edit/
+│       │   ├── design.md
+│       │   ├── requirements.md
+│       │   └── tasks.md
+│       ├── dispatch-fleet-linkage/
+│       │   ├── design.md
+│       │   ├── requirements.md
+│       │   └── tasks.md
+│       ├── driver-mobile/
+│       │   ├── design.md
+│       │   ├── requirements.md
+│       │   └── tasks.md
 │       ├── fleet/
 │       │   ├── KNOWN-ISSUES.md
 │       │   ├── design.md
@@ -236,7 +260,9 @@ Qingtou_V6/
 │   ├── V4调度中心页面功能详细文档.md
 │   └── 开发记录/
 │       ├── Bug修复_切换业务类型路线不跟随变化_20260516.md
-│       └── Bug修复_路线模板允许空地址_20260516.md
+│       ├── Bug修复_路线模板允许空地址_20260516.md
+│       ├── Bug修复_运输流水下载模板失败_20260523.md
+│       └── 健康报告_2026-05-21.md
 │
 ├── scripts/                              # 脚本工具
 │   ├── architecture-check.js
@@ -278,6 +304,7 @@ Qingtou_V6/
 | auth | ✅ 已完成 | 登录/登出、token 管理、角色权限 | shared |
 | dashboard | ⬜ 未开发 | 首页看板、地图定位、指标统计、运力列表 | shared, auth |
 | dispatch | ✅ 已完成 | 任务 CRUD、司机分配、常用地址 | shared, auth, fleet |
+| driver | ✅ 已完成 | 司机工作台、任务状态更新、移动端适配 | shared, auth, dispatch |
 | fleet | ✅ 已完成 | 车辆/司机档案、证照管理、运输流水、车队统计 | shared, auth |
 | warehouse | ⬜ 未开发 | 仓库/库位管理、出入库、库存查询、批量导入 | shared, auth |
 | settings | ⬜ 未开发 | 用户管理、参数配置、操作日志 | shared, auth |
@@ -290,6 +317,7 @@ Qingtou_V6/
 | api/v1/auth | ✅ 已完成 | 登录/注册/token 刷新 | models, services, core |
 | api/v1/dashboard | ⬜ 未开发 | 看板数据聚合、地图数据 | models, services |
 | api/v1/dispatch | ✅ 已完成 | 任务 CRUD、分配 | models, services |
+| api/v1/driver | ✅ 已完成 | 司机端任务查询、状态更新 | models, services |
 | api/v1/fleet | ✅ 已完成 | 车辆/司机管理、证照、统计 | models, services |
 | api/v1/warehouse | ⬜ 未开发 | 仓库/库位/出入库 | models, services |
 | api/v1/settings | ⬜ 未开发 | 用户管理、参数、日志 | models, services |

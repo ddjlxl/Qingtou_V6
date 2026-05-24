@@ -138,7 +138,7 @@ class TransportRecordResponse(BaseModel):
     container_status: str | None = None
     origin: str
     destination: str
-    waypoints: str | None = None
+    waypoints: list[str] | None = None
     container_no: str
     vehicle_id: str
     vehicle_plate_no: str | None = None

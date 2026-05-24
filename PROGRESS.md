@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-20（dispatch-fleet-linkage 联动全部完成，M1 MVP 核心功能已实现）
+> 最后更新：2026-05-24（dispatch-container-edit 补充箱号封号完成，Bug 修复：运输流水下载模板）
 
 ---
 
@@ -16,6 +16,7 @@
 | M1: MVP | Phase 1.3 核心业务 — dispatch 调度中心 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — driver 司机端 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — dispatch-fleet-linkage 联动 | ✅ 已完成 |
+| M1: MVP | Phase 1.3 核心业务 — dispatch-container-edit 补充箱号封号 | ✅ 已完成 |
 | M2: 完整版 | - | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -209,6 +210,26 @@
 
 ## 已完成
 
+### Phase 1.3：核心业务 — dispatch-container-edit 补充箱号封号 ✅
+
+- [x] 需求文档：[specs/features/dispatch-container-edit/requirements.md](file:///e:/Qingtou_V6/specs/features/dispatch-container-edit/requirements.md)（8 条 AC）
+- [x] 技术设计：[specs/features/dispatch-container-edit/design.md](file:///e:/Qingtou_V6/specs/features/dispatch-container-edit/design.md)
+- [x] 任务规划：[specs/features/dispatch-container-edit/tasks.md](file:///e:/Qingtou_V6/specs/features/dispatch-container-edit/tasks.md)（2 个任务）
+
+| 阶段 | 任务范围 | 任务数 | 状态 | 说明 |
+|------|---------|--------|------|------|
+| 阶段 1: 补充箱号封号 | Task-01 ~ Task-02 | 2 | ✅ | 后端放宽编辑限制 + 前端编辑按钮/弹窗改造 |
+
+- [x] Task-01：后端 `update_order` 放宽编辑限制 — [dispatch_service.py](file:///e:/Qingtou_V6/apps/server/app/services/dispatch_service.py)（新增 `EDITABLE_STATUSES` 常量，非待分配状态仅允许编辑箱号封号）
+- [x] Task-02：前端编辑按钮 + 弹窗字段禁用 — [useOrderTable.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/components/useOrderTable.ts) + [useOrderForm.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/composables/useOrderForm.ts) + [OrderFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/components/OrderFormDialog.vue) + 4 个 Section 组件
+- [x] 验证通过：前端 519 tests ✅
+
+### Bug 修复记录
+
+- [x] BUG-20260523-001：运输流水下载模板失败 — [client.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/api/client.ts)（Blob 响应跳过 camelcaseKeys 转换）— P1 ✅
+- [x] BUG-20260516-001：切换业务类型路线不跟随变化 — P1 ✅
+- [x] BUG-20260516-002：路线模板允许空地址 — P2 ✅
+
 ### Phase 1.3：核心业务 — dispatch-fleet-linkage 联动 ✅
 
 - [x] 需求文档：[specs/features/dispatch-fleet-linkage/requirements.md](file:///e:/Qingtou_V6/specs/features/dispatch-fleet-linkage/requirements.md)（24 条 AC）
@@ -232,7 +253,9 @@
 - [ ] 文件超行拆分（OrderFormDialog 561 行、OrderTable 358 行、dispatch_service.py 419 行）
 - [ ] ESLint error 修复（11 个 vue/no-mutating-props）
 - [ ] 后端测试补充
-- [ ] 任务规划文档 tasks.md 待创建
+- [ ] 健康报告 S2：driver 模块直接引用 dispatch 内部类型（架构违规）
+- [ ] 健康报告 S3：后端路线模板 API 测试失败（500）
+- [ ] 健康报告 S6：useDriverStore.ts 函数过长（121 行）
 
 ---
 

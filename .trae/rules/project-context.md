@@ -1,8 +1,8 @@
 # V6 项目上下文协议
 
-> **版本**：v1.2  
+> **版本**：v1.3  
 > **创建日期**：2026-05-04  
-> **更新日期**：2026-05-20  
+> **更新日期**：2026-05-24  
 > **定位**：定义 AI 启动时必须读取的文档，建立项目完整认知  
 > **后续文档**：[guardrails.md](guardrails.md)（定义阶段边界）
 
@@ -98,8 +98,8 @@ AI最大的问题是什么？**没有记忆。**
 
 当前状态：
 - 里程碑：M1 MVP
-- 已完成：Phase 1.1 / 1.2 / 1.3 auth / fleet / dispatch / driver
-- 下一步：dispatch-fleet-linkage 收尾（fleet 侧空重箱展示）→ warehouse 仓库管理
+- 已完成：Phase 1.1 / 1.2 / 1.3 auth / fleet / dispatch / driver / dispatch-fleet-linkage / dispatch-container-edit
+- 下一步：Phase 2.1 warehouse 仓库管理
 
 项目认知：
 - 技术栈：Vue 3 + TypeScript + Element Plus + FastAPI + PostgreSQL

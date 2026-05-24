@@ -2,6 +2,7 @@ import json
 import os
 import uuid
 from datetime import date, timedelta
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -77,7 +78,7 @@ async def bind_driver_to_vehicle(
     vehicle_id: uuid.UUID,
     driver_id: uuid.UUID,
     confirmed: bool = False,
-) -> dict:
+) -> dict[str, Any]:
     result = await db.execute(
         select(Vehicle).where(Vehicle.bound_driver_id == driver_id)
     )
@@ -128,7 +129,7 @@ def _validate_import_filename(filename: str) -> str:
 
 async def import_transport_records_from_content(
     db: AsyncSession, content: str
-) -> dict:
+) -> dict[str, Any]:
     from app.models.driver import Driver
     from app.models.transport_record import TransportRecord
     from app.models.vehicle import Vehicle
@@ -227,7 +228,7 @@ async def import_transport_records_from_content(
     }
 
 
-async def get_transport_record_statistics(db: AsyncSession) -> dict:
+async def get_transport_record_statistics(db: AsyncSession) -> dict[str, Any]:
     from sqlalchemy import func
 
     from app.models.driver import Driver
@@ -265,7 +266,7 @@ async def get_transport_record_statistics(db: AsyncSession) -> dict:
     return {"by_driver": by_driver, "by_vehicle": by_vehicle}
 
 
-async def get_fleet_statistics(db: AsyncSession) -> dict:
+async def get_fleet_statistics(db: AsyncSession) -> dict[str, Any]:
     from datetime import date
 
     from sqlalchemy import func

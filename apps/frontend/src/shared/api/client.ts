@@ -62,6 +62,10 @@ export function convertRequestData(
 }
 
 export function handleResponseSuccess<T = unknown>(response: AxiosResponse<ApiResponse<T>>): T {
+  if (response.config?.responseType === 'blob') {
+    return response.data as T
+  }
+
   const body = response.data as unknown as Record<string, unknown>
   if (body && typeof body === 'object' && 'data' in body && 'code' in body) {
     const data = body.data

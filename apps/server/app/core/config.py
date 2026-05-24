@@ -1,4 +1,4 @@
-import warnings
+﻿import warnings
 
 from pydantic_settings import BaseSettings
 
@@ -13,6 +13,9 @@ class Settings(BaseSettings):
         "http://127.0.0.1:9527",
         "http://127.0.0.1:9528",
         "http://127.0.0.1:9529",
+        "http://192.168.31.23:9527",
+        "http://192.168.31.23:9528",
+        "http://192.168.31.23:9529",
     ]
 
     class Config:

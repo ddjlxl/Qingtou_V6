@@ -193,8 +193,16 @@ describe('canEdit', () => {
     expect(canEdit(makeOrder({ status: OrderStatus.PENDING }))).toBe(true)
   })
 
-  it('assigned order cannot be edited', () => {
-    expect(canEdit(makeOrder({ status: OrderStatus.ASSIGNED }))).toBe(false)
+  it('assigned order can be edited', () => {
+    expect(canEdit(makeOrder({ status: OrderStatus.ASSIGNED }))).toBe(true)
+  })
+
+  it('transiting order can be edited', () => {
+    expect(canEdit(makeOrder({ status: OrderStatus.TRANSITING }))).toBe(true)
+  })
+
+  it('overdue order can be edited', () => {
+    expect(canEdit(makeOrder({ status: OrderStatus.OVERDUE }))).toBe(true)
   })
 
   it('completed order cannot be edited', () => {
