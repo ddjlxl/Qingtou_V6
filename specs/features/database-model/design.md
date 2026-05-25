@@ -1,8 +1,8 @@
 # 数据库模型技术方案
 
-> **版本**：v1.2
+> **版本**：v1.3
 > **创建日期**：2026-05-03
-> **最后更新**：2026-05-17
+> **最后更新**：2026-05-24
 > **需求文档**：[requirements.md](./requirements.md)
 > **设计目标**：基于 PostgreSQL + SQLAlchemy 2.0 构建完整的数据模型，支持 Alembic 迁移，为后续所有业务功能提供数据基础
 
@@ -89,6 +89,7 @@ class UserRole(enum.Enum):
     ADMIN = "admin"
     DISPATCHER = "dispatcher"
     DRIVER = "driver"
+    WAREHOUSE_KEEPER = "warehouse_keeper"
 
 class UserStatus(enum.Enum):
     ACTIVE = "active"
@@ -235,14 +236,24 @@ class User(BaseModel):
 |--------|------|------|------|
 | id | UUID | PK | 主键 |
 | name | VARCHAR(100) | NOT NULL | 仓库名称 |
-| code | VARCHAR(50) | UNIQUE, NOT NULL | 仓库编码 |
-| customer_name | VARCHAR(100) | NOT NULL | 客户名称 |
-| total_slots | INT | NOT NULL, DEFAULT 0 | 总库位数 |
+| zone_code | VARCHAR(20) | UNIQUE, NOT NULL | 区域编号（唯一标识，如 "3-5"、"6-1"） |
+| sort_order | INT | NOT NULL | 排列顺序（1-12） |
 | remark | TEXT | NULL | 备注 |
+| created_at | TIMESTAMP WITH TZ | NOT NULL, DEFAULT now() | 创建时间 |
+| updated_at | TIMESTAMP WITH TZ | NOT NULL, DEFAULT now() | 更新时间 |
 
 **索引**：
 - 主键：id
-- 唯一：code
+- 唯一：zone_code
+- 普通：sort_order
+
+**v1.3 变更说明**：
+- 删除 `code` 字段 → 与 `zone_code` 功能重复，统一使用 `zone_code` 作为区域标识
+- 删除 `customer_name` 字段 → 仓库没有客户概念，客户信息在库位层面
+- 删除 `total_slots` 字段 → 改为计算字段（由 storage_slots 关联查询得出），不存数据库
+- 新增 `zone_code` 字段 → 区域编号，用于排序和优先级匹配
+- 新增 `sort_order` 字段 → 区域在页面中的排列顺序
+- 新增 `created_at`、`updated_at` 字段 → 统一时间戳
 
 → AC-009: 仓库基本信息管理
 
@@ -251,16 +262,38 @@ class User(BaseModel):
 | 字段名 | 类型 | 约束 | 说明 |
 |--------|------|------|------|
 | id | UUID | PK | 主键 |
-| warehouse_id | UUID | FK → warehouses.id, NOT NULL | 所属仓库 |
-| slot_no | VARCHAR(20) | NOT NULL | 库位编号（仓库-区-排-层） |
+| warehouse_id | UUID | FK → warehouses.id, NOT NULL | 所属区域 |
+| zone_code | VARCHAR(20) | NOT NULL | 区域编号（冗余，避免 JOIN） |
+| slot_no | VARCHAR(20) | NOT NULL | 库位编号（如 "3-5-1-1"） |
+| row | INT | NOT NULL | 行号 1-3 |
+| col | INT | NOT NULL | 列号 1-4 |
 | status | VARCHAR(20) | NOT NULL, DEFAULT 'empty' | empty/loaded/empty_container |
 | container_no | VARCHAR(20) | NULL | 当前箱号 |
-| stored_at | DateTime | NULL | 入库时间 |
+| container_status | VARCHAR(10) | NULL | heavy/empty |
+| customer_name | VARCHAR(100) | NULL | 货主名称 |
+| container_type | VARCHAR(10) | NULL | 箱型 20GP/40GP/40HQ/45HQ |
+| seal_no | VARCHAR(20) | NULL | 封号 |
+| stored_at | TIMESTAMP WITH TZ | NULL | 入库时间 |
 | remark | TEXT | NULL | 备注 |
+| created_at | TIMESTAMP WITH TZ | NOT NULL, DEFAULT now() | 创建时间 |
+| updated_at | TIMESTAMP WITH TZ | NOT NULL, DEFAULT now() | 更新时间 |
 
 **索引**：
 - 主键：id
-- 普通：warehouse_id, status
+- 唯一：(warehouse_id, slot_no)
+- 普通：warehouse_id, status, zone_code, customer_name
+- 部分唯一：container_no WHERE container_no IS NOT NULL（PostgreSQL 部分索引，使用 `sa.Index` + `postgresql_where`）
+- 部分普通：container_no WHERE container_no IS NOT NULL（搜索箱号）
+
+**v1.3 变更说明**：
+- 新增 `zone_code` 字段 → 区域编号冗余字段，避免 JOIN 查询
+- 新增 `row`、`col` 字段 → 行列号，支持 3×4 网格布局
+- 新增 `container_status` 字段 → 重箱/空箱状态
+- 新增 `customer_name` 字段 → 货主名称（从 Warehouse 表移至库位层面）
+- 新增 `container_type` 字段 → 箱型
+- 新增 `seal_no` 字段 → 封号
+- 新增 `created_at`、`updated_at` 字段 → 统一时间戳
+- 新增部分索引 → 箱号唯一性校验和搜索优化
 
 → AC-010: 库位可视化支持（空闲/重箱/空箱）
 
@@ -404,7 +437,7 @@ alembic upgrade head
 
 | AC 编号 | AC 描述 | 技术实现点 | 状态 |
 |---------|---------|-----------|------|
-| AC-001 | 用户表支持三种角色和两种状态 | User 模型 role/status 字段 + CheckConstraint | ✅ 已覆盖 |
+| AC-001 | 用户表支持四种角色（含库管）和两种状态 | User 模型 role/status 字段 + CheckConstraint（v1.3 新增 WAREHOUSE_KEEPER） | ✅ 已覆盖 |
 | AC-002 | 订单支持 5 种状态流转 | Order 模型 status 字段 + 状态转换校验 | ✅ 已覆盖 |
 | AC-003 | 订单关联司机、车辆、调度员 | Order 模型外键字段 driver_id/vehicle_id/dispatcher_id | ✅ 已覆盖 |
 | AC-004 | 常用地址支持按类型分类和排序 | CommonAddress 模型 type/sort_order 字段 | ✅ 已覆盖 |
@@ -412,8 +445,8 @@ alembic upgrade head
 | AC-006 | 车辆状态跟踪 | Vehicle 模型 status 字段 | ✅ 已覆盖 |
 | AC-007 | 司机极简设计，关联用户账号 | Driver 模型 user_id 外键 | ✅ 已覆盖 |
 | AC-008 | 证照到期预警支持 | Certificate 模型 expiry_date 字段 + 索引 | ✅ 已覆盖 |
-| AC-009 | 仓库基本信息管理 | Warehouse 模型 | ✅ 已覆盖 |
-| AC-010 | 库位可视化支持 | StorageSlot 模型 status 字段 | ✅ 已覆盖 |
+| AC-009 | 仓库基本信息管理 | Warehouse 模型（v1.3 重构：zone_code 替代 code，删除 customer_name/total_slots） | ✅ 已覆盖 |
+| AC-010 | 库位可视化支持 | StorageSlot 模型（v1.3 扩展：新增 row/col/container_status/customer_name/container_type/seal_no） | ✅ 已覆盖 |
 | AC-011 | 操作日志审计支持 | OperationLog 模型 | ✅ 已覆盖 |
 | AC-012 | 系统参数可配置 | SystemConfig 模型 | ✅ 已覆盖 |
 | AC-013 | 帮助中心后台可编辑 | HelpArticle 模型 | ✅ 已覆盖 |

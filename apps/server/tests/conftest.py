@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_token, hash_password
 from app.models.base import Base
+from app.models import *  # noqa: F401,F403 — 确保所有模型注册到 Base.metadata
 from app.models.user import User
 
 _DB_NAME = "qingtou_v6_test"
@@ -53,6 +54,7 @@ def _prepare_db():
             TEST_DATABASE_URL, echo=False, poolclass=NullPool
         )
         async with temp_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
         await temp_engine.dispose()
 

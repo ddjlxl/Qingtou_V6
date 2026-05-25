@@ -10,6 +10,7 @@ import {
   SwitchButton,
   ArrowDown,
   List,
+  Box,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -23,6 +24,12 @@ const activeMenu = computed(() => route.path)
 const displayName = computed(() => authStore.user?.name || authStore.user?.username || '')
 
 const isDriver = computed(() => authStore.userRole === 'driver')
+
+const isWarehouseKeeper = computed(() => authStore.userRole === 'warehouse_keeper')
+
+const showWarehouseMenu = computed(() =>
+  authStore.userRole === 'admin' || isWarehouseKeeper.value
+)
 
 const isMobile = ref(false)
 let mediaQuery: MediaQueryList
@@ -100,6 +107,17 @@ function handleLogout() {
             </el-icon>
             <template #title>
               调度中心
+            </template>
+          </el-menu-item>
+          <el-menu-item
+            v-if="showWarehouseMenu"
+            index="/warehouse"
+          >
+            <el-icon>
+              <Box />
+            </el-icon>
+            <template #title>
+              仓库总览
             </template>
           </el-menu-item>
         </template>

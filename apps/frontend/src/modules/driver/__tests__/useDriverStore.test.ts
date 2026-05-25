@@ -113,6 +113,14 @@ describe('useDriverStore', () => {
       expect(driverService.driverService.completeOrder).toHaveBeenCalledWith('1')
       expect(driverService.driverService.getOrders).toHaveBeenCalled()
     })
+
+    it('throws and sets error on failure', async () => {
+      vi.spyOn(driverService.driverService, 'completeOrder').mockRejectedValue(new Error('完成任务失败'))
+      const store = useDriverStore()
+
+      await expect(store.completeOrder('1')).rejects.toThrow()
+      expect(store.error).toBe('完成任务失败')
+    })
   })
 
   describe('setTab', () => {
@@ -125,6 +133,41 @@ describe('useDriverStore', () => {
 
       expect(store.activeTab).toBe(OrderStatus.TRANSITING)
       expect(store.page).toBe(1)
+    })
+
+    it('fetches orders with status filter', async () => {
+      const spy = vi.spyOn(driverService.driverService, 'getOrders').mockResolvedValue(mockOrderListResponse)
+      const store = useDriverStore()
+
+      store.setTab(OrderStatus.TRANSITING)
+      await vi.waitFor(() => expect(spy).toHaveBeenCalled())
+
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({
+        status: OrderStatus.TRANSITING,
+      }))
+    })
+
+    it('fetches orders without status filter when tab is all', async () => {
+      const spy = vi.spyOn(driverService.driverService, 'getOrders').mockResolvedValue(mockOrderListResponse)
+      const store = useDriverStore()
+
+      store.setTab('all')
+      await vi.waitFor(() => expect(spy).toHaveBeenCalled())
+
+      expect(spy).toHaveBeenCalledWith(expect.not.objectContaining({
+        status: expect.anything(),
+      }))
+    })
+  })
+
+  describe('setPage', () => {
+    it('changes page and fetches orders', async () => {
+      vi.spyOn(driverService.driverService, 'getOrders').mockResolvedValue(mockOrderListResponse)
+      const store = useDriverStore()
+
+      store.setPage(2)
+
+      expect(store.page).toBe(2)
     })
   })
 
@@ -272,10 +315,10 @@ describe('useDriverStore', () => {
 
   describe('fetchOrders race condition', () => {
     it('discards stale response when tab switches quickly', async () => {
-      let resolveFirst: (value: unknown) => void
-      let resolveSecond: (value: unknown) => void
-      const firstPromise = new Promise((resolve) => { resolveFirst = resolve })
-      const secondPromise = new Promise((resolve) => { resolveSecond = resolve })
+      let resolveFirst: (value: DriverOrderListResponse) => void
+      let resolveSecond: (value: DriverOrderListResponse) => void
+      const firstPromise = new Promise<DriverOrderListResponse>((resolve) => { resolveFirst = resolve })
+      const secondPromise = new Promise<DriverOrderListResponse>((resolve) => { resolveSecond = resolve })
 
       const spy = vi.spyOn(driverService.driverService, 'getOrders')
       spy.mockReturnValueOnce(firstPromise)

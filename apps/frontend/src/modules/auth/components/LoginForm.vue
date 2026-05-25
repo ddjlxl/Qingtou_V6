@@ -30,7 +30,7 @@ async function handleLogin() {
 
   loading.value = true
   try {
-    await authStore.login(form.value.username, form.value.password)
+    await authStore.login(form.value.username.trim(), form.value.password)
     const role = authStore.userRole
     if (role === 'driver') {
       router.push('/driver')

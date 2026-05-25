@@ -128,11 +128,14 @@ async def create_order(
     db: AsyncSession,
     data: dict,
     dispatcher_id: uuid.UUID,
+    skip_container_validation: bool = False,
+    auto_commit: bool = True,
 ) -> Order:
     container_no = data.get("container_no")
     if container_no:
         container_no = container_no.upper()
-        await validate_container_no_unique(db, container_no)
+        if not skip_container_validation:
+            await validate_container_no_unique(db, container_no)
 
     seal_no = data.get("seal_no")
     if seal_no:
@@ -190,8 +193,11 @@ async def create_order(
         vehicle.status = VehicleStatus.TRANSITING.value
 
     db.add(order)
-    await db.commit()
-    await db.refresh(order)
+    if auto_commit:
+        await db.commit()
+        await db.refresh(order)
+    else:
+        await db.flush()
     return order
 
 
@@ -354,6 +360,19 @@ async def complete_order(
 
     await db.commit()
     await db.refresh(order)
+
+    # 自动入库（独立 session + 独立事务，失败不影响订单）
+    if order.container_no:
+        try:
+            from app.core.database import AsyncSessionLocal
+            from app.services.warehouse_service import auto_store
+
+            async with AsyncSessionLocal() as inbound_db:
+                await auto_store(inbound_db, order)
+                await inbound_db.commit()
+        except AppException as e:
+            logger.warning("自动入库失败: order_no=%s, reason=%s", order.order_no, e.message)
+
     return order
 
 

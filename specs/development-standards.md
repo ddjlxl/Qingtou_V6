@@ -1,8 +1,8 @@
 # V6 开发规范
 
-> **版本**：v1.1  
+> **版本**：v1.2  
 > **创建日期**：2026-05-03  
-> **更新日期**：2026-05-15  
+> **更新日期**：2026-05-24  
 > **用途**：AI 写代码前必须遵守的规则，每次开发前扫一眼  
 
 ---
@@ -188,6 +188,33 @@ function handleClick() {
 ```
 GET /api/v1/tasks?page=1&page_size=20
 ```
+
+### 文件下载（Blob 响应）
+
+前端 API 客户端会对所有响应数据进行 `camelcaseKeys` 转换，但 **Blob 响应必须跳过转换**，否则会破坏 Blob 对象结构导致 `URL.createObjectURL()` 失败。
+
+```typescript
+// ✅ 正确：下载文件时指定 responseType
+export async function downloadTemplate(): Promise<Blob> {
+  const response = await apiClient.get<Blob>('/v1/fleet/transport-records/template', {
+    responseType: 'blob'
+  })
+  return response
+}
+
+// ✅ 正确：处理 Blob 响应
+async function handleDownload() {
+  const blob = await downloadTemplate()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'template.txt'
+  link.click()
+  window.URL.revokeObjectURL(url)
+}
+```
+
+**注意**：`handleResponseSuccess` 函数已内置 Blob 响应检测，检测到 `responseType: 'blob'` 时会直接返回原始数据。
 
 ### 错误码
 

@@ -4,6 +4,7 @@ import { AppLayout } from '@/shared/components'
 import { FleetPage } from '@/modules/fleet'
 import { DispatchPage } from '@/modules/dispatch'
 import { DriverWorkbench, DriverHistory, DriverProfile } from '@/modules/driver'
+import { WarehousePage } from '@/modules/warehouse'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -31,6 +32,12 @@ const router = createRouter({
           name: 'Dispatch',
           component: DispatchPage,
           meta: { requiresAuth: true, roles: ['admin', 'dispatcher'] },
+        },
+        {
+          path: 'warehouse',
+          name: 'Warehouse',
+          component: WarehousePage,
+          meta: { requiresAuth: true, roles: ['admin', 'warehouse_keeper'] },
         },
         {
           path: 'driver',

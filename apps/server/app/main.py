@@ -8,6 +8,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.dispatch import router as dispatch_router
 from app.api.v1.driver import router as driver_router
 from app.api.v1.fleet import router as fleet_router
+from app.api.v1.warehouse import router as warehouse_router
 from app.core.config import settings
 from app.core.database import engine, get_pool_status
 from app.core.exception_handlers import register_exception_handlers
@@ -51,6 +52,7 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(dispatch_router, prefix="/api/v1")
 app.include_router(driver_router, prefix="/api/v1")
 app.include_router(fleet_router, prefix="/api/v1")
+app.include_router(warehouse_router, prefix="/api/v1")
 
 
 @app.get("/api/health")
