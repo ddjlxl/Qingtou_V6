@@ -82,7 +82,7 @@ class OutboundItem(BaseModel):
 
 class OutboundRequest(BaseModel):
     items: list[OutboundItem] = Field(min_length=1)
-    business_type: str | None = None
+    business_type: str | None = Field(None, pattern=r"^(heavy_transport|empty_transport|short_haul)$")
 
 
 class OutboundResultItem(BaseModel):
@@ -115,12 +115,14 @@ class MoveResponse(BaseModel):
 class SlotUpdateRequest(BaseModel):
     customer_name: str | None = None
     remark: str | None = None
+    container_status: str | None = Field(default=None, pattern=r"^(heavy|empty)$")
 
 
 class SlotUpdateResponse(BaseModel):
     slot_no: str
     customer_name: str | None = None
     remark: str | None = None
+    container_status: str | None = None
 
 
 class SearchHighlight(BaseModel):

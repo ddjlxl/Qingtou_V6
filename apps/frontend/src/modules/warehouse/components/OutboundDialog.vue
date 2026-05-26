@@ -15,13 +15,6 @@ const emit = defineEmits<{
 
 const store = useWarehouseStore()
 const submitting = ref(false)
-const businessType = ref('')
-
-const businessTypeOptions = [
-  { label: '重箱运输', value: 'heavy_transport' },
-  { label: '空箱运输', value: 'empty_transport' },
-  { label: '短驳', value: 'short_haul' },
-]
 
 function handleClose() {
   emit('update:visible', false)
@@ -30,10 +23,7 @@ function handleClose() {
 async function handleSubmit() {
   submitting.value = true
   try {
-    await store.outbound(
-      props.selectedSlots.map((s) => s.id),
-      businessType.value || undefined,
-    )
+    await store.outbound(props.selectedSlots.map((s) => s.id))
     ElMessage.success('出库成功')
     handleClose()
   } catch (err: unknown) {
@@ -85,28 +75,11 @@ async function handleSubmit() {
           </template>
         </el-table-column>
       </el-table>
-      <el-form
-        label-width="80px"
-        style="margin-top: 16px"
-      >
-        <el-form-item label="业务类型">
-          <el-select
-            v-model="businessType"
-            clearable
-            placeholder="选填"
-          >
-            <el-option
-              v-for="opt in businessTypeOptions"
-              :key="opt.value"
-              :label="opt.label"
-              :value="opt.value"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
     </div>
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
       <el-button
         type="danger"
         :loading="submitting"

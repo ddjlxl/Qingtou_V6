@@ -411,9 +411,9 @@ describe('useWarehouseStore', () => {
       const store = useWarehouseStore()
       store.toggleSlotSelection('slot-1')
       store.toggleSlotSelection('slot-2')
-      const result = await store.outbound(['slot-1', 'slot-2'], '出口')
+      const result = await store.outbound(['slot-1', 'slot-2'])
 
-      expect(mockOutbound).toHaveBeenCalledWith(['slot-1', 'slot-2'], '出口')
+      expect(mockOutbound).toHaveBeenCalledWith(['slot-1', 'slot-2'])
       expect(result.outboundCount).toBe(2)
       expect(store.selectedSlotIds.size).toBe(0)
       expect(mockFetchZones).toHaveBeenCalled()
@@ -495,7 +495,7 @@ describe('useWarehouseStore', () => {
 
       expect(mockMove).toHaveBeenCalledWith('slot-1', 'slot-2')
       expect(store.moveSourceSlot).toBeNull()
-      expect(store.isMoveMode).toBe(false)
+      expect(store.isMoveMode).toBe(true)
       expect(mockFetchZones).toHaveBeenCalled()
       expect(mockFetchStatistics).toHaveBeenCalled()
     })
@@ -532,6 +532,38 @@ describe('useWarehouseStore', () => {
       await expect(
         store.updateSlot('slot-1', { customerName: '新客户' })
       ).rejects.toThrow('Update failed')
+    })
+
+    it('calls service with containerStatus', async () => {
+      mockUpdateSlot.mockResolvedValue(undefined)
+      mockFetchZones.mockResolvedValue({ zones: [] })
+      mockFetchStatistics.mockResolvedValue(makeStatistics())
+
+      const store = useWarehouseStore()
+      await store.updateSlot('slot-1', { containerStatus: 'heavy' })
+
+      expect(mockUpdateSlot).toHaveBeenCalledWith('slot-1', {
+        containerStatus: 'heavy',
+      })
+    })
+
+    it('calls service with all fields including containerStatus', async () => {
+      mockUpdateSlot.mockResolvedValue(undefined)
+      mockFetchZones.mockResolvedValue({ zones: [] })
+      mockFetchStatistics.mockResolvedValue(makeStatistics())
+
+      const store = useWarehouseStore()
+      await store.updateSlot('slot-1', {
+        customerName: '新客户',
+        remark: '新备注',
+        containerStatus: 'empty',
+      })
+
+      expect(mockUpdateSlot).toHaveBeenCalledWith('slot-1', {
+        customerName: '新客户',
+        remark: '新备注',
+        containerStatus: 'empty',
+      })
     })
   })
 

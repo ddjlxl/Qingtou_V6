@@ -104,7 +104,7 @@ describe('OutboundDialog', () => {
       const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
       await vm.handleSubmit()
 
-      expect(mockOutbound).toHaveBeenCalledWith(['slot-1', 'slot-2'], undefined)
+      expect(mockOutbound).toHaveBeenCalledWith(['slot-1', 'slot-2'])
     })
 
     it('handleSubmit 成功后关闭弹窗', async () => {
@@ -152,29 +152,6 @@ describe('OutboundDialog', () => {
       await vm.handleSubmit()
 
       expect(wrapper.emitted('update:visible')).toBeFalsy()
-    })
-  })
-
-  describe('业务类型选项', () => {
-    it('包含重箱运输选项', () => {
-      const wrapper = createWrapper({ visible: true, selectedSlots: [makeSlot()] })
-      const vm = wrapper.vm as unknown as { businessTypeOptions: Array<{ label: string; value: string }> }
-      const option = vm.businessTypeOptions.find((o) => o.value === 'heavy_transport')
-      expect(option?.label).toBe('重箱运输')
-    })
-
-    it('包含空箱运输选项', () => {
-      const wrapper = createWrapper({ visible: true, selectedSlots: [makeSlot()] })
-      const vm = wrapper.vm as unknown as { businessTypeOptions: Array<{ label: string; value: string }> }
-      const option = vm.businessTypeOptions.find((o) => o.value === 'empty_transport')
-      expect(option?.label).toBe('空箱运输')
-    })
-
-    it('包含短驳选项', () => {
-      const wrapper = createWrapper({ visible: true, selectedSlots: [makeSlot()] })
-      const vm = wrapper.vm as unknown as { businessTypeOptions: Array<{ label: string; value: string }> }
-      const option = vm.businessTypeOptions.find((o) => o.value === 'short_haul')
-      expect(option?.label).toBe('短驳')
     })
   })
 })

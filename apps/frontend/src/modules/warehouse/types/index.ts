@@ -82,6 +82,7 @@ export interface MoveRequest {
 export interface SlotUpdateRequest {
   customerName?: string
   remark?: string
+  containerStatus?: 'heavy' | 'empty'
 }
 
 export interface SearchHighlight {

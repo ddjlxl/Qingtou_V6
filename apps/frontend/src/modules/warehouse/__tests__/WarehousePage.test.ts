@@ -357,6 +357,56 @@ describe('WarehousePage', () => {
     })
   })
 
+  describe('状态切换按钮', () => {
+    it('未选中库位时不显示', async () => {
+      mockStore.selectedSlots = []
+      const wrapper = createWrapper()
+      await flushPromises()
+      const buttons = wrapper.findAllComponents({ name: 'ElButton' })
+      const toggleBtn = buttons.find((b) => b.text().includes('标记为'))
+      expect(toggleBtn).toBeUndefined()
+    })
+
+    it('选中空库位时不显示', async () => {
+      mockStore.selectedSlots = [makeSlot({ status: 'empty' })]
+      const wrapper = createWrapper()
+      await flushPromises()
+      const buttons = wrapper.findAllComponents({ name: 'ElButton' })
+      const toggleBtn = buttons.find((b) => b.text().includes('标记为'))
+      expect(toggleBtn).toBeUndefined()
+    })
+
+    it('选中空箱时显示"标记为重箱"', async () => {
+      mockStore.selectedSlots = [makeSlot({ status: 'empty_container', containerStatus: 'empty' })]
+      const wrapper = createWrapper()
+      await flushPromises()
+      const buttons = wrapper.findAllComponents({ name: 'ElButton' })
+      const toggleBtn = buttons.find((b) => b.text().includes('标记为重箱'))
+      expect(toggleBtn).toBeDefined()
+    })
+
+    it('选中重箱时显示"标记为空箱"', async () => {
+      mockStore.selectedSlots = [makeSlot({ status: 'loaded', containerStatus: 'heavy' })]
+      const wrapper = createWrapper()
+      await flushPromises()
+      const buttons = wrapper.findAllComponents({ name: 'ElButton' })
+      const toggleBtn = buttons.find((b) => b.text().includes('标记为空箱'))
+      expect(toggleBtn).toBeDefined()
+    })
+
+    it('选中多个库位时不显示', async () => {
+      mockStore.selectedSlots = [
+        makeSlot({ status: 'loaded', containerStatus: 'heavy' }),
+        makeSlot({ id: 'slot-2', status: 'loaded', containerStatus: 'heavy' }),
+      ]
+      const wrapper = createWrapper()
+      await flushPromises()
+      const buttons = wrapper.findAllComponents({ name: 'ElButton' })
+      const toggleBtn = buttons.find((b) => b.text().includes('标记为'))
+      expect(toggleBtn).toBeUndefined()
+    })
+  })
+
   describe('库位点击处理', () => {
     it('点击空库位打开手动入库弹窗', async () => {
       mockStore.zones = [makeZone()]

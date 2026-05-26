@@ -52,7 +52,10 @@ const documents = computed({
     </el-col>
     <el-col :span="12">
       <el-form-item label="单证">
-        <el-checkbox-group v-model="documents" :disabled="disabled">
+        <el-checkbox-group
+          v-model="documents"
+          :disabled="disabled"
+        >
           <el-checkbox
             v-for="opt in documentOptions"
             :key="opt.value"

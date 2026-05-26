@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useWarehouseStore } from '../stores/useWarehouseStore'
 import { useWarehouseSearch } from '../composables/useWarehouseSearch'
 import StatisticsPanel from '../components/StatisticsPanel.vue'
@@ -30,7 +30,30 @@ const selectedZoneCode = ref('')
 
 const searchHitIds = computed(() => new Set(searchHighlights.value.keys()))
 
-// 同步搜索结果到 store
+const statusToggleVisible = computed(() => {
+  if (store.selectedSlots.length === 0) return false
+
+  if (store.selectedSlots.length === 1) {
+    const slot = store.selectedSlots[0]
+    return slot.status === 'empty_container' || slot.status === 'loaded'
+  }
+
+  return store.selectedSlots.every((s) => s.containerStatus === 'empty')
+})
+
+const statusToggleLabel = computed(() => {
+  const count = store.selectedSlots.length
+
+  if (count === 1) {
+    const slot = store.selectedSlots[0]
+    if (slot?.containerStatus === 'empty') return '标记为重箱'
+    if (slot?.containerStatus === 'heavy') return '标记为空箱'
+    return ''
+  }
+
+  return `批量标记为重箱 (${count})`
+})
+
 watch(searchHighlights, (val) => {
   store.setSearchHighlights(val, zoneCounts.value)
 })
@@ -43,7 +66,18 @@ watch(keyword, (val) => {
 
 onMounted(() => {
   store.init()
+  window.addEventListener('keydown', handleKeyDown)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && store.isMoveMode) {
+    store.toggleMoveMode()
+  }
+}
 
 function handleSlotClick(slotData: Slot) {
   if (store.isMoveMode) {
@@ -88,6 +122,41 @@ function openEdit() {
   if (!slot) return
   editingSlot.value = slot
   editVisible.value = true
+}
+
+async function toggleContainerStatus() {
+  const slots = store.selectedSlots
+  if (slots.length === 0) return
+
+  const newStatus = slots[0].containerStatus === 'empty' ? 'heavy' : 'empty'
+
+  if (newStatus === 'empty' && slots.length === 1) {
+    try {
+      await ElMessageBox.confirm(
+        '将重箱改为空箱后，货物信息将被清除。确定继续？',
+        '确认变更',
+        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+      )
+    } catch {
+      return
+    }
+  }
+
+  try {
+    const results = await Promise.allSettled(
+      slots.map((slot) => store.updateSlot(slot.id, { containerStatus: newStatus }))
+    )
+
+    const failed = results.filter((r) => r.status === 'rejected')
+    if (failed.length > 0) {
+      ElMessage.warning(`${slots.length - failed.length} 个成功，${failed.length} 个失败`)
+    } else {
+      ElMessage.success(`已更新 ${slots.length} 个库位状态`)
+    }
+  } catch (err: unknown) {
+    const error = err as { message?: string }
+    ElMessage.error(error.message || '状态更新失败')
+  }
 }
 </script>
 
@@ -155,6 +224,14 @@ function openEdit() {
           >
             编辑
           </el-button>
+          <el-button
+            v-if="statusToggleVisible"
+            size="small"
+            :disabled="store.isMoveMode"
+            @click="toggleContainerStatus"
+          >
+            {{ statusToggleLabel }}
+          </el-button>
         </div>
       </div>
 
@@ -168,7 +245,7 @@ function openEdit() {
         class="warehouse-page__move-hint"
       >
         <el-tag type="warning">
-          移动模式：点击有箱库位选择源，再点击空位完成移动
+          移动模式：点击有箱库位选择源，再点击空位完成移动。按 ESC 键退出
         </el-tag>
       </div>
 

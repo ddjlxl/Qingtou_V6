@@ -1,8 +1,8 @@
 # 数据库模型技术方案
 
-> **版本**：v1.3
+> **版本**：v1.4
 > **创建日期**：2026-05-03
-> **最后更新**：2026-05-24
+> **最后更新**：2026-05-26
 > **需求文档**：[requirements.md](./requirements.md)
 > **设计目标**：基于 PostgreSQL + SQLAlchemy 2.0 构建完整的数据模型，支持 Alembic 迁移，为后续所有业务功能提供数据基础
 
@@ -37,9 +37,12 @@ app/models/
 ├── user.py              # 用户表
 ├── order.py             # 订单表
 ├── common_address.py    # 常用地址表
+├── dispatch_address.py  # 调度常用地址表
 ├── vehicle.py           # 车辆表
 ├── driver.py            # 司机表
 ├── certificate.py       # 证照表
+├── transport_record.py  # 运输记录表
+├── business_type_route.py # 业务类型路线模板表
 ├── warehouse.py         # 仓库表
 ├── storage_slot.py      # 库位表
 ├── operation_log.py     # 操作日志表

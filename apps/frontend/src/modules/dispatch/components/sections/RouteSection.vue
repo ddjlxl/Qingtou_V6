@@ -47,7 +47,10 @@ function onWaypointInput(index: number, value: string) {
           clearable
         >
           <template #append>
-            <el-button :disabled="disabled" @click="emit('openAddressDialog')">
+            <el-button
+              :disabled="disabled"
+              @click="emit('openAddressDialog')"
+            >
               常用
             </el-button>
           </template>
@@ -96,7 +99,10 @@ function onWaypointInput(index: number, value: string) {
           clearable
         >
           <template #append>
-            <el-button :disabled="disabled" @click="emit('openAddressDialog')">
+            <el-button
+              :disabled="disabled"
+              @click="emit('openAddressDialog')"
+            >
               常用
             </el-button>
           </template>

@@ -184,21 +184,9 @@ describe('warehouseService', () => {
 
       expect(mockPost).toHaveBeenCalledWith('/v1/warehouse/slots/outbound', {
         items: [{ slotId: 'slot-1' }, { slotId: 'slot-2' }],
-        businessType: null,
       })
       expect(result.outboundCount).toBe(2)
       expect(result.items).toHaveLength(2)
-    })
-
-    it('calls POST with businessType when provided', async () => {
-      mockPost.mockResolvedValue({ outboundCount: 1, items: [] })
-
-      await warehouseService.outbound(['slot-1'], '出口')
-
-      expect(mockPost).toHaveBeenCalledWith('/v1/warehouse/slots/outbound', {
-        items: [{ slotId: 'slot-1' }],
-        businessType: '出口',
-      })
     })
 
     it('returns outboundCount as 0 when no slots selected', async () => {

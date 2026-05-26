@@ -26,10 +26,9 @@ export const warehouseService = {
     )
   },
 
-  outbound(slotIds: string[], businessType?: string) {
+  outbound(slotIds: string[]) {
     return http.post<OutboundResponse>('/v1/warehouse/slots/outbound', {
       items: slotIds.map((id) => ({ slotId: id })),
-      businessType: businessType || null,
     })
   },
 
@@ -40,7 +39,7 @@ export const warehouseService = {
     })
   },
 
-  updateSlot(slotId: string, data: { customerName?: string; remark?: string }) {
+  updateSlot(slotId: string, data: { customerName?: string; remark?: string; containerStatus?: 'heavy' | 'empty' }) {
     return http.put(`/v1/warehouse/slots/${slotId}`, data)
   },
 

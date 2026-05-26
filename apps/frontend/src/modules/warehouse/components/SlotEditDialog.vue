@@ -93,7 +93,9 @@ async function handleSubmit() {
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
       <el-button
         type="primary"
         :loading="submitting"

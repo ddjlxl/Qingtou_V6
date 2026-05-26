@@ -1,8 +1,8 @@
 # 项目目录结构
 
-> **版本**：v1.2
+> **版本**：v1.3
 > **创建日期**：2026-05-03
-> **更新日期**：2026-05-24
+> **更新日期**：2026-05-26
 
 ---
 
@@ -36,7 +36,7 @@ Qingtou_V6/
 │   │   │   │   │   └── ...              # M2 Phase 2.1 开发
 │   │   │   │   │
 │   │   │   │   ├── dispatch/            # 调度中心 ✅ 已完成
-│   │   │   │   │   ├── components/      # OrderFormDialog, OrderTable, AssignDialog, AddressDialog...
+│   │   │   │   │   ├── components/      # OrderFormDialog, OrderTable, OrderTableBody, OrderTableToolbar, AssignDialog, AddressDialog, RouteTemplateDialog, useOrderTable
 │   │   │   │   │   │   └── sections/    # AssignSection, BusinessSection, ContainerSection, CustomerSection, RouteSection
 │   │   │   │   │   ├── composables/     # useOrderForm, useOrderFormHelpers, useOrderFormOptions, useOrderFormRules, useOrderFormWatchers
 │   │   │   │   │   ├── pages/           # DispatchPage.vue
@@ -47,7 +47,7 @@ Qingtou_V6/
 │   │   │   │   │   └── __tests__/       # 10 个测试文件
 │   │   │   │   │
 │   │   │   │   ├── fleet/               # 车队管理 ✅ 已完成
-│   │   │   │   │   ├── components/      # VehicleManagement, DriverManagement, CertificateManagement, TransportRecordManagement, StatisticsTab, StatusTag...
+│   │   │   │   │   ├── components/      # VehicleManagement, DriverManagement, CertificateManagement, TransportRecordManagement, StatisticsTab, StatusTag, TransportFilterBar, TransportStatistics, certificateFormConfig...
 │   │   │   │   │   ├── pages/           # FleetPage.vue
 │   │   │   │   │   ├── stores/          # useFleetStore, useFleetVehicles, useFleetDrivers, useFleetCertificates, useFleetTransport, useFleetStatistics
 │   │   │   │   │   ├── services/        # fleetService.ts
@@ -64,8 +64,15 @@ Qingtou_V6/
 │   │   │   │   │   ├── index.ts
 │   │   │   │   │   └── __tests__/       # useDriverStore.test.ts
 │   │   │   │   │
-│   │   │   │   ├── warehouse/           # 仓库管理 ⬜ 未开发
-│   │   │   │   │   └── ...              # M2 Phase 2.1 开发
+│   │   │   │   ├── warehouse/           # 仓库管理 ✅ 已完成
+│   │   │   │   │   ├── components/      # ZoneCard, SlotCell, ManualInboundDialog, ImportInboundDialog, OutboundDialog, SlotEditDialog, StatisticsPanel
+│   │   │   │   │   ├── composables/     # useWarehouseSearch
+│   │   │   │   │   ├── pages/           # WarehousePage.vue
+│   │   │   │   │   ├── stores/          # useWarehouseStore.ts
+│   │   │   │   │   ├── services/        # warehouseService.ts
+│   │   │   │   │   ├── types/           # index.ts
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   └── __tests__/       # 11 个测试文件
 │   │   │   │   │
 │   │   │   │   ├── settings/            # 系统设置 ⬜ 未开发
 │   │   │   │   │   └── ...              # M2 Phase 2.1 开发
@@ -130,7 +137,7 @@ Qingtou_V6/
 │       │   │   │   ├── fleet_transport_records.py # 运输流水接口 ✅
 │       │   │   │   ├── fleet_vehicles.py       # 车辆接口 ✅
 │       │   │   │   ├── dashboard.py     # ⬜ 未开发
-│       │   │   │   ├── warehouse.py     # ⬜ 未开发
+│       │   │   │   ├── warehouse.py     # 仓库接口 ✅
 │       │   │   │   ├── settings.py      # ⬜ 未开发
 │       │   │   │   └── help_center.py   # ⬜ 未开发
 │       │   │   └── deps.py               # 依赖注入（get_db, get_current_user）
@@ -155,17 +162,20 @@ Qingtou_V6/
 │       │   │   ├── __init__.py
 │       │   │   ├── auth.py
 │       │   │   ├── dispatch.py            # dispatch 请求/响应 Schema
-│       │   │   └── fleet.py
+│       │   │   ├── fleet.py
+│       │   │   └── warehouse.py           # warehouse 请求/响应 Schema
 │       │   ├── services/                 # 业务逻辑层
 │       │   │   ├── __init__.py
 │       │   │   ├── auth_service.py
 │       │   │   ├── dispatch_service.py
 │       │   │   ├── dispatch_address_service.py  # 调度常用地址
 │       │   │   ├── route_template_service.py    # 业务类型路线模板
-│       │   │   └── fleet_service.py
+│       │   │   ├── fleet_service.py
+│       │   │   └── warehouse_service.py   # 仓库管理
 │       │   ├── core/                     # 核心配置
 │       │   │   ├── __init__.py
 │       │   │   ├── config.py             # 应用配置（读取 .env）
+│       │   │   ├── constants.py          # 系统常量（SYSTEM_USER_ID）
 │       │   │   ├── database.py           # 数据库引擎 + Session 管理
 │       │   │   ├── exception_handlers.py # 全局异常处理器
 │       │   │   ├── exceptions.py         # 业务异常类（AppException）
@@ -175,7 +185,7 @@ Qingtou_V6/
 │       │   │       └── fleet_validator.py
 │       │   ├── scheduler.py              # APScheduler 定时任务（超时检测 + 证照预警）
 │       │   └── main.py                   # FastAPI 应用入口
-│       ├── tests/                        # 后端测试 ✅ 135 个用例
+│       ├── tests/                        # 后端测试 ✅ 25 个测试文件
 │       │   ├── __init__.py
 │       │   ├── conftest.py
 │       │   ├── test_auth_api.py
@@ -192,7 +202,17 @@ Qingtou_V6/
 │       │   ├── test_fleet_vehicles.py
 │       │   ├── test_logger.py
 │       │   ├── test_security.py
-│       │   └── test_skeleton_order_bug.py
+│       │   ├── test_skeleton_order_bug.py
+│       │   ├── test_warehouse_service.py
+│       │   ├── test_complete_order_linkage.py
+│       │   ├── test_container_status_api.py
+│       │   ├── test_container_status.py
+│       │   ├── test_driver_api.py
+│       │   ├── test_driver_user_sync.py
+│       │   ├── test_delete_order_linkage.py
+│       │   ├── test_import_upgrade.py
+│       │   ├── test_standalone.py
+│       │   └── test_minimal.py
 │       ├── alembic/                      # 数据库迁移
 │       │   ├── versions/
 │       │   └── env.py
@@ -250,8 +270,14 @@ Qingtou_V6/
 │       │   ├── requirements.md
 │       │   ├── review-checklist.md
 │       │   └── tasks.md
-│       └── shared/
-│           ├── requirements.md
+│       ├── warehouse/
+│       │   ├── design.md
+│       │   ├── requirements.md
+│       │   └── tasks.md
+│       ├── shared/
+│       │   ├── requirements.md
+│       │   └── tasks.md
+│       └── test-coverage/
 │           └── tasks.md
 │
 ├── docs/                                 # 开发文档
@@ -306,7 +332,7 @@ Qingtou_V6/
 | dispatch | ✅ 已完成 | 任务 CRUD、司机分配、常用地址 | shared, auth, fleet |
 | driver | ✅ 已完成 | 司机工作台、任务状态更新、移动端适配 | shared, auth, dispatch |
 | fleet | ✅ 已完成 | 车辆/司机档案、证照管理、运输流水、车队统计 | shared, auth |
-| warehouse | ⬜ 未开发 | 仓库/库位管理、出入库、库存查询、批量导入 | shared, auth |
+| warehouse | ✅ 已完成 | 仓库/库位管理、出入库、库存查询、批量导入 | shared, auth |
 | settings | ⬜ 未开发 | 用户管理、参数配置、操作日志 | shared, auth |
 | help-center | ⬜ 未开发 | 图文教程展示、后台编辑管理 | shared, auth |
 
@@ -319,7 +345,7 @@ Qingtou_V6/
 | api/v1/dispatch | ✅ 已完成 | 任务 CRUD、分配 | models, services |
 | api/v1/driver | ✅ 已完成 | 司机端任务查询、状态更新 | models, services |
 | api/v1/fleet | ✅ 已完成 | 车辆/司机管理、证照、统计 | models, services |
-| api/v1/warehouse | ⬜ 未开发 | 仓库/库位/出入库 | models, services |
+| api/v1/warehouse | ✅ 已完成 | 仓库/库位/出入库 | models, services |
 | api/v1/settings | ⬜ 未开发 | 用户管理、参数、日志 | models, services |
 | api/v1/help_center | ⬜ 未开发 | 教程内容管理 | models, services |
 

@@ -102,23 +102,41 @@ async function handleSubmit() {
       label-width="80px"
     >
       <el-form-item label="区域">
-        <el-input :model-value="zoneCode" disabled />
+        <el-input
+          :model-value="zoneCode"
+          disabled
+        />
       </el-form-item>
-      <el-form-item label="箱号" prop="containerNo">
+      <el-form-item
+        label="箱号"
+        prop="containerNo"
+      >
         <el-input
           v-model="form.containerNo"
           placeholder="如：ABCD1234567"
           maxlength="11"
         />
       </el-form-item>
-      <el-form-item label="箱状态" prop="containerStatus">
+      <el-form-item
+        label="箱状态"
+        prop="containerStatus"
+      >
         <el-select v-model="form.containerStatus">
-          <el-option label="重箱" value="heavy" />
-          <el-option label="空箱" value="empty" />
+          <el-option
+            label="重箱"
+            value="heavy"
+          />
+          <el-option
+            label="空箱"
+            value="empty"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="货主">
-        <el-input v-model="form.customerName" placeholder="选填" />
+        <el-input
+          v-model="form.customerName"
+          placeholder="选填"
+        />
       </el-form-item>
       <el-form-item label="箱型">
         <el-select
@@ -135,11 +153,16 @@ async function handleSubmit() {
         </el-select>
       </el-form-item>
       <el-form-item label="封号">
-        <el-input v-model="form.sealNo" placeholder="选填" />
+        <el-input
+          v-model="form.sealNo"
+          placeholder="选填"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
       <el-button
         type="primary"
         :loading="submitting"

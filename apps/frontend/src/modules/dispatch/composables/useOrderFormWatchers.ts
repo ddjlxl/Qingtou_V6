@@ -37,7 +37,6 @@ function watchBusinessType(
   watch(
     () => form.businessType,
     async (val) => {
-      if (options.mode.value !== 'create') return
       if (!val) {
         form.originName = ''
         form.waypoints = []

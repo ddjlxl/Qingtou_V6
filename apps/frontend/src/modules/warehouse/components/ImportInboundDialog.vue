@@ -71,17 +71,23 @@ function handleExceed() {
         drag
         @change="handleUpload"
       >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+        <el-icon class="el-icon--upload">
+          <upload-filled />
+        </el-icon>
         <div class="el-upload__text">
           拖拽文件到此处，或<em>点击上传</em>
         </div>
         <template #tip>
-          <div class="el-upload__tip">仅支持 .xlsx 文件</div>
+          <div class="el-upload__tip">
+            仅支持 .xlsx 文件
+          </div>
         </template>
       </el-upload>
     </div>
     <template #footer>
-      <el-button @click="handleClose">关闭</el-button>
+      <el-button @click="handleClose">
+        关闭
+      </el-button>
     </template>
   </el-dialog>
 </template>

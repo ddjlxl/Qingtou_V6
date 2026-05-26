@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-24（dispatch-container-edit 补充箱号封号完成，Bug 修复：运输流水下载模板）
+> 最后更新：2026-05-26（warehouse 仓库管理完成）
 
 ---
 
@@ -17,7 +17,9 @@
 | M1: MVP | Phase 1.3 核心业务 — driver 司机端 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — dispatch-fleet-linkage 联动 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — dispatch-container-edit 补充箱号封号 | ✅ 已完成 |
-| M2: 完整版 | - | ⬜ 未开始 |
+| M2: 完整版 | Phase 2.1 业务补齐 — warehouse 仓库管理 | ✅ 已完成 |
+| M2: 完整版 | Phase 2.1 业务补齐 — dashboard 运营看板 | ⬜ 未开始 |
+| M2: 完整版 | Phase 2.1 业务补齐 — settings 系统设置 | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
 ---
@@ -202,13 +204,32 @@
 
 ## 下一步
 
-### Phase 2.1：业务补齐 — warehouse 仓库管理 ⬜
+### Phase 2.1：业务补齐 — dashboard 运营看板 ⬜
 
-后续模块：warehouse 仓库管理
+后续模块：dashboard 运营看板、settings 系统设置
 
 ---
 
 ## 已完成
+
+### Phase 2.1：业务补齐 — warehouse 仓库管理 ✅
+
+- [x] 需求文档：[specs/features/warehouse/requirements.md](file:///e:/Qingtou_V6/specs/features/warehouse/requirements.md)（14 条 AC）
+- [x] 技术设计：[specs/features/warehouse/design.md](file:///e:/Qingtou_V6/specs/features/warehouse/design.md)
+- [x] 任务规划：[specs/features/warehouse/tasks.md](file:///e:/Qingtou_V6/specs/features/warehouse/tasks.md)（6 个任务）
+- [x] 后端 API：[api/v1/warehouse.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/warehouse.py) — 仓库管理接口（区域列表/手动入库/导入入库/出库/移动/编辑/搜索/统计）
+- [x] 后端 Service：[services/warehouse_service.py](file:///e:/Qingtou_V6/apps/server/app/services/warehouse_service.py) — 9 个函数（get_zones, manual_inbound, import_inbound, outbound, move_slot, update_slot, search_slots, get_statistics, auto_store）
+- [x] 后端 Schema：[schemas/warehouse.py](file:///e:/Qingtou_V6/apps/server/app/schemas/warehouse.py)
+- [x] 后端常量：[core/constants.py](file:///e:/Qingtou_V6/apps/server/app/core/constants.py)（SYSTEM_USER_ID）
+- [x] 后端测试：[tests/test_warehouse_service.py](file:///e:/Qingtou_V6/apps/server/tests/test_warehouse_service.py)
+- [x] 前端页面：[pages/WarehousePage.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/warehouse/pages/WarehousePage.vue)
+- [x] 前端 Store：[stores/useWarehouseStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/warehouse/stores/useWarehouseStore.ts)
+- [x] 前端 Service：[services/warehouseService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/warehouse/services/warehouseService.ts)
+- [x] 前端 Composable：[composables/useWarehouseSearch.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/warehouse/composables/useWarehouseSearch.ts)
+- [x] 前端组件：ZoneCard、SlotCell、ManualInboundDialog、ImportInboundDialog、OutboundDialog、SlotEditDialog、StatisticsPanel
+- [x] 前端测试：11 个测试文件（ZoneCard、SlotCell、ManualInboundDialog、ImportInboundDialog、OutboundDialog、SlotEditDialog、StatisticsPanel、WarehousePage、types、useWarehouseStore、warehouseService）
+- [x] 路由配置：`/warehouse`（roles=['admin', 'warehouse_keeper']）
+- [x] 数据库迁移：StorageSlot 模型重构 + 12 区域 144 库位 seed data
 
 ### Phase 1.3：核心业务 — dispatch-container-edit 补充箱号封号 ✅
 

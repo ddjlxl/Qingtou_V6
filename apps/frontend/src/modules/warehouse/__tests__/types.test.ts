@@ -450,6 +450,26 @@ describe('Warehouse types', () => {
       expect(request3.customerName).toBe('客户')
       expect(request3.remark).toBe('备注')
     })
+
+    it('allows containerStatus update', () => {
+      const request1: SlotUpdateRequest = {
+        containerStatus: 'heavy',
+      }
+
+      const request2: SlotUpdateRequest = {
+        containerStatus: 'empty',
+      }
+
+      const request3: SlotUpdateRequest = {
+        customerName: '客户',
+        containerStatus: 'heavy',
+      }
+
+      expect(request1.containerStatus).toBe('heavy')
+      expect(request2.containerStatus).toBe('empty')
+      expect(request3.customerName).toBe('客户')
+      expect(request3.containerStatus).toBe('heavy')
+    })
   })
 
   describe('SearchHighlight type', () => {

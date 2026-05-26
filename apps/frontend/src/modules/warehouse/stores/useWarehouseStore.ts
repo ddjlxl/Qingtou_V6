@@ -79,8 +79,8 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     return result
   }
 
-  async function outbound(slotIds: string[], businessType?: string): Promise<OutboundResponse> {
-    const result = await warehouseService.outbound(slotIds, businessType)
+  async function outbound(slotIds: string[]): Promise<OutboundResponse> {
+    const result = await warehouseService.outbound(slotIds)
     clearSelection()
     await Promise.all([fetchZones(), fetchStatistics()])
     return result
@@ -100,11 +100,11 @@ export const useWarehouseStore = defineStore('warehouse', () => {
   async function move(sourceSlotId: string, targetSlotId: string) {
     await warehouseService.move(sourceSlotId, targetSlotId)
     moveSourceSlot.value = null
-    isMoveMode.value = false
+    clearSelection()
     await Promise.all([fetchZones(), fetchStatistics()])
   }
 
-  async function updateSlot(slotId: string, data: { customerName?: string; remark?: string }) {
+  async function updateSlot(slotId: string, data: { customerName?: string; remark?: string; containerStatus?: 'heavy' | 'empty' }) {
     await warehouseService.updateSlot(slotId, data)
     await Promise.all([fetchZones(), fetchStatistics()])
   }

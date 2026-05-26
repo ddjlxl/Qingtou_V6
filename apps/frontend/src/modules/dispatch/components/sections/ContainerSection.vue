@@ -34,7 +34,10 @@ const containerStatus = computed({
   </el-divider>
   <el-row :gutter="16">
     <el-col :span="12">
-      <el-form-item label="箱号" style="max-width: 300px">
+      <el-form-item
+        label="箱号"
+        style="max-width: 300px"
+      >
         <el-input
           :model-value="form.containerNo"
           placeholder="4位字母+7位数字"
@@ -69,7 +72,10 @@ const containerStatus = computed({
   </el-row>
   <el-row :gutter="16">
     <el-col :span="12">
-      <el-form-item label="箱型" style="max-width: 300px">
+      <el-form-item
+        label="箱型"
+        style="max-width: 300px"
+      >
         <el-select
           v-model="containerType"
           :disabled="disabled"
@@ -88,7 +94,10 @@ const containerStatus = computed({
       </el-form-item>
     </el-col>
     <el-col :span="12">
-      <el-form-item label="封号" style="max-width: 300px">
+      <el-form-item
+        label="封号"
+        style="max-width: 300px"
+      >
         <el-input
           :model-value="form.sealNo"
           placeholder="请输入封号"

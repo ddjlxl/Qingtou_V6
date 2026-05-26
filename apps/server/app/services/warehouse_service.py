@@ -308,7 +308,6 @@ async def outbound(
     db: AsyncSession, slot_ids: list[str], business_type: str | None = None
 ) -> dict:
     """出库：锁行校验 → 创建调度任务 → 清空库位 → 统一 commit 由调用方执行"""
-    # 函数内 import 避免与 dispatch_service 循环依赖
     from app.services.dispatch_service import create_order
 
     slots = []
@@ -393,7 +392,6 @@ async def move_slot(
 async def update_slot(
     db: AsyncSession, slot_id: str, data: dict
 ) -> dict:
-    """编辑库位：只允许修改 customer_name 和 remark"""
     slot = await _get_slot_or_raise(db, slot_id)
 
     if slot.status == SlotStatus.EMPTY.value:
@@ -403,6 +401,12 @@ async def update_slot(
         slot.customer_name = data["customer_name"]
     if "remark" in data:
         slot.remark = data["remark"]
+    if "container_status" in data:
+        slot.container_status = data["container_status"]
+        if data["container_status"] == "heavy":
+            slot.status = SlotStatus.LOADED.value
+        else:
+            slot.status = SlotStatus.EMPTY_CONTAINER.value
 
     await db.flush()
 
@@ -410,6 +414,7 @@ async def update_slot(
         "slot_no": slot.slot_no,
         "customer_name": slot.customer_name,
         "remark": slot.remark,
+        "container_status": slot.container_status,
     }
 
 
