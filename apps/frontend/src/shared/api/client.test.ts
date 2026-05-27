@@ -61,7 +61,7 @@ describe('http client', () => {
       const result = handleResponseSuccess(response)
 
       expect(result).toBeInstanceOf(Blob)
-      expect(result.type).toBe('text/plain')
+      expect((result as Blob).type).toBe('text/plain')
     })
   })
 

@@ -5,6 +5,11 @@ import { setActivePinia, createPinia } from 'pinia'
 import SlotEditDialog from '../components/SlotEditDialog.vue'
 import type { Slot } from '../types'
 
+interface SlotEditDialogVM {
+  formRef: { validate: () => Promise<boolean> }
+  handleSubmit: () => Promise<void>
+}
+
 const mockUpdateSlot = vi.fn()
 
 vi.mock('../stores/useWarehouseStore', () => ({
@@ -100,7 +105,9 @@ describe('SlotEditDialog', () => {
       const wrapper = createWrapper({ visible: true, slotData: makeSlot() })
       await flushPromises()
 
-      const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
+      // mock ElForm.validate: 第三方库内部实现，test-utils 无法可靠触发
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
+      vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
       await vm.handleSubmit()
 
       expect(wrapper.emitted('update:visible')).toBeTruthy()
@@ -113,7 +120,9 @@ describe('SlotEditDialog', () => {
       const wrapper = createWrapper({ visible: true, slotData: makeSlot() })
       await flushPromises()
 
-      const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
+      // mock ElForm.validate: 第三方库内部实现，test-utils 无法可靠触发
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
+      vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
       await vm.handleSubmit()
 
       expect(ElMessage.success).toHaveBeenCalledWith('更新成功')
@@ -125,7 +134,9 @@ describe('SlotEditDialog', () => {
       const wrapper = createWrapper({ visible: true, slotData: makeSlot() })
       await flushPromises()
 
-      const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
+      // mock ElForm.validate: 第三方库内部实现，test-utils 无法可靠触发
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
+      vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
       await vm.handleSubmit()
 
       expect(ElMessage.error).toHaveBeenCalledWith('网络错误')
@@ -136,7 +147,9 @@ describe('SlotEditDialog', () => {
       const wrapper = createWrapper({ visible: true, slotData: makeSlot() })
       await flushPromises()
 
-      const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
+      // mock ElForm.validate: 第三方库内部实现，test-utils 无法可靠触发
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
+      vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
       await vm.handleSubmit()
 
       expect(wrapper.emitted('update:visible')).toBeFalsy()
@@ -146,7 +159,7 @@ describe('SlotEditDialog', () => {
       const wrapper = createWrapper({ visible: true, slotData: null })
       await flushPromises()
 
-      const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
       await vm.handleSubmit()
 
       expect(mockUpdateSlot).not.toHaveBeenCalled()
@@ -158,13 +171,27 @@ describe('SlotEditDialog', () => {
       const wrapper = createWrapper({ visible: true, slotData: slot })
       await flushPromises()
 
-      const vm = wrapper.vm as unknown as { handleSubmit: () => Promise<void> }
+      // mock ElForm.validate: 第三方库内部实现，test-utils 无法可靠触发
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
+      vm.formRef = { validate: vi.fn().mockResolvedValue(true) }
       await vm.handleSubmit()
 
       expect(mockUpdateSlot).toHaveBeenCalledWith('slot-1', {
         customerName: undefined,
         remark: undefined,
       })
+    })
+
+    it('验证失败时不调用 updateSlot', async () => {
+      const wrapper = createWrapper({ visible: true, slotData: makeSlot() })
+      await flushPromises()
+
+      // mock ElForm.validate: 验证失败场景
+      const vm = wrapper.vm as unknown as SlotEditDialogVM
+      vm.formRef = { validate: vi.fn().mockResolvedValue(false) }
+      await vm.handleSubmit()
+
+      expect(mockUpdateSlot).not.toHaveBeenCalled()
     })
   })
 })

@@ -1,8 +1,8 @@
 # 项目目录结构
 
-> **版本**：v1.3
+> **版本**：v1.5
 > **创建日期**：2026-05-03
-> **更新日期**：2026-05-26
+> **更新日期**：2026-05-27
 
 ---
 
@@ -21,7 +21,8 @@ Qingtou_V6/
 ├── apps/
 │   ├── frontend/                        # 调度端（Vue 3 + Vite + TypeScript）
 │   │   ├── public/
-│   │   │   └── favicon.ico
+│   │   │   ├── favicon.svg
+│   │   │   └── icons.svg
 │   │   ├── src/
 │   │   │   ├── modules/                 # ⭐ 业务模块（特性架构核心）
 │   │   │   │   ├── auth/                # 用户认证 ✅ 已完成
@@ -44,16 +45,16 @@ Qingtou_V6/
 │   │   │   │   │   ├── services/        # dispatchService.ts
 │   │   │   │   │   ├── types/           # index.ts, order.ts
 │   │   │   │   │   ├── index.ts
-│   │   │   │   │   └── __tests__/       # 10 个测试文件
+│   │   │   │   │   ├── __tests__/       # 12 个测试文件
 │   │   │   │   │
 │   │   │   │   ├── fleet/               # 车队管理 ✅ 已完成
-│   │   │   │   │   ├── components/      # VehicleManagement, DriverManagement, CertificateManagement, TransportRecordManagement, StatisticsTab, StatusTag, TransportFilterBar, TransportStatistics, certificateFormConfig...
+│   │   │   │   │   ├── components/      # VehicleManagement, VehicleFormDialog, DriverManagement, DriverFormDialog, CertificateManagement, CertificateFormDialog, TransportRecordManagement, TransportFilterBar, TransportStatistics, StatisticsTab, StatusTag, certificateFormConfig
 │   │   │   │   │   ├── pages/           # FleetPage.vue
 │   │   │   │   │   ├── stores/          # useFleetStore, useFleetVehicles, useFleetDrivers, useFleetCertificates, useFleetTransport, useFleetStatistics
 │   │   │   │   │   ├── services/        # fleetService.ts
 │   │   │   │   │   ├── types/           # vehicle.ts, driver.ts, certificate.ts, transport-record.ts, statistics.ts, index.ts
 │   │   │   │   │   ├── index.ts
-│   │   │   │   │   └── __tests__/       # 20 个测试文件
+│   │   │   │   │   └── __tests__/       # 22 个测试文件
 │   │   │   │   │
 │   │   │   │   ├── driver/              # 司机端 ✅ 已完成
 │   │   │   │   │   ├── components/      # DriverOrderCard.vue
@@ -62,7 +63,7 @@ Qingtou_V6/
 │   │   │   │   │   ├── services/        # driverService.ts
 │   │   │   │   │   ├── types/           # index.ts
 │   │   │   │   │   ├── index.ts
-│   │   │   │   │   └── __tests__/       # useDriverStore.test.ts
+│   │   │   │   │   └── __tests__/       # 4 个测试文件
 │   │   │   │   │
 │   │   │   │   ├── warehouse/           # 仓库管理 ✅ 已完成
 │   │   │   │   │   ├── components/      # ZoneCard, SlotCell, ManualInboundDialog, ImportInboundDialog, OutboundDialog, SlotEditDialog, StatisticsPanel
@@ -72,7 +73,7 @@ Qingtou_V6/
 │   │   │   │   │   ├── services/        # warehouseService.ts
 │   │   │   │   │   ├── types/           # index.ts
 │   │   │   │   │   ├── index.ts
-│   │   │   │   │   └── __tests__/       # 11 个测试文件
+│   │   │   │   │   └── __tests__/       # 12 个测试文件
 │   │   │   │   │
 │   │   │   │   ├── settings/            # 系统设置 ⬜ 未开发
 │   │   │   │   │   └── ...              # M2 Phase 2.1 开发
@@ -284,11 +285,26 @@ Qingtou_V6/
 │   ├── 2026-03-15-公司业务与运营全维度总结.md
 │   ├── AI纯大模型开发可行性评估.md
 │   ├── V4调度中心页面功能详细文档.md
+│   ├── v4仓库管理页面需求澄清.md
+│   ├── SQLite转PostgreSQL迁移踩坑总结.md
+│   ├── 审查标准.md
+│   ├── 模块概览.md
+│   ├── 项目健康检查维度手册.md
+│   ├── Harness Engineering 研究報告.md
+│   ├── Harness Engineering 优化建议.md
+│   ├── Harness Engineering 优化实施路线图.md
 │   └── 开发记录/
 │       ├── Bug修复_切换业务类型路线不跟随变化_20260516.md
 │       ├── Bug修复_路线模板允许空地址_20260516.md
 │       ├── Bug修复_运输流水下载模板失败_20260523.md
-│       └── 健康报告_2026-05-21.md
+│       ├── Bug修复_出库业务类型地址自动填充_20260526.md
+│       ├── Bug修复_移动后选中状态未清空_20260526.md
+│       ├── 仓库管理_迭代_CR-001_20260526.md
+│       ├── 健康报告_2026-05-21.md
+│       ├── 测试补充_阶段1_完成报告.md
+│       ├── 测试补充_阶段2_完成报告.md
+│       ├── 测试补充_阶段3_完成报告.md
+│       └── 测试补充_阶段4_完成报告.md
 │
 ├── scripts/                              # 脚本工具
 │   ├── architecture-check.js
@@ -297,6 +313,7 @@ Qingtou_V6/
 │   ├── development-validation.js
 │   ├── init-project.js
 │   ├── pre-development-checklist.js
+│   ├── test_vehicle_management.py        # e2e 车辆管理测试脚本
 │   └── screenshots/                      # e2e 测试截图
 │       ├── step1_fleet_page.png
 │       ├── step2_vehicle_tab.png
@@ -332,7 +349,7 @@ Qingtou_V6/
 | dispatch | ✅ 已完成 | 任务 CRUD、司机分配、常用地址 | shared, auth, fleet |
 | driver | ✅ 已完成 | 司机工作台、任务状态更新、移动端适配 | shared, auth, dispatch |
 | fleet | ✅ 已完成 | 车辆/司机档案、证照管理、运输流水、车队统计 | shared, auth |
-| warehouse | ✅ 已完成 | 仓库/库位管理、出入库、库存查询、批量导入 | shared, auth |
+| warehouse | ✅ 已完成 | 仓库/库位管理、出入库、库存查询、批量导入、集装箱移动 | shared, auth |
 | settings | ⬜ 未开发 | 用户管理、参数配置、操作日志 | shared, auth |
 | help-center | ⬜ 未开发 | 图文教程展示、后台编辑管理 | shared, auth |
 
@@ -345,7 +362,7 @@ Qingtou_V6/
 | api/v1/dispatch | ✅ 已完成 | 任务 CRUD、分配 | models, services |
 | api/v1/driver | ✅ 已完成 | 司机端任务查询、状态更新 | models, services |
 | api/v1/fleet | ✅ 已完成 | 车辆/司机管理、证照、统计 | models, services |
-| api/v1/warehouse | ✅ 已完成 | 仓库/库位/出入库 | models, services |
+| api/v1/warehouse | ✅ 已完成 | 仓库/库位/出入库/移动/搜索/统计 | models, services |
 | api/v1/settings | ⬜ 未开发 | 用户管理、参数、日志 | models, services |
 | api/v1/help_center | ⬜ 未开发 | 教程内容管理 | models, services |
 

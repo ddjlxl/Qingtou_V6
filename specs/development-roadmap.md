@@ -1,8 +1,8 @@
 # 开发路线图
 
-> **版本**：v1.4  
+> **版本**：v1.5  
 > **创建日期**：2026-05-03  
-> **更新日期**：2026-05-26  
+> **更新日期**：2026-05-27  
 > **策略**：先做核心闭环（M1），能用再说，再逐步补齐  
 
 ---
@@ -117,7 +117,8 @@
   - 依赖：auth、shared
   - 完成标准：库管能入库/出库/移动集装箱，出库自动创建调度任务，网格可视化正确显示库位状态
   - 需求文档：[requirements.md](../features/warehouse/requirements.md) ✅ 已完成
-  - 进度：6/6 任务全部完成（前端 7 组件 + 1 composable + 11 测试 / 后端 9 service 函数 + API + Schema + 测试）
+  - 进度：6/6 任务全部完成（前端 7 组件 + 1 composable + 12 测试 / 后端 9 service 函数 + API + Schema + 测试）
+  - 迭代记录：CR-001 移动模式保持连续移动 + ESC 键退出；BUG-20260526 出库业务类型传递 + 移动后选中状态清空
 
 - [ ] **dashboard 运营看板**
   - 开发指令：`开发首页看板（今日任务数、完成率、超时数、平均转运时间）、天地图地图集成 + 车辆实时定位标记、地图与运力列表双向联动、30 秒自动刷新`
@@ -169,7 +170,7 @@
 | 里程碑 | 模块数 | 状态 |
 |--------|--------|------|
 | M1: MVP | 5 个 Phase | ✅ 完成（Phase 1.1 ✅ / 1.2 ✅ / 1.3 auth ✅ / fleet ✅ / dispatch ✅ / driver ✅ / dispatch-fleet-linkage ✅ / dispatch-container-edit ✅） |
-| M2: 完整版 | 3 个模块 | 🔄 进行中（warehouse ✅ / dashboard ⬜ / settings ⬜） |
+| M2: 完整版 | 3 个模块 | 🔄 进行中（warehouse ✅ 含 CR-001 迭代 / dashboard ⬜ / settings ⬜） |
 | M3: 增强版 | 3 个模块 | ⬜ 未开始 |
 
 ---

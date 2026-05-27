@@ -54,6 +54,7 @@ vi.mock('../stores/useFleetStore', () => ({
 }))
 
 import DriverFormDialog from '../components/DriverFormDialog.vue'
+import { Ownership, VehicleStatus } from '../types/vehicle'
 
 interface DriverFormDialogVM {
   form: {
@@ -68,10 +69,10 @@ function makeVehicle(overrides: Record<string, unknown> = {}) {
   return {
     id: 'v1',
     plateNo: '粤A12345',
-    ownership: 'own' as const,
+    ownership: Ownership.OWN,
     boundDriverId: null,
     boundDriverName: undefined,
-    status: 'idle' as const,
+    status: VehicleStatus.IDLE,
     isDisabled: false,
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',

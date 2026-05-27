@@ -45,7 +45,7 @@ export const warehouseService = {
 
   searchSlots(keyword: string) {
     return http.get<SearchResponse>('/v1/warehouse/slots/search', {
-      keyword,
+      params: { keyword },
     })
   },
 }

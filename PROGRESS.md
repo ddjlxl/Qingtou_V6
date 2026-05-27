@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-26（warehouse 仓库管理完成）
+> 最后更新：2026-05-27（文档同步更新）
 
 ---
 
@@ -175,7 +175,7 @@
 - [x] 前端 Service：driverService.ts
 - [x] 前端组件：DriverOrderCard.vue
 - [x] 前端类型：types/index.ts
-- [x] 前端测试：__tests__/useDriverStore.test.ts
+- [x] 前端测试：4 个测试文件（DriverWorkbench、DriverOrderCard、useDriverStore、driverService）
 - [x] 路由配置：`/driver`、`/driver/history`、`/driver/profile`（roles=['driver']）
 - [x] 登录跳转：按角色动态跳转（driver → /driver，其他 → /fleet）
 
@@ -196,9 +196,9 @@
 - [x] 前端 Store：[stores/useDispatchStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/stores/useDispatchStore.ts)
 - [x] 前端 Service：[services/dispatchService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/services/dispatchService.ts)
 - [x] 前端 Types：[types/order.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/types/order.ts)
-- [x] 前端 Components：OrderFormDialog、OrderTable、AssignDialog、AddressDialog、RouteTemplateDialog + 5 个 section 组件
-- [x] 前端 Composables：[composables/useOrderForm.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/composables/useOrderForm.ts)
-- [x] 前端测试：[__tests__/OrderFormDialog.test.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/__tests__/OrderFormDialog.test.ts)（9 tests）
+- [x] 前端 Components：OrderFormDialog、OrderTable、OrderTableBody、OrderTableToolbar、AssignDialog、AddressDialog、RouteTemplateDialog
+- [x] 前端 Composables：useOrderForm、useOrderFormHelpers、useOrderFormOptions、useOrderFormRules、useOrderFormWatchers
+- [x] 前端测试：12 个测试文件（OrderFormDialog、OrderTable、AssignDialog、AddressDialog、useDispatchStore、dispatchService、useOrderTable、useOrderFormWatchers、useOrderFormHelpers、containerStatus、useOrderFormRules、useOrderFormOptions）
 
 ---
 
@@ -227,9 +227,14 @@
 - [x] 前端 Service：[services/warehouseService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/warehouse/services/warehouseService.ts)
 - [x] 前端 Composable：[composables/useWarehouseSearch.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/warehouse/composables/useWarehouseSearch.ts)
 - [x] 前端组件：ZoneCard、SlotCell、ManualInboundDialog、ImportInboundDialog、OutboundDialog、SlotEditDialog、StatisticsPanel
-- [x] 前端测试：11 个测试文件（ZoneCard、SlotCell、ManualInboundDialog、ImportInboundDialog、OutboundDialog、SlotEditDialog、StatisticsPanel、WarehousePage、types、useWarehouseStore、warehouseService）
+- [x] 前端测试：12 个测试文件（ZoneCard、SlotCell、ManualInboundDialog、ImportInboundDialog、OutboundDialog、SlotEditDialog、StatisticsPanel、WarehousePage、types、useWarehouseStore、warehouseService、container-move-scenario）
 - [x] 路由配置：`/warehouse`（roles=['admin', 'warehouse_keeper']）
 - [x] 数据库迁移：StorageSlot 模型重构 + 12 区域 144 库位 seed data
+
+**仓库迭代记录**：
+- [x] CR-001（2026-05-26）：移动完成后保持移动模式，支持连续移动；新增 ESC 键退出 — AC-004 变更
+- [x] BUG-20260526-001（P1）：出库业务类型地址自动填充 — 后端 outbound 缺 business_type 参数 + 前端编辑模式 watcher 限制
+- [x] BUG-20260526-002（P2）：移动后选中状态未清空 — move() 缺少 clearSelection() 调用
 
 ### Phase 1.3：核心业务 — dispatch-container-edit 补充箱号封号 ✅
 
@@ -243,10 +248,12 @@
 
 - [x] Task-01：后端 `update_order` 放宽编辑限制 — [dispatch_service.py](file:///e:/Qingtou_V6/apps/server/app/services/dispatch_service.py)（新增 `EDITABLE_STATUSES` 常量，非待分配状态仅允许编辑箱号封号）
 - [x] Task-02：前端编辑按钮 + 弹窗字段禁用 — [useOrderTable.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/components/useOrderTable.ts) + [useOrderForm.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/composables/useOrderForm.ts) + [OrderFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/components/OrderFormDialog.vue) + 4 个 Section 组件
-- [x] 验证通过：前端 519 tests ✅
+- [x] 验证通过：前端 889 tests ✅
 
 ### Bug 修复记录
 
+- [x] BUG-20260526-001：出库业务类型地址自动填充 — 后端 outbound 缺 business_type + 前端编辑模式 watcher 限制 — P1 ✅
+- [x] BUG-20260526-002：移动后选中状态未清空 — move() 缺少 clearSelection() — P2 ✅
 - [x] BUG-20260523-001：运输流水下载模板失败 — [client.ts](file:///e:/Qingtou_V6/apps/frontend/src/shared/api/client.ts)（Blob 响应跳过 camelcaseKeys 转换）— P1 ✅
 - [x] BUG-20260516-001：切换业务类型路线不跟随变化 — P1 ✅
 - [x] BUG-20260516-002：路线模板允许空地址 — P2 ✅
@@ -271,12 +278,15 @@
 
 ### dispatch 模块技术债（待修复）
 
-- [ ] 文件超行拆分（OrderFormDialog 561 行、OrderTable 358 行、dispatch_service.py 419 行）
-- [ ] ESLint error 修复（11 个 vue/no-mutating-props）
+- [ ] 文件超行拆分（dispatch_service.py 519 行）
 - [ ] 后端测试补充
-- [ ] 健康报告 S2：driver 模块直接引用 dispatch 内部类型（架构违规）
 - [ ] 健康报告 S3：后端路线模板 API 测试失败（500）
-- [ ] 健康报告 S6：useDriverStore.ts 函数过长（121 行）
+
+### 已解决的技术债
+
+- [x] ~~OrderFormDialog 561 行~~ → 拆分 sections/ 后降至 259 行
+- [x] ~~OrderTable 358 行~~ → 拆分 OrderTableBody/OrderTableToolbar 后降至 154 行
+- [x] ~~ESLint error 11 个 vue/no-mutating-props~~ → 已修复，0 errors
 
 ---
 

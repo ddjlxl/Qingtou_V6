@@ -31,6 +31,20 @@ vi.mock('../stores/useFleetStore', () => ({
 
 import CertificateFormDialog from '../components/CertificateFormDialog.vue'
 import { OwnerType, VehicleCertType } from '../types/certificate'
+import type { CertType } from '../types/certificate'
+
+interface CertificateFormDialogVM {
+  form: {
+    ownerId: string
+    ownerType: OwnerType
+    certType: CertType
+    certName: string
+    issueDate: string
+    expiryDate: string
+    remark: string
+  }
+  ownerOptions: { label: string; value: string }[]
+}
 
 function createWrapper(props = {}) {
   return mount(CertificateFormDialog, {
@@ -115,48 +129,52 @@ describe('CertificateFormDialog', () => {
 
   it('computes ownerOptions from vehicles excluding disabled when ownerType is vehicle', () => {
     wrapper = createWrapper()
-    expect(wrapper.vm.form.ownerType).toBe(OwnerType.VEHICLE)
-    const vm = wrapper.vm as unknown as { ownerOptions: { label: string; value: string }[] }
+    const vm = wrapper.vm as unknown as CertificateFormDialogVM
+    expect(vm.form.ownerType).toBe(OwnerType.VEHICLE)
     expect(vm.ownerOptions).toEqual([{ label: '粤A12345', value: 'v1' }])
   })
 
   it('computes ownerOptions from drivers excluding disabled when ownerType is driver', async () => {
     wrapper = createWrapper()
-    wrapper.vm.form.ownerType = OwnerType.DRIVER
+    const vm = wrapper.vm as unknown as CertificateFormDialogVM
+    vm.form.ownerType = OwnerType.DRIVER
     await nextTick()
-    const vm = wrapper.vm as unknown as { ownerOptions: { label: string; value: string }[] }
     expect(vm.ownerOptions).toEqual([{ label: '张三', value: 'd1' }])
   })
 
   it('clears ownerId when ownerType changes', async () => {
     wrapper = createWrapper()
-    wrapper.vm.form.ownerId = 'v1'
+    const vm = wrapper.vm as unknown as CertificateFormDialogVM
+    vm.form.ownerId = 'v1'
     await wrapper.vm.$nextTick()
-    wrapper.vm.form.ownerType = OwnerType.DRIVER
+    vm.form.ownerType = OwnerType.DRIVER
     await wrapper.vm.$nextTick()
-    expect(wrapper.vm.form.ownerId).toBe('')
+    expect(vm.form.ownerId).toBe('')
   })
 
   it('auto-fills certName when certType changes to vehicle license', async () => {
     wrapper = createWrapper()
-    wrapper.vm.form.certType = VehicleCertType.COMMERCIAL_INSURANCE
+    const vm = wrapper.vm as unknown as CertificateFormDialogVM
+    vm.form.certType = VehicleCertType.COMMERCIAL_INSURANCE
     await nextTick()
-    wrapper.vm.form.certType = VehicleCertType.VEHICLE_LICENSE
+    vm.form.certType = VehicleCertType.VEHICLE_LICENSE
     await nextTick()
-    expect(wrapper.vm.form.certName).toBe('行驶证')
+    expect(vm.form.certName).toBe('行驶证')
   })
 
   it('auto-fills certName when certType changes to road transport', async () => {
     wrapper = createWrapper()
-    wrapper.vm.form.certType = VehicleCertType.ROAD_TRANSPORT
+    const vm = wrapper.vm as unknown as CertificateFormDialogVM
+    vm.form.certType = VehicleCertType.ROAD_TRANSPORT
     await nextTick()
-    expect(wrapper.vm.form.certName).toBe('道路运输证')
+    expect(vm.form.certName).toBe('道路运输证')
   })
 
   it('auto-fills certName when ownerType switches to driver', async () => {
     wrapper = createWrapper()
-    wrapper.vm.form.ownerType = OwnerType.DRIVER
+    const vm = wrapper.vm as unknown as CertificateFormDialogVM
+    vm.form.ownerType = OwnerType.DRIVER
     await nextTick()
-    expect(wrapper.vm.form.certName).toBe('驾驶证')
+    expect(vm.form.certName).toBe('驾驶证')
   })
 })

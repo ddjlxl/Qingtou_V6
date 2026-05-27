@@ -112,6 +112,8 @@ watch(
   { immediate: true }
 )
 
+defineExpose({ form, ownerOptions })
+
 function handleClose() {
   emit('update:visible', false)
 }

@@ -283,7 +283,7 @@ describe('warehouseService', () => {
 
       const result = await warehouseService.searchSlots('CONT')
 
-      expect(mockGet).toHaveBeenCalledWith('/v1/warehouse/slots/search', { keyword: 'CONT' })
+      expect(mockGet).toHaveBeenCalledWith('/v1/warehouse/slots/search', { params: { keyword: 'CONT' } })
       expect(result.keyword).toBe('CONT')
       expect(result.total).toBe(2)
       expect(result.items).toHaveLength(2)

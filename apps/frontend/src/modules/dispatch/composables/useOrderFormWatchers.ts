@@ -32,7 +32,6 @@ function watchVisible(
 
 function watchBusinessType(
   form: OrderFormState,
-  options: { mode: Ref<'create' | 'edit'> },
 ) {
   watch(
     () => form.businessType,
@@ -141,7 +140,7 @@ export function useOrderFormWatchers(
   fetchAvailableResources: () => Promise<void>,
 ) {
   watchVisible(form, options, fetchAvailableResources)
-  watchBusinessType(form, options)
+  watchBusinessType(form)
   watchVehicleId(form, options, getAvailableVehicles, getAvailableDrivers)
   watchDriverId(form, options, getAvailableDrivers, getAvailableVehicles)
 }
