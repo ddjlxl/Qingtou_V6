@@ -17,11 +17,12 @@ export const warehouseService = {
     })
   },
 
-  importInbound(zoneCode: string, file: File) {
+  importInbound(zoneCode: string | null, file: File) {
     const formData = new FormData()
     formData.append('file', file)
+    const params = zoneCode ? `?zone_code=${encodeURIComponent(zoneCode)}` : ''
     return http.post<ImportInboundResponse>(
-      `/v1/warehouse/slots/import-inbound?zone_code=${encodeURIComponent(zoneCode)}`,
+      `/v1/warehouse/slots/import-inbound${params}`,
       formData,
     )
   },

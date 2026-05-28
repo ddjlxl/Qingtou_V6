@@ -106,15 +106,6 @@ async def get_statistics(db: AsyncSession) -> dict:
     }
 
 
-async def _count_empty_slots(db: AsyncSession, zone_code: str) -> int:
-    result = await db.execute(
-        select(func.count(StorageSlot.id)).where(
-            StorageSlot.zone_code == zone_code,
-            StorageSlot.status == SlotStatus.EMPTY.value,
-        )
-    )
-    return result.scalar() or 0
-
 
 async def _find_empty_slots(
     db: AsyncSession, zone_code: str, limit: int
@@ -166,18 +157,17 @@ async def _check_container_uniqueness(db: AsyncSession, container_nos: list[str]
 async def manual_inbound(
     db: AsyncSession, zone_code: str, items: list[dict]
 ) -> dict:
-    """手动入库：校验容量 → 校验箱号唯一性 → 行优先分配空位 → fill → flush"""
+    """手动入库：校验箱号唯一性 → 行锁获取空位 → 容量校验 → fill → flush"""
     container_nos = [item["container_no"] for item in items]
-
-    empty_count = await _count_empty_slots(db, zone_code)
-    if empty_count < len(items):
-        raise BusinessRuleViolationError(
-            f"可用库位不足，当前可用 {empty_count} 个，需要 {len(items)} 个"
-        )
 
     await _check_container_uniqueness(db, container_nos)
 
     empty_slots = await _find_empty_slots(db, zone_code, len(items))
+
+    if len(empty_slots) < len(items):
+        raise BusinessRuleViolationError(
+            f"可用库位不足，当前可用 {len(empty_slots)} 个，需要 {len(items)} 个"
+        )
 
     result_items = []
     for slot, item in zip(empty_slots, items):
@@ -225,9 +215,11 @@ def _parse_excel(content: bytes) -> list[dict]:
 
 
 async def import_inbound(
-    db: AsyncSession, zone_code: str, content: bytes
+    db: AsyncSession, zone_code: str | None, content: bytes
 ) -> dict:
-    """导入入库：解析 Excel → 校验行数据 → 复用 manual_inbound 逻辑"""
+    """导入入库：解析 Excel → 校验行数据 → 入库
+    zone_code 为 None 时按优先级自动跨区域分配库位
+    """
     rows = _parse_excel(content)
 
     valid_items: list[dict] = []
@@ -235,41 +227,130 @@ async def import_inbound(
 
     for i, row in enumerate(rows, start=2):
         container_no = str(row.get("container_no", "")).strip().upper()
-        container_status = str(row.get("container_status", "")).strip().lower()
+        container_status = row.get("container_status")
+        if container_status is not None:
+            container_status = str(container_status).strip().lower()
 
         if not re.match(r"^[A-Z]{4}\d{7}$", container_no):
             errors.append(f"第 {i} 行: 箱号格式错误 '{container_no}'")
             continue
 
-        if container_status not in ("heavy", "empty"):
+        if container_status and container_status not in ("heavy", "empty"):
             errors.append(f"第 {i} 行: 箱状态必须为 heavy 或 empty")
             continue
 
         valid_items.append({
             "container_no": container_no,
-            "container_status": container_status,
-            "customer_name": str(row.get("customer_name", "")).strip() or None,
-            "container_type": str(row.get("container_type", "")).strip() or None,
-            "seal_no": str(row.get("seal_no", "")).strip() or None,
+            "container_status": container_status or "empty",
+            "customer_name": (str(v).strip() or None) if (v := row.get("customer_name")) is not None else None,
+            "container_type": (str(v).strip() or None) if (v := row.get("container_type")) is not None else None,
+            "seal_no": (str(v).strip() or None) if (v := row.get("seal_no")) is not None else None,
         })
 
     stored_count = 0
     result_items: list[dict] = []
 
     if valid_items:
-        try:
-            async with db.begin_nested():
-                result = await manual_inbound(db, zone_code, valid_items)
-                stored_count = result["stored_count"]
-                result_items = result["items"]
-        except BusinessRuleViolationError as e:
-            errors.append(e.message)
+        if zone_code:
+            # 指定区域：在该区域内入库
+            result = await _import_to_zone(db, zone_code, valid_items, errors)
+            stored_count = result["stored_count"]
+            result_items = result["items"]
+        else:
+            # 自动分配：按优先级跨区域入库
+            result = await _import_auto_assign(db, valid_items, errors)
+            stored_count = result["stored_count"]
+            result_items = result["items"]
 
     return {
         "total_rows": len(rows),
         "stored_count": stored_count,
         "errors": errors,
     }
+
+
+async def _import_to_zone(
+    db: AsyncSession, zone_code: str, valid_items: list[dict], errors: list[str]
+) -> dict:
+    """导入到指定区域，溢出部分按优先级链自动跨区域分配"""
+    # 用行锁获取空位，避免 TOCTOU 竞态
+    empty_slots = await _find_empty_slots(db, zone_code, len(valid_items))
+    empty_count = len(empty_slots)
+
+    if empty_count == 0:
+        # 指定区域无空位，全部走自动分配
+        return await _import_auto_assign(db, valid_items, errors)
+
+    storable_items = valid_items[:empty_count]
+    overflow_items = valid_items[empty_count:]
+
+    stored_count = 0
+    result_items: list[dict] = []
+
+    try:
+        async with db.begin_nested():
+            # empty_slots 已加行锁，直接填充
+            for slot, item in zip(empty_slots, storable_items):
+                _fill_slot(slot, item)
+                result_items.append({
+                    "slot_no": slot.slot_no,
+                    "container_no": item["container_no"],
+                })
+            stored_count = len(result_items)
+            await db.flush()
+    except BusinessRuleViolationError as e:
+        errors.append(e.message)
+        return {"stored_count": 0, "items": []}
+
+    # 溢出部分按优先级链自动分配到其他区域（跳过唯一性检查，已在 manual_inbound 中校验过）
+    if overflow_items:
+        overflow_result = await _import_auto_assign(db, overflow_items, errors, skip_uniqueness_check=True)
+        stored_count += overflow_result["stored_count"]
+        result_items.extend(overflow_result["items"])
+
+    return {"stored_count": stored_count, "items": result_items}
+
+
+async def _import_auto_assign(
+    db: AsyncSession, valid_items: list[dict], errors: list[str],
+    skip_uniqueness_check: bool = False,
+) -> dict:
+    """自动分配：按优先级跨区域入库"""
+    if not skip_uniqueness_check:
+        container_nos = [item["container_no"] for item in valid_items]
+        await _check_container_uniqueness(db, container_nos)
+
+    stored_count = 0
+    result_items: list[dict] = []
+    remaining_items = list(valid_items)
+
+    async with db.begin_nested():
+        for zone_code in AUTO_INBOUND_PRIORITY:
+            if not remaining_items:
+                break
+
+            empty_slots = await _find_empty_slots(db, zone_code, len(remaining_items))
+            if not empty_slots:
+                continue
+
+            for slot in empty_slots:
+                if not remaining_items:
+                    break
+                item = remaining_items.pop(0)
+                _fill_slot(slot, item)
+                result_items.append({
+                    "slot_no": slot.slot_no,
+                    "container_no": item["container_no"],
+                })
+                stored_count += 1
+
+        await db.flush()
+
+    if remaining_items:
+        nos = ", ".join(item["container_no"] for item in remaining_items)
+        errors.append(f"库位不足，以下 {len(remaining_items)} 条未入库: {nos}")
+
+    return {"stored_count": stored_count, "items": result_items}
 
 
 def _clear_slot(slot: StorageSlot) -> dict:
@@ -473,7 +554,7 @@ async def search_slots(db: AsyncSession, keyword: str) -> dict:
             StorageSlot.status != SlotStatus.EMPTY.value,
             (StorageSlot.container_no.ilike(pattern))
             | (StorageSlot.customer_name.ilike(pattern)),
-        )
+        ).limit(100)
     )
     slots = result.scalars().all()
 

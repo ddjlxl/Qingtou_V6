@@ -8,7 +8,6 @@ export const useWarehouseStore = defineStore('warehouse', () => {
   const statistics = ref<WarehouseStatistics | null>(null)
   const filter = ref<SlotFilter>('all')
   const loading = ref(false)
-  const inboundZoneCode = ref('')
   const selectedSlotIds = ref<Set<string>>(new Set())
   const isMoveMode = ref(false)
   const moveSourceSlot = ref<Slot | null>(null)
@@ -56,7 +55,11 @@ export const useWarehouseStore = defineStore('warehouse', () => {
   }
 
   async function fetchStatistics() {
-    statistics.value = await warehouseService.fetchStatistics()
+    try {
+      statistics.value = await warehouseService.fetchStatistics()
+    } catch {
+      statistics.value = null
+    }
   }
 
   async function init() {
@@ -73,7 +76,7 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     return result
   }
 
-  async function importInbound(zoneCode: string, file: File): Promise<ImportInboundResponse> {
+  async function importInbound(zoneCode: string | null, file: File): Promise<ImportInboundResponse> {
     const result = await warehouseService.importInbound(zoneCode, file)
     await Promise.all([fetchZones(), fetchStatistics()])
     return result
@@ -124,7 +127,6 @@ export const useWarehouseStore = defineStore('warehouse', () => {
     statistics,
     filter,
     loading,
-    inboundZoneCode,
     selectedSlotIds,
     selectedSlots,
     isMoveMode,

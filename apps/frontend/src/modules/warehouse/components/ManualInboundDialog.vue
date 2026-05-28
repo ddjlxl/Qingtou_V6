@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { useWarehouseStore } from '../stores/useWarehouseStore'
@@ -17,6 +17,8 @@ const store = useWarehouseStore()
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 
+const CUSTOMER_HISTORY_KEY = 'customer_history'
+
 interface InboundFormItem {
   containerNo: string
   containerStatus: 'heavy' | 'empty'
@@ -27,19 +29,40 @@ interface InboundFormItem {
 
 const form = reactive<InboundFormItem>({
   containerNo: '',
-  containerStatus: 'heavy',
+  containerStatus: 'empty',
   customerName: '',
   containerType: '',
   sealNo: '',
 })
 
+watch(() => form.containerNo, (val) => {
+  form.containerNo = val.toUpperCase()
+})
+
+function getCustomerHistory(): string[] {
+  const data = localStorage.getItem(CUSTOMER_HISTORY_KEY)
+  return data ? JSON.parse(data) : []
+}
+
+function saveCustomerHistory(name: string) {
+  if (!name?.trim()) return
+  const list = getCustomerHistory()
+  const updated = [name.trim(), ...list.filter(n => n !== name.trim())].slice(0, 20)
+  localStorage.setItem(CUSTOMER_HISTORY_KEY, JSON.stringify(updated))
+}
+
+function fetchCustomerSuggestions(queryString: string, cb: (results: { value: string }[]) => void) {
+  const history = getCustomerHistory()
+  const results = history
+    .filter(name => name.toLowerCase().includes(queryString.toLowerCase()))
+    .map(value => ({ value }))
+  cb(results)
+}
+
 const rules: FormRules = {
   containerNo: [
     { required: true, message: '请输入箱号', trigger: 'blur' },
     { pattern: /^[A-Z]{4}\d{7}$/, message: '箱号格式：4大写字母+7数字', trigger: 'blur' },
-  ],
-  containerStatus: [
-    { required: true, message: '请选择箱状态', trigger: 'change' },
   ],
 }
 
@@ -57,7 +80,7 @@ function handleClose() {
 
 function resetForm() {
   form.containerNo = ''
-  form.containerStatus = 'heavy'
+  form.containerStatus = 'empty'
   form.customerName = ''
   form.containerType = ''
   form.sealNo = ''
@@ -77,6 +100,7 @@ async function handleSubmit() {
       containerType: form.containerType || undefined,
       sealNo: form.sealNo.toUpperCase() || undefined,
     })
+    saveCustomerHistory(form.customerName)
     ElMessage.success('入库成功')
     handleClose()
   } catch (err: unknown) {
@@ -117,10 +141,7 @@ async function handleSubmit() {
           maxlength="11"
         />
       </el-form-item>
-      <el-form-item
-        label="箱状态"
-        prop="containerStatus"
-      >
+      <el-form-item label="箱状态">
         <el-select v-model="form.containerStatus">
           <el-option
             label="重箱"
@@ -132,10 +153,12 @@ async function handleSubmit() {
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="货主">
-        <el-input
+      <el-form-item label="客户名称">
+        <el-autocomplete
           v-model="form.customerName"
+          :fetch-suggestions="fetchCustomerSuggestions"
           placeholder="选填"
+          clearable
         />
       </el-form-item>
       <el-form-item label="箱型">

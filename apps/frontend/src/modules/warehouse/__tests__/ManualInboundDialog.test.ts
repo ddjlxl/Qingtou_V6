@@ -187,22 +187,16 @@ describe('ManualInboundDialog', () => {
   })
 
   describe('表单验证规则', () => {
-    it('containerNo 必填', () => {
+    it('containerNo 必填', async () => {
       const wrapper = createWrapper({ visible: true })
-      const vm = wrapper.vm as unknown as { rules: { containerNo: Array<{ required: boolean }> } }
+      const vm = wrapper.vm as unknown as { rules: { containerNo: { required: boolean }[] } }
       expect(vm.rules.containerNo[0].required).toBe(true)
     })
 
-    it('containerNo 格式验证', () => {
+    it('containerNo 格式验证', async () => {
       const wrapper = createWrapper({ visible: true })
-      const vm = wrapper.vm as unknown as { rules: { containerNo: Array<{ pattern: RegExp }> } }
-      expect(vm.rules.containerNo[1].pattern).toBeInstanceOf(RegExp)
-    })
-
-    it('containerStatus 必填', () => {
-      const wrapper = createWrapper({ visible: true })
-      const vm = wrapper.vm as unknown as { rules: { containerStatus: Array<{ required: boolean }> } }
-      expect(vm.rules.containerStatus[0].required).toBe(true)
+      const vm = wrapper.vm as unknown as { rules: { containerNo: { pattern: RegExp }[] } }
+      expect(vm.rules.containerNo[1].pattern).toEqual(/^[A-Z]{4}\d{7}$/)
     })
   })
 
@@ -233,6 +227,139 @@ describe('ManualInboundDialog', () => {
       const vm = wrapper.vm as unknown as { containerTypeOptions: Array<{ label: string; value: string }> }
       const option = vm.containerTypeOptions.find((o) => o.value === '45HQ')
       expect(option?.label).toBe('45HQ')
+    })
+  })
+
+  describe('箱号自动转大写', () => {
+    it('输入小写字母自动转为大写', async () => {
+      const wrapper = createWrapper({ visible: true })
+      const vm = wrapper.vm as unknown as {
+        form: { containerNo: string }
+      }
+      vm.form.containerNo = 'abcd1234567'
+      await flushPromises()
+      expect(vm.form.containerNo).toBe('ABCD1234567')
+    })
+
+    it('输入混合大小写自动转为大写', async () => {
+      const wrapper = createWrapper({ visible: true })
+      const vm = wrapper.vm as unknown as {
+        form: { containerNo: string }
+      }
+      vm.form.containerNo = 'AbCd1234567'
+      await flushPromises()
+      expect(vm.form.containerNo).toBe('ABCD1234567')
+    })
+  })
+
+  describe('箱状态默认值', () => {
+    it('默认为空箱', () => {
+      const wrapper = createWrapper({ visible: true })
+      const vm = wrapper.vm as unknown as {
+        form: { containerStatus: string }
+      }
+      expect(vm.form.containerStatus).toBe('empty')
+    })
+  })
+
+  describe('货主历史记录', () => {
+    beforeEach(() => {
+      localStorage.clear()
+    })
+
+    it('入库成功后保存货主到历史记录', async () => {
+      mockManualInbound.mockResolvedValue(undefined)
+      const wrapper = createWrapper({ visible: true })
+      await flushPromises()
+
+      const vm = wrapper.vm as unknown as {
+        handleSubmit: () => Promise<void>
+        form: {
+          containerNo: string
+          containerStatus: 'heavy' | 'empty'
+          customerName: string
+        }
+      }
+      vm.form.containerNo = 'ABCD1234567'
+      vm.form.containerStatus = 'empty'
+      vm.form.customerName = '测试客户'
+      await vm.handleSubmit()
+
+      const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+      expect(history).toContain('测试客户')
+    })
+
+    it('历史记录最多保存 20 条', async () => {
+      const existingHistory = Array.from({ length: 25 }, (_, i) => `客户${i + 1}`)
+      localStorage.setItem('customer_history', JSON.stringify(existingHistory))
+
+      mockManualInbound.mockResolvedValue(undefined)
+      const wrapper = createWrapper({ visible: true })
+      await flushPromises()
+
+      const vm = wrapper.vm as unknown as {
+        handleSubmit: () => Promise<void>
+        form: {
+          containerNo: string
+          containerStatus: 'heavy' | 'empty'
+          customerName: string
+        }
+      }
+      vm.form.containerNo = 'ABCD1234567'
+      vm.form.containerStatus = 'empty'
+      vm.form.customerName = '新客户'
+      await vm.handleSubmit()
+
+      const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+      expect(history.length).toBe(20)
+      expect(history[0]).toBe('新客户')
+    })
+
+    it('重复货主移到最前面', async () => {
+      localStorage.setItem('customer_history', JSON.stringify(['客户A', '客户B', '客户C']))
+
+      mockManualInbound.mockResolvedValue(undefined)
+      const wrapper = createWrapper({ visible: true })
+      await flushPromises()
+
+      const vm = wrapper.vm as unknown as {
+        handleSubmit: () => Promise<void>
+        form: {
+          containerNo: string
+          containerStatus: 'heavy' | 'empty'
+          customerName: string
+        }
+      }
+      vm.form.containerNo = 'ABCD1234567'
+      vm.form.containerStatus = 'empty'
+      vm.form.customerName = '客户B'
+      await vm.handleSubmit()
+
+      const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+      expect(history[0]).toBe('客户B')
+      expect(history.filter((n: string) => n === '客户B').length).toBe(1)
+    })
+
+    it('空货主不保存到历史记录', async () => {
+      mockManualInbound.mockResolvedValue(undefined)
+      const wrapper = createWrapper({ visible: true })
+      await flushPromises()
+
+      const vm = wrapper.vm as unknown as {
+        handleSubmit: () => Promise<void>
+        form: {
+          containerNo: string
+          containerStatus: 'heavy' | 'empty'
+          customerName: string
+        }
+      }
+      vm.form.containerNo = 'ABCD1234567'
+      vm.form.containerStatus = 'empty'
+      vm.form.customerName = ''
+      await vm.handleSubmit()
+
+      const history = localStorage.getItem('customer_history')
+      expect(history).toBeNull()
     })
   })
 })

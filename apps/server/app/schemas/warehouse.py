@@ -49,7 +49,7 @@ class WarehouseStatistics(BaseModel):
 
 class ManualInboundItem(BaseModel):
     container_no: str = Field(pattern=r"^[A-Z]{4}\d{7}$")
-    container_status: str = Field(pattern=r"^(heavy|empty)$")
+    container_status: str | None = Field(default=None, pattern=r"^(heavy|empty)$")
     customer_name: str | None = None
     container_type: str | None = Field(default=None, pattern=r"^(20GP|40GP|40HQ|45HQ)$")
     seal_no: str | None = None

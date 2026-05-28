@@ -46,6 +46,10 @@ export function useWarehouseSearch(debounceMs = 300) {
     keyword.value = ''
   }
 
+  function refreshSearch() {
+    doSearch(keyword.value)
+  }
+
   return {
     keyword,
     searchHighlights,
@@ -53,5 +57,6 @@ export function useWarehouseSearch(debounceMs = 300) {
     searchTotal,
     searching,
     clearSearch,
+    refreshSearch,
   }
 }

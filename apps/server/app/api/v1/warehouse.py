@@ -71,8 +71,8 @@ async def create_manual_inbound(
 
 @router.post("/slots/import-inbound", response_model=ImportInboundResponse)
 async def create_import_inbound(
-    zone_code: str,
     file: UploadFile = File(...),
+    zone_code: str | None = None,
     db: AsyncSession = Depends(get_db),
     _current_user: User = Depends(_require_warehouse_role),
 ):

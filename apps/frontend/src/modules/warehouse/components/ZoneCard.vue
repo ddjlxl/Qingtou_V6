@@ -9,6 +9,7 @@ const props = defineProps<{
   selectedSlotIds: Set<string>
   moveSourceId?: string
   isMoveMode?: boolean
+  isSearching?: boolean
   searchHitIds?: Set<string>
   searchMatchCount?: number
 }>()
@@ -52,6 +53,7 @@ const visibleSlotIds = computed(() => {
         :is-move-source="moveSourceId === slot.id"
         :is-move-target="isMoveMode && !!moveSourceId && slot.status === 'empty'"
         :is-search-hit="searchHitIds?.has(slot.id)"
+        :is-searching="isSearching"
         :visible="visibleSlotIds === null || visibleSlotIds.has(slot.id)"
         @click="emit('slotClick', slot)"
       />
@@ -95,5 +97,11 @@ const visibleSlotIds = computed(() => {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
+}
+
+@media (max-width: 600px) {
+  .zone-card__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

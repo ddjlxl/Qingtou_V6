@@ -12,7 +12,7 @@ import SlotEditDialog from '../components/SlotEditDialog.vue'
 import type { SlotFilter, Slot } from '../types'
 
 const store = useWarehouseStore()
-const { keyword, searchHighlights, zoneCounts, searchTotal, clearSearch } = useWarehouseSearch()
+const { keyword, searchHighlights, zoneCounts, searchTotal, clearSearch, refreshSearch } = useWarehouseSearch()
 
 const filterOptions: { label: string; value: SlotFilter }[] = [
   { label: '全部', value: 'all' },
@@ -26,9 +26,11 @@ const importInboundVisible = ref(false)
 const outboundVisible = ref(false)
 const editVisible = ref(false)
 const editingSlot = ref<Slot | null>(null)
-const selectedZoneCode = ref('')
+const manualInboundZoneCode = ref('')
 
 const searchHitIds = computed(() => new Set(searchHighlights.value.keys()))
+
+const isSearching = computed(() => !!keyword.value.trim())
 
 const statusToggleVisible = computed(() => {
   if (store.selectedSlots.length === 0) return false
@@ -64,6 +66,12 @@ watch(keyword, (val) => {
   }
 })
 
+watch(() => store.zones, () => {
+  if (keyword.value.trim()) {
+    refreshSearch()
+  }
+}, { deep: true })
+
 onMounted(() => {
   store.init()
   window.addEventListener('keydown', handleKeyDown)
@@ -92,24 +100,14 @@ function handleSlotClick(slotData: Slot) {
   }
 
   if (slotData.status === 'empty') {
-    selectedZoneCode.value = slotData.zoneCode
+    manualInboundZoneCode.value = slotData.zoneCode
     manualInboundVisible.value = true
   } else {
     store.toggleSlotSelection(slotData.id)
   }
 }
 
-function openManualInbound() {
-  if (!selectedZoneCode.value && store.zones.length > 0) {
-    selectedZoneCode.value = store.zones[0].zoneCode
-  }
-  manualInboundVisible.value = true
-}
-
 function openImportInbound() {
-  if (!selectedZoneCode.value && store.zones.length > 0) {
-    selectedZoneCode.value = store.zones[0].zoneCode
-  }
   importInboundVisible.value = true
 }
 
@@ -174,30 +172,9 @@ async function toggleContainerStatus() {
             style="width: 160px"
             @clear="clearSearch"
           />
-          <el-select
-            v-model="selectedZoneCode"
-            placeholder="选择区域"
-            size="small"
-            style="width: 120px"
-          >
-            <el-option
-              v-for="zone in store.zones"
-              :key="zone.id"
-              :label="zone.zoneCode"
-              :value="zone.zoneCode"
-            />
-          </el-select>
           <el-button
             size="small"
-            type="primary"
-            :disabled="!selectedZoneCode || store.isMoveMode"
-            @click="openManualInbound"
-          >
-            手动录入
-          </el-button>
-          <el-button
-            size="small"
-            :disabled="!selectedZoneCode || store.isMoveMode"
+            :disabled="store.isMoveMode"
             @click="openImportInbound"
           >
             导入
@@ -287,6 +264,7 @@ async function toggleContainerStatus() {
         :selected-slot-ids="store.selectedSlotIds"
         :move-source-id="store.moveSourceSlot?.id"
         :is-move-mode="store.isMoveMode"
+        :is-searching="isSearching"
         :search-hit-ids="searchHitIds"
         :search-match-count="zoneCounts[zone.zoneCode]"
         @slot-click="handleSlotClick"
@@ -295,12 +273,12 @@ async function toggleContainerStatus() {
 
     <ManualInboundDialog
       v-model:visible="manualInboundVisible"
-      :zone-code="selectedZoneCode"
+      :zone-code="manualInboundZoneCode"
     />
 
     <ImportInboundDialog
       v-model:visible="importInboundVisible"
-      :zone-code="selectedZoneCode"
+      :zone-code="null"
     />
 
     <OutboundDialog

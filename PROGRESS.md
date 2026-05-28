@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-27（文档同步更新）
+> 最后更新：2026-05-27
 
 ---
 
@@ -248,7 +248,7 @@
 
 - [x] Task-01：后端 `update_order` 放宽编辑限制 — [dispatch_service.py](file:///e:/Qingtou_V6/apps/server/app/services/dispatch_service.py)（新增 `EDITABLE_STATUSES` 常量，非待分配状态仅允许编辑箱号封号）
 - [x] Task-02：前端编辑按钮 + 弹窗字段禁用 — [useOrderTable.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/components/useOrderTable.ts) + [useOrderForm.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/composables/useOrderForm.ts) + [OrderFormDialog.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/dispatch/components/OrderFormDialog.vue) + 4 个 Section 组件
-- [x] 验证通过：前端 889 tests ✅
+- [x] 验证通过：前端 899 tests ✅ / 后端 334 tests ✅
 
 ### Bug 修复记录
 

@@ -207,7 +207,8 @@ describe('useWarehouseStore', () => {
       mockFetchStatistics.mockRejectedValue(new Error('Failed to fetch statistics'))
 
       const store = useWarehouseStore()
-      await expect(store.fetchStatistics()).rejects.toThrow('Failed to fetch statistics')
+      await store.fetchStatistics()
+      expect(store.statistics).toBeNull()
     })
   })
 

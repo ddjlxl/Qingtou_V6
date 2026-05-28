@@ -210,6 +210,9 @@ function handleLogout() {
 .app-menu {
   border-right: none;
   background: #304156;
+  --el-menu-text-color: #bfcbd9;
+  --el-menu-hover-text-color: #409eff;
+  --el-menu-active-color: #409eff;
 }
 
 .app-menu:not(.el-menu--collapse) {

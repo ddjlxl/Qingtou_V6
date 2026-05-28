@@ -11,12 +11,12 @@ export const tabs = [
   { value: OrderStatus.OVERDUE, label: '已超时' },
 ]
 
-export const statusTagConfig: Record<string, { type: string; label: string }> = {
-  [OrderStatus.PENDING]: { type: 'info', label: '待分配' },
-  [OrderStatus.ASSIGNED]: { type: 'warning', label: '已分配' },
-  [OrderStatus.TRANSITING]: { type: '', label: '运输中' },
-  [OrderStatus.COMPLETED]: { type: 'success', label: '已完成' },
-  [OrderStatus.OVERDUE]: { type: 'danger', label: '已超时' },
+export const statusTagConfig: Record<string, { type: string; label: string; dotColor: string }> = {
+  [OrderStatus.PENDING]: { type: 'info', label: '待分配', dotColor: '#909399' },
+  [OrderStatus.ASSIGNED]: { type: 'warning', label: '已分配', dotColor: '#e6a23c' },
+  [OrderStatus.TRANSITING]: { type: '', label: '运输中', dotColor: '#409eff' },
+  [OrderStatus.COMPLETED]: { type: 'success', label: '已完成', dotColor: '#67c23a' },
+  [OrderStatus.OVERDUE]: { type: 'danger', label: '已超时', dotColor: '#f56c6c' },
 }
 
 export const documentLabels: Record<string, string> = {
@@ -25,14 +25,18 @@ export const documentLabels: Record<string, string> = {
   [DocumentType.RECTIFICATION]: '整改',
 }
 
-export function formatRoute(order: Order): string {
-  const parts: string[] = []
-  if (order.originName) parts.push(order.originName)
-  if (order.waypoints && order.waypoints.length > 0) {
-    parts.push(...order.waypoints)
+export interface RouteParts {
+  origin: string | null
+  waypoints: string[]
+  dest: string | null
+}
+
+export function formatRoute(order: Order): RouteParts {
+  return {
+    origin: order.originName ?? null,
+    waypoints: order.waypoints ?? [],
+    dest: order.destName ?? null,
   }
-  if (order.destName) parts.push(order.destName)
-  return parts.length > 0 ? parts.join(' → ') : '-'
 }
 
 export function formatDateTime(value: string): string {

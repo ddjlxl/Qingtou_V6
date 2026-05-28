@@ -33,11 +33,11 @@ function createWrapper(props: Record<string, unknown> = {}) {
 
 describe('SlotCell', () => {
   describe('空库位状态', () => {
-    it('显示 slotNo 作为 title', () => {
+    it('title 显示库位和空位状态', () => {
       const wrapper = createWrapper({
         slotData: makeSlot({ slotNo: 'A-01-01', containerNo: null }),
       })
-      expect(wrapper.attributes('title')).toBe('A-01-01')
+      expect(wrapper.attributes('title')).toBe('库位：A-01-01\n状态：空位')
     })
 
     it('应用 slot--empty 类', () => {
@@ -57,11 +57,11 @@ describe('SlotCell', () => {
   })
 
   describe('已装载状态', () => {
-    it('显示 containerNo 作为 title', () => {
+    it('title 显示箱号、状态和库位', () => {
       const wrapper = createWrapper({
         slotData: makeSlot({ status: 'loaded', containerNo: 'CONT123' }),
       })
-      expect(wrapper.attributes('title')).toBe('CONT123')
+      expect(wrapper.attributes('title')).toBe('箱号：CONT123\n状态：重箱\n库位：A-01-01')
     })
 
     it('应用 slot--loaded 类', () => {
@@ -71,21 +71,21 @@ describe('SlotCell', () => {
       expect(wrapper.classes()).toContain('slot--loaded')
     })
 
-    it('显示"重"标签', () => {
+    it('格子内显示箱号', () => {
       const wrapper = createWrapper({
-        slotData: makeSlot({ status: 'loaded', containerStatus: 'heavy' }),
+        slotData: makeSlot({ status: 'loaded', containerStatus: 'heavy', containerNo: 'CONT123' }),
       })
       const label = wrapper.find('.slot-cell__label')
-      expect(label.text()).toBe('重')
+      expect(label.text()).toBe('CONT123')
     })
   })
 
   describe('空箱状态', () => {
-    it('显示 containerNo 作为 title', () => {
+    it('title 显示箱号、状态和库位', () => {
       const wrapper = createWrapper({
         slotData: makeSlot({ status: 'empty_container', containerNo: 'CONT456' }),
       })
-      expect(wrapper.attributes('title')).toBe('CONT456')
+      expect(wrapper.attributes('title')).toBe('箱号：CONT456\n状态：空箱\n库位：A-01-01')
     })
 
     it('应用 slot--empty-container 类', () => {
@@ -95,12 +95,12 @@ describe('SlotCell', () => {
       expect(wrapper.classes()).toContain('slot--empty-container')
     })
 
-    it('显示"空"标签', () => {
+    it('格子内显示箱号', () => {
       const wrapper = createWrapper({
-        slotData: makeSlot({ status: 'empty_container', containerStatus: 'empty' }),
+        slotData: makeSlot({ status: 'empty_container', containerStatus: 'empty', containerNo: 'CONT456' }),
       })
       const label = wrapper.find('.slot-cell__label')
-      expect(label.text()).toBe('空')
+      expect(label.text()).toBe('CONT456')
     })
   })
 
@@ -197,6 +197,33 @@ describe('SlotCell', () => {
         isSearchHit: false,
       })
       expect(wrapper.classes()).not.toContain('slot--search-hit')
+    })
+
+    it('搜索中且非命中时应用 slot--search-dimmed 类', () => {
+      const wrapper = createWrapper({
+        slotData: makeSlot(),
+        isSearching: true,
+        isSearchHit: false,
+      })
+      expect(wrapper.classes()).toContain('slot--search-dimmed')
+    })
+
+    it('搜索中且命中时不应用 slot--search-dimmed 类', () => {
+      const wrapper = createWrapper({
+        slotData: makeSlot(),
+        isSearching: true,
+        isSearchHit: true,
+      })
+      expect(wrapper.classes()).not.toContain('slot--search-dimmed')
+    })
+
+    it('非搜索时不应用 slot--search-dimmed 类', () => {
+      const wrapper = createWrapper({
+        slotData: makeSlot(),
+        isSearching: false,
+        isSearchHit: false,
+      })
+      expect(wrapper.classes()).not.toContain('slot--search-dimmed')
     })
   })
 

@@ -238,31 +238,6 @@ describe('WarehousePage', () => {
     })
   })
 
-  describe('区域选择', () => {
-    it('显示区域下拉框', async () => {
-      mockStore.zones = [makeZone(), makeZone({ id: 'zone-2', zoneCode: 'B' })]
-      const wrapper = createWrapper()
-      await flushPromises()
-      const select = wrapper.findComponent({ name: 'ElSelect' })
-      expect(select.exists()).toBe(true)
-    })
-  })
-
-  describe('手动录入按钮', () => {
-    it('点击手动录入按钮打开弹窗', async () => {
-      mockStore.zones = [makeZone()]
-      const wrapper = createWrapper()
-      await flushPromises()
-      const buttons = wrapper.findAllComponents({ name: 'ElButton' })
-      const manualBtn = buttons.find((b) => b.text().includes('手动录入'))
-      if (manualBtn) {
-        await manualBtn.trigger('click')
-        await flushPromises()
-        expect(wrapper.find('.manual-inbound-dialog-stub').exists()).toBe(true)
-      }
-    })
-  })
-
   describe('导入按钮', () => {
     it('点击导入按钮打开弹窗', async () => {
       mockStore.zones = [makeZone()]

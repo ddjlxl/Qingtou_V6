@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import dayjs from 'dayjs'
 import type { Slot } from '../types'
 
 const props = withDefaults(
@@ -8,6 +10,7 @@ const props = withDefaults(
     isMoveSource?: boolean
     isMoveTarget?: boolean
     isSearchHit?: boolean
+    isSearching?: boolean
     visible?: boolean
   }>(),
   {
@@ -15,6 +18,7 @@ const props = withDefaults(
     isMoveSource: false,
     isMoveTarget: false,
     isSearchHit: false,
+    isSearching: false,
     visible: true,
   }
 )
@@ -29,11 +33,24 @@ const statusClass: Record<string, string> = {
   empty_container: 'slot--empty-container',
 }
 
-const statusLabel: Record<string, string> = {
-  empty: '',
-  loaded: '重',
-  empty_container: '空',
+const statusText: Record<string, string> = {
+  loaded: '重箱',
+  empty_container: '空箱',
 }
+
+const tooltipContent = computed(() => {
+  if (!props.visible) return ''
+  const s = props.slotData
+  if (s.status === 'empty') return `库位：${s.slotNo}\n状态：空位`
+  const lines = [`箱号：${s.containerNo}`]
+  lines.push(`状态：${statusText[s.status] || s.status}`)
+  if (s.customerName) lines.push(`货主：${s.customerName}`)
+  if (s.containerType) lines.push(`箱型：${s.containerType}`)
+  if (s.sealNo) lines.push(`封号：${s.sealNo}`)
+  lines.push(`库位：${s.slotNo}`)
+  if (s.storedAt) lines.push(`入库：${dayjs(s.storedAt).format('YYYY-MM-DD HH:mm')}`)
+  return lines.join('\n')
+})
 
 function handleClick() {
   if (!props.visible) return
@@ -46,13 +63,13 @@ function handleClick() {
     class="slot-cell"
     :class="[
       visible ? statusClass[props.slotData.status] : 'slot--hidden',
-      { 'slot--selected': selected, 'slot--move-source': isMoveSource, 'slot--move-target': isMoveTarget, 'slot--search-hit': isSearchHit },
+      { 'slot--selected': selected, 'slot--move-source': isMoveSource, 'slot--move-target': isMoveTarget, 'slot--search-hit': isSearchHit, 'slot--search-dimmed': isSearching && !isSearchHit },
     ]"
-    :title="visible ? (props.slotData.containerNo || props.slotData.slotNo) : ''"
+    :title="tooltipContent"
     @click="handleClick"
   >
     <span class="slot-cell__label">
-      {{ statusLabel[props.slotData.status] || '' }}
+      {{ props.slotData.containerNo || '' }}
     </span>
     <span
       v-if="selected"
@@ -63,15 +80,21 @@ function handleClick() {
 
 <style scoped>
 .slot-cell {
-  aspect-ratio: 1;
+  height: 36px;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 11px;
   font-weight: 600;
   cursor: default;
   transition: transform 0.15s;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
 }
 
 .slot-cell:hover {
@@ -125,8 +148,22 @@ function handleClick() {
 }
 
 .slot--search-hit {
-  outline: 2px solid #e6a23c;
+  outline: 3px solid #ff9900;
   outline-offset: -2px;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(255, 153, 0, 0.5);
+  z-index: 1;
+}
+
+.slot--search-dimmed {
+  opacity: 0.4;
+}
+
+@media (max-width: 600px) {
+  .slot-cell {
+    height: 40px;
+    font-size: 12px;
+  }
 }
 
 @keyframes blink {

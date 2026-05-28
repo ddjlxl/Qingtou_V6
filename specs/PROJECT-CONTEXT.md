@@ -53,6 +53,7 @@ scripts/                     # 检查脚本（architecture-check/code-quality-ch
 | Phase 1.3 dispatch-container-edit 补充箱号封号 | ✅ |
 | Phase 2.1 warehouse 仓库管理 | ✅ |
 | **Phase 2.1 dashboard 运营看板** | **⬜ 未开始** |
+| **Phase 2.1 settings 系统设置** | **⬜ 未开始** |
 
 ---
 

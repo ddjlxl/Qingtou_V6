@@ -101,6 +101,7 @@ function onPageSizeChange(ps: number) {
     <OrderTableBody
       v-else
       :orders="store.orders"
+      table-max-height="calc(100vh - 320px)"
       @edit="emit('edit', $event)"
       @assign="emit('assign', $event)"
       @complete="emit('complete', $event)"

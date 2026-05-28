@@ -244,7 +244,7 @@ class WarehouseStatistics(BaseModel):
 ```python
 class ManualInboundItem(BaseModel):
     container_no: str = Field(..., pattern=r"^[A-Z]{4}\d{7}$")
-    container_status: str = Field(..., pattern="^(heavy|empty)$")
+    container_status: str | None = Field(None, pattern="^(heavy|empty)$")
     customer_name: str | None = Field(None, max_length=100)
     container_type: str | None = Field(None, pattern="^(20GP|40GP|40HQ|45HQ)$")
     seal_no: str | None = Field(None, max_length=20)
@@ -253,6 +253,8 @@ class ManualInboundRequest(BaseModel):
     zone_code: str = Field(..., max_length=20)
     items: list[ManualInboundItem] = Field(..., min_length=1)
 ```
+
+**说明**：`container_status` 为可选字段，不填时默认为 `empty`（空箱）
 
 **Response**:
 ```python
@@ -268,11 +270,14 @@ class ManualInboundResponse(BaseModel):
 
 #### POST /api/v1/warehouse/slots/import-inbound
 
-**Request**: `multipart/form-data`，上传 .xlsx 文件 + `zone_code` 字段
+**Request**: `multipart/form-data`，上传 .xlsx 文件 + `zone_code` 可选字段
 
-**Response**: 同 ManualInboundResponse
+- `zone_code`：可选。不传时按 AC-017 优先级链自动跨区域分配库位
+- 传了 `zone_code` 时，行为与手动入库一致（只在该区域分配）
 
-→ AC-002: 导入入库
+**Response**: 同 ImportInboundResponse
+
+→ AC-002: 导入入库（支持自动分配区域）
 
 #### POST /api/v1/warehouse/slots/outbound
 

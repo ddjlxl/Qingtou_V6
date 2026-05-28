@@ -7,7 +7,7 @@ import { useWarehouseStore } from '../stores/useWarehouseStore'
 
 const props = defineProps<{
   visible: boolean
-  zoneCode: string
+  zoneCode: string | null
 }>()
 
 const emit = defineEmits<{
@@ -61,7 +61,7 @@ function handleExceed() {
   >
     <div class="import-content">
       <p class="import-content__hint">
-        上传 .xlsx 文件，表头：箱号、箱状态(heavy/empty)、货主、箱型、封号
+        上传 .xlsx 文件，系统自动分配库位。表头：箱号、箱状态(heavy/empty,可选)、货主、箱型、封号
       </p>
       <el-upload
         :auto-upload="false"
