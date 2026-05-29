@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { LoginForm, useAuthStore } from '@/modules/auth'
 import { AppLayout } from '@/shared/components'
+import { DashboardPage } from '@/modules/dashboard'
 import { FleetPage } from '@/modules/fleet'
 import { DispatchPage } from '@/modules/dispatch'
 import { DriverWorkbench, DriverHistory, DriverProfile } from '@/modules/driver'
@@ -18,8 +19,14 @@ const router = createRouter({
           path: '',
           redirect: () => {
             const authStore = useAuthStore()
-            return authStore.userRole === 'driver' ? '/driver' : '/fleet'
+            return authStore.userRole === 'driver' ? '/driver' : '/dashboard'
           },
+        },
+        {
+          path: 'dashboard',
+          name: 'Dashboard',
+          component: DashboardPage,
+          meta: { requiresAuth: true, roles: ['admin', 'dispatcher'] },
         },
         {
           path: 'fleet',

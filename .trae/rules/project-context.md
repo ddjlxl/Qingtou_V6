@@ -1,8 +1,8 @@
 # V6 项目上下文协议
 
-> **版本**：v1.5  
+> **版本**：v1.6  
 > **创建日期**：2026-05-04  
-> **更新日期**：2026-05-27  
+> **更新日期**：2026-05-29  
 > **定位**：定义 AI 启动时必须读取的文档，建立项目完整认知  
 > **后续文档**：[guardrails.md](guardrails.md)（定义阶段边界）
 
@@ -98,14 +98,14 @@ AI最大的问题是什么？**没有记忆。**
 
 当前状态：
 - 里程碑：M2 完整版（进行中）
-- 已完成：Phase 1.1 / 1.2 / 1.3 auth / fleet / dispatch / driver / dispatch-fleet-linkage / dispatch-container-edit / 2.1 warehouse
-- 下一步：Phase 2.1 dashboard 运营看板
+- 已完成：Phase 1.1 / 1.2 / 1.3 auth / fleet / dispatch / driver / dispatch-fleet-linkage / dispatch-container-edit / 2.1 warehouse / 2.1 dashboard
+- 下一步：Phase 2.1 settings 系统设置
 
 项目认知：
 - 技术栈：Vue 3 + TypeScript + Element Plus + FastAPI + PostgreSQL
 - 核心功能：运营看板、调度中心、车队管理、仓库管理、系统设置、帮助中心、司机端
 - 开发约束：无any类型、无console.log、文件不超过300行
-- 测试统计：前端 899 tests / 后端 334 tests
+- 测试统计：前端 981 tests / 后端 358 tests
 ```
 
 ### 交叉验证

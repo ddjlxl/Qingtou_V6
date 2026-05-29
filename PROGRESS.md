@@ -1,7 +1,7 @@
 # V6 开发进度
 
 > ⚠️ 同一时间只开一个会话进行开发。多开会话可能导致进度文件冲突。
-> 最后更新：2026-05-27
+> 最后更新：2026-05-29
 
 ---
 
@@ -18,7 +18,7 @@
 | M1: MVP | Phase 1.3 核心业务 — dispatch-fleet-linkage 联动 | ✅ 已完成 |
 | M1: MVP | Phase 1.3 核心业务 — dispatch-container-edit 补充箱号封号 | ✅ 已完成 |
 | M2: 完整版 | Phase 2.1 业务补齐 — warehouse 仓库管理 | ✅ 已完成 |
-| M2: 完整版 | Phase 2.1 业务补齐 — dashboard 运营看板 | ⬜ 未开始 |
+| M2: 完整版 | Phase 2.1 业务补齐 — dashboard 运营看板 | ✅ 已完成 |
 | M2: 完整版 | Phase 2.1 业务补齐 — settings 系统设置 | ⬜ 未开始 |
 | M3: 增强版 | - | ⬜ 未开始 |
 
@@ -202,11 +202,33 @@
 
 ---
 
+### Phase 2.1：业务补齐 — dashboard 运营看板 ✅
+
+- [x] 需求文档：[specs/features/dashboard/requirements.md](file:///e:/Qingtou_V6/specs/features/dashboard/requirements.md)（12 条 AC）
+- [x] 技术设计：[specs/features/dashboard/design.md](file:///e:/Qingtou_V6/specs/features/dashboard/design.md)
+- [x] 任务规划：[specs/features/dashboard/tasks.md](file:///e:/Qingtou_V6/specs/features/dashboard/tasks.md)（6 个任务）
+- [x] 后端 API：[api/v1/dashboard.py](file:///e:/Qingtou_V6/apps/server/app/api/v1/dashboard.py) — 运营看板接口（GET /api/v1/dashboard）
+- [x] 后端 Service：[services/dashboard_service.py](file:///e:/Qingtou_V6/apps/server/app/services/dashboard_service.py) — 6 个函数（今日任务数、完成率、超时数、平均转运时间、车辆位置、聚合查询）
+- [x] 后端 Schema：[schemas/dashboard.py](file:///e:/Qingtou_V6/apps/server/app/schemas/dashboard.py) — DashboardStats, VehicleLocationItem, StatusCounts, DashboardResponse
+- [x] 前端页面：[pages/DashboardPage.vue](file:///e:/Qingtou_V6/apps/frontend/src/modules/dashboard/pages/DashboardPage.vue) — 页面容器（数据获取/刷新/联动）
+- [x] 前端 Store：[stores/useDashboardStore.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dashboard/stores/useDashboardStore.ts)
+- [x] 前端 Service：[services/dashboardService.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dashboard/services/dashboardService.ts)
+- [x] 前端 Types：[types/index.ts](file:///e:/Qingtou_V6/apps/frontend/src/modules/dashboard/types/index.ts)
+- [x] 前端组件：StatisticsOverlay（浮动统计卡片）、MapArea（Leaflet 地图 + 车辆标记）、FleetPanel（运力面板 + 搜索）、StatusOverview（状态统计）
+- [x] 前端测试：8 个测试文件（DashboardPage、MapArea、FleetPanel、StatisticsOverlay、StatusOverview、dashboard-types、dashboardService、useDashboardStore）
+- [x] 路由配置：`/dashboard`（roles=['admin', 'dispatcher']），`/` 默认重定向改为 `/dashboard`
+- [x] AppLayout 侧边栏：新增"运营看板"菜单项（DataAnalysis 图标），置于车队管理之前
+- [x] 地图集成：Leaflet + 天地图瓦片（VITE_TIANDITU_KEY），无 Key 时降级 OSM
+- [x] 双向联动：地图标记 ↔ 运力列表点击联动
+- [x] 自动刷新：30 秒定时刷新 + 手动刷新按钮
+
+---
+
 ## 下一步
 
-### Phase 2.1：业务补齐 — dashboard 运营看板 ⬜
+### Phase 2.1：业务补齐 — settings 系统设置 ⬜
 
-后续模块：dashboard 运营看板、settings 系统设置
+后续模块：settings 系统设置
 
 ---
 

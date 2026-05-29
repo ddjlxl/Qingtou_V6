@@ -11,7 +11,7 @@ const statusConfig = computed(() => {
     case VehicleStatus.IDLE:
       return { type: 'success' as const, label: '空闲' }
     case VehicleStatus.TRANSITING:
-      return { type: '' as const, label: '运输中' }
+      return { type: 'primary' as const, label: '运输中' }
     case VehicleStatus.OVERDUE:
       return { type: 'danger' as const, label: '超时' }
     default:

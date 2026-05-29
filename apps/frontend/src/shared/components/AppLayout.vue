@@ -11,6 +11,7 @@ import {
   ArrowDown,
   List,
   Box,
+  DataAnalysis,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -93,12 +94,12 @@ function handleLogout() {
           </template>
         </el-menu-item>
         <template v-if="!isDriver">
-          <el-menu-item index="/fleet">
+          <el-menu-item index="/dashboard">
             <el-icon>
-              <Van />
+              <DataAnalysis />
             </el-icon>
             <template #title>
-              车队管理
+              运营看板
             </template>
           </el-menu-item>
           <el-menu-item index="/dispatch">
@@ -118,6 +119,14 @@ function handleLogout() {
             </el-icon>
             <template #title>
               仓库总览
+            </template>
+          </el-menu-item>
+          <el-menu-item index="/fleet">
+            <el-icon>
+              <Van />
+            </el-icon>
+            <template #title>
+              车队管理
             </template>
           </el-menu-item>
         </template>
