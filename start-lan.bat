@@ -94,7 +94,7 @@ echo Creating frontend .env files...
 ) > apps\frontend\.env
 (
     echo VITE_API_BASE_URL=/api
-    echo VITE_TIANDITU_KEY=fe8d31f18e970f8d6697ca9697711f18
+    echo VITE_TIANDITU_KEY=YOUR_TIANDITU_KEY_HERE
 ) > apps\frontend\.env.development
 echo OK: Frontend .env files created (using Vite proxy mode)
 echo [%date% %time%] Frontend .env files created >> %LOG_FILE%

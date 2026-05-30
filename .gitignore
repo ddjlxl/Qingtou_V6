@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 .env.local
+.env.development
 .env.*.local
 *.log
 .DS_Store
@@ -34,6 +35,14 @@ Desktop.ini
 credentials.json
 secrets.json
 .credentials.local
+
+# Security reports (contain real credentials)
+SEC-*.md
+安全事件报告*.md
+
+# Server docs (contain real IPs, passwords, connection strings)
+服务器说明文档.md
+部署流程方案.md
 
 # Screenshots
 *.png
