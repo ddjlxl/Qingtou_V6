@@ -362,7 +362,8 @@ async def complete_order(
     await db.refresh(order)
 
     # 自动入库（独立 session + 独立事务，失败不影响订单）
-    if order.container_no:
+    # 仅空箱运输业务类型触发自动入库，其他业务类型一般不回仓库
+    if order.container_no and order.business_type == BusinessType.EMPTY_TRANSPORT.value:
         try:
             from app.core.database import AsyncSessionLocal
             from app.services.warehouse_service import auto_store
