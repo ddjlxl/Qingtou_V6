@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
@@ -556,5 +556,102 @@ describe('OrderFormDialog - 关闭对话框', () => {
 
     expect(wrapper.emitted('update:visible')).toBeTruthy()
     expect(wrapper.emitted('update:visible')![0]).toEqual([false])
+  })
+})
+
+describe('OrderFormDialog - 客户名称历史记忆', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+  })
+
+  it('创建任务成功后保存客户名称到历史记录', async () => {
+    mockCreateOrder.mockResolvedValue(undefined)
+    const wrapper = createWrapper({ mode: 'create' })
+    await nextTick()
+
+    const vm = wrapper.vm as unknown as {
+      handleCreateTask: () => Promise<void>
+      form: { customerName: string }
+    }
+    vm.form.customerName = '测试客户A'
+    await vm.handleCreateTask()
+
+    const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+    expect(history).toContain('测试客户A')
+  })
+
+  it('创建并派车成功后保存客户名称到历史记录', async () => {
+    mockCreateOrder.mockResolvedValue(undefined)
+    const wrapper = createWrapper({ mode: 'create' })
+    await nextTick()
+
+    const vm = wrapper.vm as unknown as {
+      handleCreateAndAssign: () => Promise<void>
+      form: { customerName: string; driverId: string; vehicleId: string }
+    }
+    vm.form.customerName = '测试客户B'
+    vm.form.driverId = 'driver-1'
+    vm.form.vehicleId = 'vehicle-1'
+    await vm.handleCreateAndAssign()
+
+    const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+    expect(history).toContain('测试客户B')
+  })
+
+  it('编辑任务成功后保存客户名称到历史记录', async () => {
+    mockUpdateOrder.mockResolvedValue(undefined)
+    const wrapper = createWrapper({ mode: 'edit', order: makeOrder() })
+    await nextTick()
+
+    const vm = wrapper.vm as unknown as {
+      handleUpdate: () => Promise<void>
+      form: { customerName: string }
+    }
+    vm.form.customerName = '测试客户C'
+    await vm.handleUpdate()
+
+    const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+    expect(history).toContain('测试客户C')
+  })
+
+  it('空客户名称不保存到历史记录', async () => {
+    mockCreateOrder.mockResolvedValue(undefined)
+    const wrapper = createWrapper({ mode: 'create' })
+    await nextTick()
+
+    const vm = wrapper.vm as unknown as {
+      handleCreateTask: () => Promise<void>
+      form: { customerName: string }
+    }
+    vm.form.customerName = ''
+    await vm.handleCreateTask()
+
+    const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+    expect(history).toEqual([])
+  })
+
+  it('重复客户名称移到最前面', async () => {
+    localStorage.setItem('customer_history', JSON.stringify(['客户A', '客户B', '客户C']))
+
+    mockCreateOrder.mockResolvedValue(undefined)
+    const wrapper = createWrapper({ mode: 'create' })
+    await nextTick()
+
+    const vm = wrapper.vm as unknown as {
+      handleCreateTask: () => Promise<void>
+      form: { customerName: string }
+    }
+    vm.form.customerName = '客户B'
+    await vm.handleCreateTask()
+
+    const history = JSON.parse(localStorage.getItem('customer_history') || '[]')
+    expect(history[0]).toBe('客户B')
+    expect(history.filter((n: string) => n === '客户B').length).toBe(1)
   })
 })

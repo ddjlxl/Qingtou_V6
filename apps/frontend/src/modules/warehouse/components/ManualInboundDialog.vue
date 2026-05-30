@@ -3,6 +3,7 @@ import { ref, reactive, watch } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { useWarehouseStore } from '../stores/useWarehouseStore'
+import { getCustomerHistory, saveCustomerHistory } from '@/shared/utils/customerHistory'
 
 const props = defineProps<{
   visible: boolean
@@ -16,8 +17,6 @@ const emit = defineEmits<{
 const store = useWarehouseStore()
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
-
-const CUSTOMER_HISTORY_KEY = 'customer_history'
 
 interface InboundFormItem {
   containerNo: string
@@ -38,18 +37,6 @@ const form = reactive<InboundFormItem>({
 watch(() => form.containerNo, (val) => {
   form.containerNo = val.toUpperCase()
 })
-
-function getCustomerHistory(): string[] {
-  const data = localStorage.getItem(CUSTOMER_HISTORY_KEY)
-  return data ? JSON.parse(data) : []
-}
-
-function saveCustomerHistory(name: string) {
-  if (!name?.trim()) return
-  const list = getCustomerHistory()
-  const updated = [name.trim(), ...list.filter(n => n !== name.trim())].slice(0, 20)
-  localStorage.setItem(CUSTOMER_HISTORY_KEY, JSON.stringify(updated))
-}
 
 function fetchCustomerSuggestions(queryString: string, cb: (results: { value: string }[]) => void) {
   const history = getCustomerHistory()

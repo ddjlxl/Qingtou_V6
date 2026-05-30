@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import { useDispatchStore } from '../stores/useDispatchStore'
 import { useOrderForm } from '../composables/useOrderForm'
 import type { Order, CreateOrderRequest, UpdateOrderRequest } from '../types/order'
+import { saveCustomerHistory } from '@/shared/utils/customerHistory'
 import AddressDialog from './AddressDialog.vue'
 import BusinessSection from './sections/BusinessSection.vue'
 import RouteSection from './sections/RouteSection.vue'
@@ -71,6 +72,7 @@ async function handleCreateTask() {
   try {
     const data = buildRequest() as CreateOrderRequest
     await store.createOrder(data)
+    saveCustomerHistory(form.customerName)
     ElMessage.success('任务创建成功')
     emit('update:visible', false)
     emit('success')
@@ -92,6 +94,7 @@ async function handleCreateAndAssign() {
       vehicleId: form.vehicleId,
     }
     await store.createOrder(data)
+    saveCustomerHistory(form.customerName)
     ElMessage.success('任务创建并派车成功')
     emit('update:visible', false)
     emit('success')
@@ -110,6 +113,7 @@ async function handleUpdate() {
   try {
     const data = buildRequest() as UpdateOrderRequest
     await store.updateOrder(props.order.id, data)
+    saveCustomerHistory(form.customerName)
     ElMessage.success('任务编辑成功')
     emit('update:visible', false)
     emit('success')
