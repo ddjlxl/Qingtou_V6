@@ -76,6 +76,7 @@ function createWrapper(props: Record<string, unknown> = {}) {
 describe('MapArea', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    import.meta.env.VITE_TIANDITU_KEY = 'test-key'
   })
 
   describe('地图初始化', () => {
@@ -86,24 +87,31 @@ describe('MapArea', () => {
       expect(L.map).toHaveBeenCalled()
     })
 
-    it('默认中心点为上海港区域 [31.23, 121.47]，zoom=12', async () => {
+    it('默认中心点为青白江业务片区 [30.838, 104.307]，zoom=13', async () => {
       const L = (await import('leaflet')).default
       createWrapper()
 
       expect(L.map).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          center: [31.23, 121.47],
-          zoom: 12,
+          center: [30.838, 104.307],
+          zoom: 13,
         }),
       )
     })
 
-    it('添加瓦片图层', async () => {
+    it('添加 vec_w 底图和 cva_w 注记两个瓦片图层', async () => {
       const L = (await import('leaflet')).default
       createWrapper()
 
-      expect(L.tileLayer).toHaveBeenCalled()
+      expect(L.tileLayer).toHaveBeenCalledTimes(2)
+      const urls = (L.tileLayer as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => (c as [string])[0])
+      const vecUrl = urls.find((u: string) => u.includes('vec_w'))
+      const cvaUrl = urls.find((u: string) => u.includes('cva_w'))
+      expect(vecUrl).toBeTruthy()
+      expect(cvaUrl).toBeTruthy()
+      expect(vecUrl).toContain('LAYER=vec')
+      expect(cvaUrl).toContain('LAYER=cva')
     })
   })
 

@@ -55,15 +55,19 @@ function formatPopupContent(vehicle: VehicleLocation): string {
   `
 }
 
-function createTileLayer(): L.TileLayer | null {
+function createTileLayerUrl(layerPath: string, layerName: string, tiandituKey: string): string {
+  return `https://t{s}.tianditu.gov.cn/${layerPath}/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layerName}&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL={x}&TILEROW={y}&TILEMATRIX={z}&tk=${tiandituKey}`
+}
+
+function createTileLayers(): L.TileLayer[] | null {
   const tiandituKey = import.meta.env.VITE_TIANDITU_KEY as string | undefined
   if (!tiandituKey) {
     return null
   }
-  return L.tileLayer(
-    `https://t{s}.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILECOL={x}&TILEROW={y}&TILEMATRIX={z}&tk=${tiandituKey}`,
-    { subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'] },
-  )
+  const subdomains = ['0', '1', '2', '3', '4', '5', '6', '7']
+  const baseLayer = L.tileLayer(createTileLayerUrl('vec_w', 'vec', tiandituKey), { subdomains })
+  const labelLayer = L.tileLayer(createTileLayerUrl('cva_w', 'cva', tiandituKey), { subdomains })
+  return [baseLayer, labelLayer]
 }
 
 function updateMarkers(vehicles: VehicleLocation[]) {
@@ -122,19 +126,21 @@ watch(() => props.selectedVehicleId, handleSelectedVehicleChange)
 onMounted(() => {
   if (!mapContainer.value) return
 
-  const tileLayer = createTileLayer()
-  if (!tileLayer) {
+  const tileLayers = createTileLayers()
+  if (!tileLayers) {
     mapError.value = '天地图服务不可用，请联系管理员配置 VITE_TIANDITU_KEY'
     return
   }
 
   map = L.map(mapContainer.value, {
-    center: [31.23, 121.47],
-    zoom: 12,
+    center: [30.838, 104.307],
+    zoom: 13,
     zoomControl: true,
   })
 
-  tileLayer.addTo(map)
+  for (const layer of tileLayers) {
+    layer.addTo(map)
+  }
 
   if (props.vehicles.length > 0) {
     updateMarkers(props.vehicles)
