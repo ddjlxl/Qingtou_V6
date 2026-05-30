@@ -1,3 +1,4 @@
+import secrets
 import uuid
 
 from fastapi import APIRouter, Depends, Query
@@ -138,7 +139,7 @@ async def create_driver(
         user = User(
             id=uuid.uuid4(),
             username=data.phone,
-            password=hash_password(data.phone),
+            password=hash_password(secrets.token_urlsafe(12)),
             name=data.name,
             phone=data.phone,
             role=UserRole.DRIVER.value,
