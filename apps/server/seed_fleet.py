@@ -23,7 +23,7 @@ async def seed():
             {"name": "杨均", "phone": "13980051438", "plate_no": "川ALC706"},
         ]
 
-        for item in fleet_data:
+        for i, item in enumerate(fleet_data):
             driver = Driver(
                 id=uuid.uuid4(),
                 name=item["name"],
@@ -40,6 +40,9 @@ async def seed():
                 bound_driver_id=driver.id,
                 status="idle",
                 is_disabled=False,
+                current_lat=30.839840 + i * 0.0005,
+                current_lng=104.329095 + i * 0.0005,
+                current_location="成都市青白江区文汉物流",
             )
             db.add(vehicle)
             print(f"  创建: {item['name']} ({item['phone']}) → {item['plate_no']}")
