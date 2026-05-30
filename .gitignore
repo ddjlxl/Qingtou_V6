@@ -33,6 +33,7 @@ Desktop.ini
 *.key
 credentials.json
 secrets.json
+.credentials.local
 
 # Screenshots
 *.png
